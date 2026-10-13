@@ -1,6 +1,6 @@
 // Natan: tiene l'app sul dispositivo così si apre anche senza rete (anche il motore che fa girare Natan sul dispositivo).
 // La biblioteca non passa di qui: l'app la salva da sola nel dispositivo. I modelli li salva il motore stesso.
-const CACHE = "natan-1.7.0-1791928546";
+const CACHE = "natan-1.7.0-1791929838";
 const FILES = ["./", "./index.html", "./app/", "./app/index.html", "./manifest.webmanifest", "./icone/icon-192.png", "./icone/icon-512.png", "./icone/apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
