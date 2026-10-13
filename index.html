@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f1d">
+<meta name="description" content="Natan è un tutor AI creato da Kevin: spiega le materie, risolve gli esercizi e legge le foto dei compiti.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone/apple-touch-icon.png">
+<link rel="icon" href="icone/icon-192.png">
+<title>Natan · il tutor che studia con te</title>
+<style>
+:root{--bg:#0b0f1d;--panel:#141a2f;--line:#232b4f;--text:#e9ecf8;--soft:#b4bbdb;--muted:#8e97bd;--acc:#6c7bff;--vio:#9b6bff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.55 -apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",sans-serif}
+a{color:#aab4ff}a:hover{color:#fff}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:20px 0}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:22px}
+.mark{width:40px;height:40px;border-radius:12px;background:#000;border:1px solid #2c355c;display:flex;align-items:center;justify-content:center;color:var(--acc);font-weight:900;font-size:22px}
+nav{display:flex;flex-wrap:wrap;gap:20px;font-weight:600;font-size:15px}nav a{text-decoration:none}
+.hero{display:flex;flex-wrap:wrap;align-items:center;gap:44px;padding:44px 0 56px}
+.hero .txt{flex:999 1 460px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.badge{align-self:flex-start;font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#aab4ff;background:#161c36;border:1px solid #2c355c;border-radius:999px;padding:6px 14px}
+h1{margin:0;font-size:clamp(38px,6vw,58px);line-height:1.05;letter-spacing:-1.2px}
+h2{margin:0 0 20px;font-size:32px}
+.lead{margin:0;font-size:19px;color:var(--soft);max-width:560px}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-block;text-decoration:none;border:0;cursor:pointer;font:inherit;font-weight:700;font-size:16px;padding:14px 22px;border-radius:14px;background:var(--acc);color:#fff}
+.btn.soft{background:#1b2240;color:var(--text);border:1px solid #3a4475}
+.btn[disabled]{opacity:.55;cursor:default}
+.logo{flex:1 1 280px;display:flex;justify-content:center}
+.logo div{position:relative;width:280px;height:280px;border-radius:40px;background:#000;border:1px solid #1f2747;display:flex;align-items:center;justify-content:center}
+.logo svg{position:absolute;inset:15px;animation:orbit 6s linear infinite}
+.logo b{font-size:120px;font-weight:900;line-height:1}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.logo svg{animation:none}}
+section{padding:0 0 60px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.card strong{font-size:19px}.card span{color:var(--soft)}.card small{color:var(--muted);font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.steps div{display:flex;gap:14px}
+.steps i{flex:none;width:36px;height:36px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800}
+.steps p{margin:4px 0 0;color:var(--soft)}
+.soon{font-size:12px;font-weight:700;color:#c9a8ff;text-transform:uppercase;letter-spacing:1px}
+.help{background:#161b38;border:1px solid #3a3f86;border-radius:28px;padding:34px;display:flex;flex-wrap:wrap;gap:34px}
+.help>div{flex:1 1 320px;min-width:0}
+.help ul{margin:0;padding-left:20px;line-height:1.9}
+footer{border-top:1px solid #1f2747;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:26px 20px}
+dialog{background:#141a2f;color:var(--text);border:1px solid #2c355c;border-radius:20px;max-width:420px;padding:24px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog ol{padding-left:22px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="mark">N</span>Natan</div>
+    <nav><a href="#cosa">Cosa fa</a><a href="#scarica">Scarica</a><a href="#aiuta">Aiuta Natan</a></nav>
+  </header>
+
+  <div class="hero">
+    <div class="txt">
+      <span class="badge">Beta · creato da Kevin</span>
+      <h1>Il tutor che studia<br>insieme a te.</h1>
+      <p class="lead">Natan spiega le materie, risolve gli esercizi passo per passo, legge le foto dei compiti e studia da solo per sapere sempre di più.</p>
+      <div class="btns"><a class="btn" href="#telefono">Scarica per il telefono</a><a class="btn soft" href="#computer">Per il computer</a></div>
+    </div>
+    <div class="logo"><div>
+      <svg viewBox="0 0 250 250" aria-hidden="true">
+        <circle cx="125" cy="125" r="104" fill="none" stroke="#1d2340" stroke-width="2"/>
+        <path d="M60 52 A104 104 0 0 1 206 70" fill="none" stroke="#9b6bff" stroke-width="4" stroke-linecap="round"/>
+        <path d="M206 70 l-14 -3 m14 3 l-4 14" stroke="#9b6bff" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M222 156 A104 104 0 0 1 116 228" fill="none" stroke="#6c7bff" stroke-width="4" stroke-linecap="round"/>
+        <path d="M116 228 l13 -6 m-13 6 l10 11" stroke="#6c7bff" stroke-width="4" stroke-linecap="round" fill="none"/>
+      </svg>
+      <b>N</b>
+    </div></div>
+  </div>
+
+  <section id="cosa">
+    <h2>Cosa può fare</h2>
+    <div class="grid">
+      <div class="card"><strong>Spiega tutto</strong><span>Matematica, fisica, latino, storia, inglese e altre materie, con esempi semplici.</span></div>
+      <div class="card"><strong>Risolve gli esercizi</strong><span>Ci pensa un attimo e ti mostra tutti i passaggi, non solo il risultato.</span></div>
+      <div class="card"><strong>Legge le foto</strong><span>Fotografa il libro o il quaderno: fino a 30 foto per messaggio.</span></div>
+      <div class="card"><strong>Studia da solo</strong><span>Ha già decine di migliaia di appunti sulle materie della scuola, e ogni giorno ne aggiunge altri.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Come lavora</h2>
+    <div class="steps">
+      <div><i>1</i><div><strong>Il cervello di Natan</strong><p>Un modello di intelligenza artificiale che gira sul computer di Kevin. Presto anche direttamente sul tuo telefono.</p></div></div>
+      <div><i>2</i><div><strong>La biblioteca di appunti</strong><p>Prima di risponderti cerca negli appunti che ha preso studiando, così sbaglia meno.</p></div></div>
+      <div><i>3</i><div><strong>Impara da te</strong><p>Quando una risposta è giusta o sbagliata diglielo: Natan usa i voti per migliorare.</p></div></div>
+    </div>
+  </section>
+
+  <section id="scarica">
+    <h2 id="telefono">Scarica per il telefono</h2>
+    <div class="grid">
+      <div class="card"><strong>iPhone</strong><span>Da iPhone 11 in su.</span><button class="btn" id="ios" type="button" style="align-self:flex-start">Scarica per iPhone</button><small>Si installa da Safari, senza App Store.</small></div>
+      <div class="card"><strong>Android</strong><span>Android 10 o più recente, con Chrome.</span><button class="btn" id="android" type="button" style="align-self:flex-start">Scarica per Android</button><small>Un tocco su «Installa» e Natan appare tra le tue app.</small></div>
+    </div>
+    <h2 id="computer" style="margin-top:40px">Scarica per il computer</h2>
+    <div class="grid">
+      <div class="card"><span class="soon">In arrivo</span><strong>Mac</strong><span>Con chip Apple: da M1 in poi.</span></div>
+      <div class="card"><span class="soon">In arrivo</span><strong>Windows</strong><span>Windows 10 o 11, almeno 8 GB di RAM.</span></div>
+      <div class="card"><span class="soon">In arrivo</span><strong>Linux</strong><span>Distribuzioni moderne a 64 bit, almeno 8 GB di RAM.</span></div>
+    </div>
+    <p style="color:var(--muted)">Nel frattempo dal computer puoi già usare <a href="app/">la versione web</a>.</p>
+  </section>
+
+  <section id="aiuta">
+    <div class="help">
+      <div>
+        <span class="soon">In arrivo</span>
+        <h2 style="margin-top:8px">Aiuta Natan e ti daremo un Natan potente.</h2>
+        <p style="color:#c3c9ea;margin:0">Presterai un po' del tuo PC quando non lo usi, per rispondere alle domande dei compagni in modo anonimo. Tu vedrai solo quante persone stai aiutando.</p>
+      </div>
+      <div>
+        <ul>
+          <li>Natan Pro: le tue domande ai Natan più forti</li>
+          <li>Niente coda quando la rete è piena</li>
+          <li>Funzioni nuove in anteprima</li>
+          <li>Distintivo e classifica dei volontari</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+<footer><div class="wrap">
+  <span>Natan · creato da Kevin · beta</span>
+  <span>Le chat vengono inviate a Kevin, che può leggerle. Appunti da Wikipedia (CC BY-SA).</span>
+</div></footer>
+
+<dialog id="dlg">
+  <h3 style="margin-top:0">Installa Natan sull'iPhone</h3>
+  <ol>
+    <li>Apri questa pagina con <b>Safari</b>.</li>
+    <li>Tocca il pulsante <b>Condividi</b> (il quadrato con la freccia).</li>
+    <li>Scegli <b>«Aggiungi alla schermata Home»</b>.</li>
+    <li>Apri Natan dall'icona nuova.</li>
+  </ol>
+  <div class="btns"><a class="btn" href="app/">Apri Natan</a><button class="btn soft" type="button" id="close">Chiudi</button></div>
+</dialog>
+<script>
+let deferred=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e});
+document.getElementById("ios").onclick=()=>document.getElementById("dlg").showModal();
+document.getElementById("close").onclick=()=>document.getElementById("dlg").close();
+document.getElementById("android").onclick=async()=>{
+  if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r.outcome==="accepted")return}
+  location.href="app/";
+};
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
