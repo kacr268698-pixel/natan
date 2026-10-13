@@ -11,6 +11,8 @@
 <link rel="apple-touch-icon" href="../icone/apple-touch-icon.png">
 <link rel="icon" href="../icone/icon-192.png">
 <title>Natan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0e1222;--panel:#141a2f;--card:#1b2240;--card2:#232b4f;--line:#2c355c;--text:#e9ecf8;--muted:#8e97bd;--soft:#b4bbdb;--acc:#6c7bff;--vio:#9b6bff;--user:#4152d8;--good:#2fb879;--bad:#e5484d;--warn:#f5a524;--yel:#f5c542}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -105,6 +107,56 @@ textarea{flex:1;min-width:0;resize:none;background:var(--panel);border:1px solid
 #drawer nav .it{text-align:left;background:none;border:0;border-radius:12px;padding:12px;color:var(--soft);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #drawer nav .it.on{background:var(--card);color:#fff}
 #drawer nav h3{margin:10px 4px 2px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+/* ===== versione PC (schermo grande): barra laterale, elenco chat, livelli ===== */
+#pcv{position:fixed;inset:0;display:flex;background:var(--bg)}
+body.pc,body.pc button,body.pc input,body.pc textarea,body.pc select{font-family:Figtree,-apple-system,"Segoe UI",sans-serif}
+body.pc .screen:not(#splash){max-width:760px}
+#pcv aside{width:232px;flex:none;background:var(--panel);display:flex;flex-direction:column;padding:20px 12px 16px;gap:4px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:8px;padding:0 8px 14px}.brand b{font:800 22px/1 Sora,Figtree,sans-serif}.brand small{font-size:12px;color:var(--muted)}
+.nv{display:flex;align-items:center;border-radius:10px}.nv>button{flex:1;text-align:left;background:none;border:0;color:#a3abd6;font-weight:600;padding:11px 12px;border-radius:10px}
+.nv.on{background:var(--card)}.nv.on>button{color:#fff;font-weight:700}
+.nv .ham{flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+.vbox{margin-top:14px;background:#1a2047;border:1px solid #3a3f86;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.vbox .yn{display:flex;gap:8px}.vbox .yn button{flex:1;height:40px;border-radius:10px;font-weight:700;border:1px solid var(--line);background:transparent;color:#a3abd6}
+.vbox .yn button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.vbox .n{font:800 30px/1 Sora,Figtree,sans-serif}.vbox small{font-size:12px;color:#a3abd6}.vbox .lk{background:none;border:0;padding:0;text-align:left;font-weight:700;font-size:15px}
+.who{border-top:1px solid var(--line);margin-top:6px;padding:12px 12px 0;font-size:13px;color:var(--muted)}
+#pclist{width:220px;flex:none;background:#11162a;border-right:1px solid #1f2747;padding:20px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+#pclist.hide{display:none}
+#pclist .ci{text-align:left;background:none;border:0;color:#a3abd6;border-radius:10px;padding:10px 12px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+#pclist .ci.on{background:var(--card);color:#fff}
+#pclist .btn{padding:11px;font-size:15px;margin-bottom:8px;border-radius:12px}
+#pcmain{flex:1;min-width:0;display:flex;flex-direction:column;padding:18px 24px 20px;gap:12px}
+#pctop{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.seg{display:flex;background:var(--panel);border-radius:12px;padding:4px;gap:2px}
+.seg button{height:36px;border:0;border-radius:9px;background:transparent;color:#a3abd6;font-weight:600;padding:0 12px;display:flex;align-items:center;gap:6px}
+.seg button.on{background:var(--acc);color:#fff;font-weight:700}.seg button.lock{color:var(--muted)}
+.tb{height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:600;padding:0 14px}
+.tb.red{background:var(--bad);border-color:var(--bad);color:#fff}
+.hint{font-size:13px;color:#c9a8ff}
+#pcchat,#pcsub{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+#pcsub{overflow-y:auto}
+#pcsubt{font:800 26px/1.2 Sora,Figtree,sans-serif;margin:2px 0 6px}
+body.pc main{background:var(--panel);border-radius:18px;padding:18px 22px}
+body.pc .b{max-width:72%}
+body.pc footer{background:var(--card);border-radius:16px;padding:8px}
+body.pc footer textarea{background:transparent;border:0}
+body.pc .banner{margin:0}
+body.pc .pics{padding:0 4px}
+body.pc #subbody{padding:0 2px 10px;overflow:visible;flex:none}
+body.pc .toggles{padding:0}
+/* pagina Impara (PC) */
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{height:38px;border:0;border-radius:10px;background:var(--card);color:#a3abd6;font-weight:600;padding:0 16px}.tabs button.on{background:var(--acc);color:#fff;font-weight:700}
+.imp{display:flex;gap:12px;min-height:380px;height:calc(100vh - 330px)}
+.imp .col{background:#11162a;border-radius:12px;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.imp .c1{width:200px;flex:none}.imp .c2{width:240px;flex:none}
+.imp .c3{flex:1;min-width:0;background:var(--card);border-radius:12px;padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.imp .col button{text-align:left;background:none;border:0;color:#a3abd6;padding:8px 10px;border-radius:8px;flex:none}
+.imp .col button.on{background:var(--card);color:#fff;font-weight:700}
+.imp .col strong{color:#8592ff;padding:6px 6px 2px}
+.imp .c3 p{margin:0;font-size:14px;line-height:1.6;color:#cdd3f2;white-space:pre-wrap}
+.live{font-size:14px;color:#8fd3ff}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--card2);padding:10px 16px;border-radius:12px;font-size:14px;z-index:60;transition:opacity .3s;max-width:90vw}
 </style>
 </head>
@@ -184,6 +236,7 @@ textarea{flex:1;min-width:0;resize:none;background:var(--panel);border:1px solid
   <div class="toggles">
     <button class="tg on" id="tNet" aria-pressed="true">Internet</button>
     <button class="tg on" id="tLib" aria-pressed="true">Biblioteca</button>
+    <button class="tg" id="tVoice" aria-pressed="false">Leggi ad alta voce</button>
   </div>
   <div class="banner hide" id="banner"></div>
   <main id="main"></main>
@@ -215,10 +268,36 @@ textarea{flex:1;min-width:0;resize:none;background:var(--panel);border:1px solid
   </nav>
   <div class="shade" id="shade"></div>
 </div>
+<div id="pcv" class="hide">
+  <aside>
+    <div class="brand" id="pcbrand"><b>Natan</b><small id="pcstate">pronto</small></div>
+    <div class="nv" data-k="profilo"><button id="nProf">Profilo</button></div>
+    <div class="nv" data-k="chat"><button id="nChat">Chat</button><button class="ham" id="nList" aria-label="Mostra o nascondi l'elenco delle chat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+    <div class="nv" data-k="impara"><button id="nImp">Impara</button></div>
+    <div class="nv" data-k="impostazioni"><button id="nSet">Impostazioni</button></div>
+    <div class="vbox" id="vbox"></div>
+    <div style="flex:1"></div>
+    <div class="nv" data-k="modello"><button id="nMod">Modello</button></div>
+    <div class="who" id="pcwho"></div>
+  </aside>
+  <div id="pclist"></div>
+  <div id="pcmain">
+    <div id="pctop">
+      <div class="seg" role="group" aria-label="Livello" id="pcseg"></div>
+      <span class="hint" id="pchint"></span>
+      <div style="flex:1"></div>
+      <button class="tb" id="pcCall">Chiamata</button>
+      <button class="tb" id="pcMod">Modello</button>
+    </div>
+    <div id="pctoggles" class="toggles"></div>
+    <div id="pcchat"></div>
+    <div id="pcsub" class="hide"><div id="pcsubt"></div></div>
+  </div>
+</div>
 <div class="toast hide" id="toast"></div>
 
 <script>
-const VERSION="1.6.0";
+const VERSION="1.7.0";
 const SUBJ=["Matematica","Fisica","Chimica","Biologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Arte","Geografia","Economia","Musica"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -228,7 +307,13 @@ const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
 function toast(t){const e=$("toast");e.textContent=t;e.classList.remove("hide");e.style.opacity=1;clearTimeout(e._t);e._t=setTimeout(()=>{e.style.opacity=0;setTimeout(()=>e.classList.add("hide"),300)},3000)}
 const SCREENS=["welcome","profile","effort","chatv","sub"];
-function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hide",s!==id))}
+const PC=!IS_MOBILE&&innerWidth>=900;
+function show(id){
+  if(PC&&(id==="chatv"||id==="sub")){SCREENS.forEach(s=>$(s).classList.add("hide"));$("pcv").classList.remove("hide");
+    $("pcchat").classList.toggle("hide",id!=="chatv");$("pcsub").classList.toggle("hide",id!=="sub");return}
+  if(PC)$("pcv").classList.add("hide");
+  SCREENS.forEach(s=>$(s).classList.toggle("hide",s!==id))
+}
 function rid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function mb(kb){return kb>1024?(kb/1024).toFixed(1).replace(".",",")+" MB":kb+" KB"}
 
@@ -267,10 +352,11 @@ async function api(path,body,retry=true){
 let statusAt=0;
 async function ping(){
   try{await findBase();if(!BASE)throw 0;const r=await fetch(BASE+"/ping",{cache:"no-store"});online=r.ok}catch(e){online=false;await findBase(true)}
-  if(online&&TOKEN){flushQueue();flushNotes();if(Date.now()-statusAt>60000){statusAt=Date.now();api("/status").then(d=>{PRO=!!d.pro;LS.set("natan_pro",PRO);updatePill()}).catch(()=>{})}}
+  if(online&&TOKEN){flushQueue();flushNotes();if(Date.now()-statusAt>60000){statusAt=Date.now();api("/status").then(d=>{PRO=!!d.pro;LS.set("natan_pro",PRO);if(d.volontario){HELP.stato=d.volontario;LS.set("natan_vol",d.volontario);renderVbox()}updatePill()}).catch(()=>{})}}
   updateDot();updateBanner()
 }
-function updateDot(){$("dot").className="dot"+(busy?" busy":online?" on":localLevel()?" tel":"")}
+function updateDot(){$("dot").className="dot"+(busy?" busy":online?" on":localLevel()?" tel":"");
+  if(PC)$("pcstate").textContent=busy?"sta pensando":STUDY.on?"sta studiando":HELP.job?"sta aiutando":online?"pronto":localLevel()?"sul PC":"spento"}
 
 // =====================================================================================================
 // NATAN SUL DISPOSITIVO: un modello che gira nel browser con WebGPU (WebLLM). Si scarica una volta sola.
@@ -344,7 +430,7 @@ const DB={_db:null,
 };
 const MINE="Miei appunti";
 function libMeta(){return LS.get("natan_lib",{})}
-function setLibMeta(m){LS.set("natan_lib",m);MEM=null}
+function setLibMeta(m){LS.set("natan_lib",m);MEM=null;if(typeof IMP!=="undefined")IMP.rows={}}
 const STOP=new Set("che chi cosa come dove quando perche quale quali quanto quanti sono sei era erano essere avere del della dello dei degli delle dal dalla dai dagli nel nella nei negli nelle sul sulla sui sugli sulle con per tra fra una uno gli le lo la il mi ti ci si vi me te noi voi loro suo sua tuo tua mio mia questo questa questi quello quella fammi dimmi spiegami spiega scrivi fai puoi vorrei voglio sapere anche ancora molto poco piu meno tutto tutti tutte the and for with what how".split(" "));
 function norm(s){return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")}
 let MEM=null;
@@ -474,25 +560,28 @@ async function deviceAdvice(){
 }
 async function openEffort(edit){
   show("effort");$("estep").textContent=edit?"Impegno":"Passo 3 di 3";
-  const box=$("opts");box.innerHTML="";const cur=LS.get("natan_impegno","")||"kevin";const got=LS.get("natan_scaricato",{});
+  const box=$("opts");box.innerHTML="";const got=LS.get("natan_scaricato",{});
   const adv=await deviceAdvice();
+  const cur=LS.get("natan_impegno","")||(PC&&adv.g.ok&&bestLevelFor(adv.mem||8)?bestLevelFor(adv.mem||8):"kevin");
   const mk=(key,title,size,txt,tag)=>{const o=el("button","opt"+(key===cur?" on":""));o.dataset.e=key;
     const top=el("span","top");top.append(el("strong","",title));const r=el("span","");if(tag){const t=el("span","tag"+(tag.tag?" "+tag.tag:""),tag.t);r.append(t," ")}r.append(el("small","",size));top.append(r);
     o.append(top,el("span","",txt));if(tag&&tag.tag==="no")o.classList.add("no");
     o.onclick=()=>{box.querySelectorAll(".opt").forEach(x=>x.classList.toggle("on",x===o))};box.append(o)};
   for(const [k,L] of Object.entries(LEVELS))mk(k,L.name+" · "+L.params,(got[k]?"già scaricato":"~"+String(L.gb).replace(".",",")+" GB"),L.txt,adv.out[k]);
-  mk("kevin","Natan di Kevin","niente da scaricare","Risponde sempre il computer di Kevin (il più forte, legge anche le foto). Se è spento devi aspettare.",null);
+  if(PC)mk("kevin",PRO?"Altissimo · Natan Pro":"Altissimo · Natan di Kevin","niente da scaricare","Risponde il modello più forte del Mac di Kevin, con ragionamento lungo.",kevinAllowed()?null:{tag:"no",t:"premio per i volontari"});
+  else mk("kevin","Natan di Kevin","niente da scaricare","Risponde sempre il computer di Kevin (il più forte, legge anche le foto). Se è spento devi aspettare.",null);
   const db=$("devbox");db.classList.remove("hide");db.innerHTML="";
   db.append(el("strong","",adv.g.ok?"Il tuo dispositivo":"Natan sul dispositivo non funziona qui"));
   db.append(el("span","",adv.g.ok?(adv.mem?`Memoria: circa ${adv.mem} GB. Ti consiglio il livello più alto con la scritta verde.`:"Su iPhone parti da Veloce: se va bene puoi provare Medio."):"Questo browser non ha WebGPU. Su iPhone serve iOS 26 o più recente, su Android e PC Chrome o Edge aggiornati. Intanto puoi usare «Natan di Kevin»."));
   $("go3").textContent=edit?"Salva":"Inizia";
   $("go3").onclick=()=>{const o=box.querySelector(".opt.on");const v=o?o.dataset.e:"kevin";
+    if(PC&&v==="kevin"&&!kevinAllowed()){toast("Altissimo è il premio per i volontari: scegli Basico, Medio o Alto");return}
     if(o&&o.classList.contains("no")&&!confirmLight(o))return;
     LS.set("natan_impegno",v);openChat();
     if(v!=="kevin"){toast("Scarico Natan "+LEVELS[v].name+": la prima volta ci vuole un po', meglio con il Wi-Fi");loadEngine(v).then(()=>toast("Natan "+LEVELS[v].name+" è pronto sul dispositivo ✓")).catch(e=>toast(e.message));autoLib()}}
 }
 function confirmLight(o){if(o.dataset.warned){return true}o.dataset.warned=1;toast("Questo livello è troppo pesante qui: se vuoi provarlo comunque premi di nuovo «Inizia»");return false}
-function updatePill(){
+function updatePill(){renderSeg();
   const l=LS.get("natan_impegno","kevin");const p=$("epill");p.textContent=PRO&&l==="kevin"?"Natan Pro":({kevin:"Kevin",veloce:"Veloce",medio:"Medio",massimo:"Massimo"}[l]||"Kevin");
   p.classList.toggle("pro",PRO);$("mEffortV").textContent=p.textContent
 }
@@ -505,18 +594,18 @@ function updateBanner(){
 
 // =====================================================================================================
 // CHAT salvate sul dispositivo
-function newChat(){chat="c"+Date.now().toString(36);LS.set("natan_chat",chat);hist=[];render()}
+function newChat(){chat="c"+Date.now().toString(36);LS.set("natan_chat",chat);hist=[];render();renderPcList()}
 function saveHist(){
   LS.set("natan_hist_"+chat,hist.slice(-60));
   const first=hist.find(x=>x.role==="user");
   const i=chats.findIndex(c=>c.id===chat);const item={id:chat,title:(first?.content||"Nuova chat").slice(0,40),ts:Date.now()};
   if(i>=0)chats[i]=item;else chats.unshift(item);
-  chats.sort((a,b)=>b.ts-a.ts);chats=chats.slice(0,50);LS.set("natan_chats",chats)
+  chats.sort((a,b)=>b.ts-a.ts);chats=chats.slice(0,50);LS.set("natan_chats",chats);renderPcList()
 }
 function openChat(){
   show("chatv");
   if(!chat)newChat();else{hist=LS.get("natan_hist_"+chat,[]);render()}
-  updatePill();updateBanner();updateDot();$("mTel").checked=LS.get("natan_sempre_tel",false)
+  updatePill();updateBanner();updateDot();$("mTel").checked=LS.get("natan_sempre_tel",false);setNav("chat");renderPcList();if(PC)$("pcwho").textContent=prof?(prof.name+" · "+prof.age+" anni"):""
 }
 function render(){
   const m=$("main");m.innerHTML="";
@@ -553,7 +642,7 @@ function route(nPhotos){
   const lvl=LS.get("natan_impegno","kevin");const loc=localLevel();
   if(nPhotos)return "kevin";                            // le foto le legge solo il Natan di Kevin
   if(!loc)return "kevin";
-  if(lvl!=="kevin"&&(LS.get("natan_sempre_tel",false)||!online))return "tel";
+  if(lvl!=="kevin"&&(PC||LS.get("natan_sempre_tel",false)||!online))return "tel";
   if(lvl==="kevin"&&!online)return "tel";
   return "kevin"
 }
@@ -569,7 +658,7 @@ async function send(forced,opts={}){
   const wait=bubble({role:"assistant",content:"Natan sta pensando"});wait.classList.add("wait");const m=$("main");m.scrollTop=m.scrollHeight;
   busy=true;updateDot();const t0=Date.now();const st={est:0,text:false};
   const tick=setInterval(()=>{const s=Math.round((Date.now()-t0)/1000);if(!st.text)wait.textContent="Natan sta pensando"+".".repeat(s%4)+(st.est?"\nCi metto circa "+st.est+" s · "+s+" s":" · "+s+" s")},500);
-  const done=x=>{wait.closest(".row").remove();hist.push(x);saveHist();bubble(x);m.scrollTop=m.scrollHeight;
+  const done=x=>{wait.closest(".row").remove();hist.push(x);saveHist();bubble(x);m.scrollTop=m.scrollHeight;speak(x.content);
     if(document.hidden&&"Notification" in window&&Notification.permission==="granted")new Notification("Natan ha risposto",{body:x.content.slice(0,100)})};
   try{
     let way=route(ph.length);
@@ -584,7 +673,8 @@ async function send(forced,opts={}){
     else if(e.code===0)wait.textContent=ph.length?"Le foto le legge solo il Natan di Kevin, che adesso è spento: riprova più tardi.":"Il Natan di Kevin adesso è spento: riprova più tardi, oppure scarica Natan sul dispositivo dal menu «Impegno».";
     else if(e.code===-1)wait.textContent="Le foto le legge solo il Natan di Kevin, che adesso è spento: riprova più tardi.";
     else wait.textContent="Errore: "+e.message}
-  finally{clearInterval(tick);busy=false;updateDot();ping()}
+  finally{clearInterval(tick);busy=false;updateDot();ping();
+    if(CALL.on)setTimeout(()=>{if(!("speechSynthesis" in window)||!speechSynthesis.speaking)callListen()},1500)}
 }
 async function askKevin(t,ph,opts,wait,st,t0,done,um){
   const j=await api("/chat",{chat,text:t,photos:ph,biblioteca:$("tLib").classList.contains("on"),pensaci:!!opts.deep});st.est=j.estimate||0;
@@ -621,7 +711,8 @@ function grow(){const i=$("inp");i.style.height="auto";i.style.height=Math.min(1
 $("inp").addEventListener("input",grow);
 $("inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!IS_MOBILE){e.preventDefault();send()}});
 $("send").onclick=()=>send();
-["tNet","tLib"].forEach(id=>{const b=$(id);b.onclick=()=>{b.classList.toggle("on");b.setAttribute("aria-pressed",b.classList.contains("on"));LS.set("natan_"+id,b.classList.contains("on"))};if(LS.get("natan_"+id,true)===false){b.classList.remove("on");b.setAttribute("aria-pressed","false")}});
+["tNet","tLib","tVoice"].forEach(id=>{const b=$(id);const def=id!=="tVoice";b.onclick=()=>{b.classList.toggle("on");b.setAttribute("aria-pressed",b.classList.contains("on"));LS.set("natan_"+id,b.classList.contains("on"));if(id==="tVoice"&&!b.classList.contains("on"))speechSynthesis?.cancel()};
+  const v=LS.get("natan_"+id,def);b.classList.toggle("on",!!v);b.setAttribute("aria-pressed",String(!!v))});
 
 // --- foto: rimpicciolite prima di inviarle (massimo 30)
 function shrinkPhoto(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file);const im=new Image();
@@ -646,7 +737,8 @@ if(SR){const mic=$("mic");mic.classList.remove("hide");let rec=null;
 // =====================================================================================================
 // PAGINE SECONDARIE
 let SUBNOW="";
-function openSub(title,key){show("sub");$("subtitle").textContent=title;$("subbody").innerHTML="";SUBNOW=key;STUDY.screen=key==="study";HELP.screen=key==="help";return $("subbody")}
+function openSub(title,key){show("sub");$("subtitle").textContent=title;$("pcsubt").textContent=title;$("subbody").innerHTML="";SUBNOW=key;
+  STUDY.screen=key==="study"||key==="impara";HELP.screen=key==="help";setNav({impara:"impara",study:"impara",impostazioni:"impostazioni",lib:"impara"}[key]||"");return $("subbody")}
 $("back").onclick=()=>{SUBNOW="";STUDY.screen=false;HELP.screen=false;openChat()};
 
 // --- biblioteca
@@ -689,7 +781,7 @@ function chunks(text){
   return out.filter(c=>c.length>=120).map(c=>c.slice(0,1400))
 }
 async function studyLoop(){
-  STUDY.on=true;STUDY.msg="";renderStudy();let pool=[];let offset=0;const auto=!STUDY.topic;
+  STUDY.on=true;STUDY.msg="";STUDY.p0=STUDY.pages;STUDY.n0=STUDY.notes;STUDY.titles=[];renderStudy();updateDot();let pool=[];let offset=0;const auto=!STUDY.topic;
   try{
     while(STUDY.on){
       if(!pool.length){
@@ -708,18 +800,23 @@ async function studyLoop(){
         cs.forEach((c,i)=>rows.push([base+i,"it",page.title||title,c]));await DB.set("m:"+MINE,rows);
         const meta=libMeta();meta[MINE]={n:rows.length,max:base,kb:0};setLibMeta(meta);
         const qd=LS.get("natan_appunti_coda",[]);cs.forEach(c=>qd.push({materia:STUDY.materia||"Generale",title:page.title||title,url,text:c}));LS.set("natan_appunti_coda",qd.slice(-3000));
-        STUDY.pages++;STUDY.notes+=cs.length
+        STUDY.pages++;STUDY.notes+=cs.length;STUDY.titles.push(page.title||title)
       }
       STUDY.seen.add(title);LS.set("natan_studiati",[...STUDY.seen].slice(-3000));
       if(online)flushNotes();
       renderStudy();await sleep(1500)                    // con calma: Wikipedia non vuole troppe richieste
     }
   }catch(e){STUDY.msg="Mi sono fermato: "+(e.name==="AbortError"?"Wikipedia non risponde":e.message)+". Riprova tra poco."}
-  STUDY.on=false;STUDY.cur="";renderStudy()
+  STUDY.on=false;STUDY.cur="";
+  if(STUDY.pages>STUDY.p0){const r=LS.get("natan_resoconti",[]);r.unshift({ts:Date.now(),topic:auto?"Scelto da Natan ("+(STUDY.materia||"varie")+")":STUDY.topic,
+    pages:STUDY.pages-STUDY.p0,notes:STUDY.notes-STUDY.n0,titles:STUDY.titles.slice(-30),msg:STUDY.msg});LS.set("natan_resoconti",r.slice(0,40))}
+  renderStudy();updateDot()
 }
 function openStudy(){openSub("Studia","study");renderStudy()}
 function renderStudy(){
-  if(!STUDY.screen)return;const b=$("subbody");b.innerHTML="";
+  if(!STUDY.screen)return;
+  if(SUBNOW==="impara")return renderImpTop();
+  const b=$("subbody");b.innerHTML="";
   b.append(el("p","lead","Natan legge le pagine di Wikipedia e prende appunti. Gli appunti restano sul tuo dispositivo e vengono proposti a Kevin per la biblioteca di tutti. Consigliato sul PC."));
   const inp=el("input","field");inp.placeholder="Cosa devo studiare? (lascia vuoto e scelgo io)";inp.value=STUDY.topic;inp.disabled=STUDY.on;b.append(inp);
   const sel=el("select","field");["Generale",...SUBJ].forEach(s=>{const o=el("option","",s);o.value=s;sel.append(o)});sel.value=STUDY.materia||(prof?.interests||[])[0]||"Generale";sel.disabled=STUDY.on;
@@ -788,6 +885,7 @@ async function helpLoop(){
 }
 function openHelp(){openSub("Aiuta Natan","help");renderHelp()}
 function renderHelp(){
+  renderVbox();updateDot();
   if(!HELP.screen)return;const b=$("subbody");b.innerHTML="";
   b.append(el("h1","","Aiuta Natan e ti daremo un Natan potente 🤵‍♂️"));
   b.append(el("p","lead","Quando il Mac di Kevin è pieno di domande, il tuo computer risponde al posto suo. Tu vedi solo quante persone stai aiutando: mai chi sono."));
@@ -832,6 +930,153 @@ $("mInstall").onclick=async()=>{closeDrawer();
   else if(!IS_MOBILE)toast("In Chrome o Edge premi l'icona di installazione nella barra degli indirizzi");
   else toast("Apri il menu ⋮ del browser e scegli «Installa app»")};
 if("Notification" in window&&Notification.permission==="default")document.addEventListener("click",()=>Notification.requestPermission().catch(()=>{}),{once:true});
+// =====================================================================================================
+// VERSIONE PC
+function setNav(k){document.querySelectorAll("#pcv .nv").forEach(n=>n.classList.toggle("on",n.dataset.k===k))}
+function renderPcList(){
+  if(!PC)return;const l=$("pclist");l.innerHTML="";
+  const nb=el("button","btn","Nuova chat");nb.onclick=()=>{if(busy)return;newChat();openChat()};l.append(nb);
+  chats.forEach(c=>{const b=el("button","ci"+(c.id===chat?" on":""),c.title||"Chat");b.title=c.title||"Chat";b.onclick=()=>{if(busy)return;chat=c.id;LS.set("natan_chat",chat);openChat()};l.append(b)});
+  if(!chats.length)l.append(el("span","","Ancora nessuna chat"));
+}
+const SEG=[["veloce","Basico"],["medio","Medio"],["massimo","Alto"],["kevin","Altissimo"]];
+function kevinAllowed(){return PRO||!hasWebGPU()}
+function renderSeg(){
+  if(!PC)return;const g=$("pcseg");g.innerHTML="";const cur=LS.get("natan_impegno","kevin");
+  for(const [k,lab] of SEG){
+    const b=el("button","");const lock=k==="kevin"&&!kevinAllowed();
+    b.className=(k===cur?"on":"")+(lock?" lock":"");
+    if(lock)b.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+    b.append(document.createTextNode(k==="kevin"&&PRO?"Altissimo · Pro":lab));
+    b.title=k==="kevin"?(PRO?"Il modello più forte del Mac di Kevin":lock?"Altissimo è il premio per i volontari":"Risponde il Mac di Kevin"):LEVELS[k].name+" · "+LEVELS[k].params;
+    b.onclick=()=>pickSeg(k);g.append(b)}
+  $("pchint").textContent=kevinAllowed()?"":"Altissimo è il premio per i volontari";
+}
+function pickSeg(k){
+  if(busy)return;
+  if(k==="kevin"&&!kevinAllowed()){toast("Altissimo è il premio per i volontari: premi «Sì» nel riquadro «Aiuta Natan»");return}
+  LS.set("natan_impegno",k);updatePill();
+  if(k!=="kevin"){toast("Natan "+LEVELS[k].name+" ("+LEVELS[k].params+") sul tuo PC");loadEngine(k).then(()=>toast("Natan "+LEVELS[k].name+" è pronto ✓")).catch(e=>toast(e.message));autoLib()}
+  else toast(PRO?"Natan Pro: risponde il modello più forte del Mac di Kevin":"Risponde il Mac di Kevin")
+}
+function renderVbox(){
+  if(!PC)return;const v=$("vbox");v.innerHTML="";
+  const t=el("button","lk","Aiuta Natan");t.onclick=openHelp;v.append(t);
+  const yn=el("div","yn");const y=el("button",HELP.on?"on":"","Sì"),n=el("button",HELP.on?"":"on","No");
+  y.onclick=()=>{if(HELP.on)return;if(!HELP.test||!HELP.test.ok){openHelp();toast("Prima fai il test del PC: ci vuole un minuto");return}helpOn()};
+  n.onclick=()=>{if(HELP.on)helpOff()};yn.append(y,n);v.append(yn);
+  if(HELP.on){v.append(el("span","","Utenti che aiuti adesso"));v.append(el("span","n",String(HELP.aiuti)))}
+  const st={in_prova:"In prova · controlli in corso",approvato:"Approvato · hai Natan Pro",sospeso:"Sospeso"}[HELP.stato];
+  v.append(el("small","",(HELP.on?"Uso al massimo 3/4 del PC":"Presta il PC e vinci Natan Pro")+(st?" · "+st:"")));
+}
+function speak(text){
+  if(!$("tVoice").classList.contains("on")&&!CALL.on)return;
+  if(!("speechSynthesis" in window))return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,3000));u.lang="it-IT";
+    const v=speechSynthesis.getVoices().find(x=>/^it/i.test(x.lang));if(v)u.voice=v;
+    u.onend=()=>{if(CALL.on)setTimeout(callListen,400)};speechSynthesis.speak(u)}catch(e){}
+}
+// --- chiamata: parli, Natan risponde a voce, poi ti ascolta di nuovo
+const CALL={on:false,rec:null};
+function callListen(){
+  if(!CALL.on||busy)return;if(!SR){callStop();return}
+  const r=new SR();r.lang="it-IT";r.interimResults=false;CALL.rec=r;$("pcCall").textContent="● Ti ascolto...";
+  r.onresult=ev=>{const t=[...ev.results].map(x=>x[0].transcript).join(" ").trim();if(t){$("pcCall").textContent="Termina chiamata";send(t)}};
+  r.onend=()=>{CALL.rec=null;if(CALL.on&&!busy&&$("pcCall").textContent.startsWith("●"))setTimeout(callListen,300)};
+  r.onerror=e=>{if(e.error==="not-allowed"){toast("Permetti l'uso del microfono per la chiamata");callStop()}};
+  try{r.start()}catch(e){}
+}
+function callStop(){CALL.on=false;try{CALL.rec&&CALL.rec.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}$("pcCall").textContent="Chiamata";$("pcCall").classList.remove("red")}
+function callToggle(){
+  if(CALL.on){callStop();return}
+  if(!SR){toast("Questo browser non sente la voce: usa Chrome o Edge");return}
+  CALL.on=true;$("pcCall").classList.add("red");$("pcCall").textContent="Termina chiamata";openChat();callListen()
+}
+// --- pagina Impara: studio in diretta + appunti dalla A alla Z + resoconti
+const IMP={tab:"az",mat:"",title:"",rows:{}};
+function openImpara(){openSub("Impara","impara");const b=$("subbody");
+  const top=el("div","card");top.id="imptop";b.append(top);
+  const tabs=el("div","tabs");tabs.id="imptabs";b.append(tabs);
+  const body=el("div","");body.id="impbody";b.append(body);
+  renderImpTop();renderImpTabs();renderImpBody()}
+function renderImpTop(){
+  const top=$("imptop");if(!top)return;top.innerHTML="";
+  const r=el("div","");r.style.cssText="display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+  const inp=el("input","field");inp.placeholder="Cosa devo imparare? (lascia vuoto e scelgo io)";inp.value=STUDY.topic;inp.disabled=STUDY.on;inp.style.flex="1 1 300px";
+  const sel=el("select","field");sel.style.flex="0 0 170px";["Generale",...SUBJ].forEach(x=>{const o=el("option","",x);o.value=x;sel.append(o)});
+  sel.value=STUDY.materia||(prof?.interests||[])[0]||"Generale";sel.disabled=STUDY.on;sel.setAttribute("aria-label","Materia degli appunti");
+  const stop=el("button","btn red","Basta");stop.disabled=!STUDY.on;stop.onclick=()=>{STUDY.on=false;STUDY.msg="Fermato: riparto quando vuoi."};
+  const go=el("button","btn","Vai");go.disabled=STUDY.on;go.onclick=()=>{STUDY.topic=inp.value.trim();STUDY.materia=sel.value;studyLoop()};
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")go.click()});
+  r.append(inp,sel,stop,go);top.append(r);
+  const wait=LS.get("natan_appunti_coda",[]).length;
+  const line=STUDY.on?"In diretta · "+STUDY.notes+" appunti · "+STUDY.pages+" pagine"+(STUDY.cur?" · leggo «"+STUDY.cur+"» (Wikipedia it)":"")+" · li proporrò a Kevin per la biblioteca di tutti"
+    :(STUDY.msg||"Premi «Vai»: Natan legge Wikipedia e prende appunti.")+(STUDY.sent||wait?" · "+STUDY.sent+" appunti arrivati a Kevin"+(wait?", "+wait+" in attesa":""):"");
+  top.append(el("span","live",line));
+  if(!STUDY.on&&IMP.tab==="az")renderImpBody()
+}
+function renderImpTabs(){const t=$("imptabs");if(!t)return;t.innerHTML="";
+  [["az","Appunti A-Z"],["res","Resoconti di studio"]].forEach(([k,l])=>{const b=el("button",IMP.tab===k?"on":"",l);b.onclick=()=>{IMP.tab=k;renderImpTabs();renderImpBody()};t.append(b)});
+  const g=el("button","","Scarica o aggiorna la biblioteca");g.onclick=openLib;t.append(g)}
+async function renderImpBody(){
+  const body=$("impbody");if(!body)return;body.innerHTML="";
+  if(IMP.tab==="res"){
+    const r=LS.get("natan_resoconti",[]);const l=el("div","list");
+    if(!r.length)l.append(el("span","","Ancora nessuno studio: scrivi un argomento in alto e premi «Vai»."));
+    r.forEach(x=>{const c=el("div","card");c.append(el("strong","",x.topic),el("small","",new Date(x.ts).toLocaleString("it-IT")+" · "+x.pages+" pagine · "+x.notes+" appunti"));
+      if(x.titles?.length)c.append(el("span","","Ho letto: "+x.titles.join(", ")));if(x.msg)c.append(el("small","",x.msg));l.append(c)});
+    body.append(l);return}
+  const wrap=el("div","imp");const c1=el("div","col c1"),c2=el("div","col c2"),c3=el("div","c3");wrap.append(c1,c2,c3);body.append(wrap);
+  const meta=libMeta();const mats=Object.keys(meta).sort((a,b)=>a.localeCompare(b,"it"));
+  if(!mats.length){c3.append(el("strong","","La biblioteca è vuota"),el("p","","Premi «Scarica o aggiorna la biblioteca», oppure fai studiare Natan con «Vai»."));return}
+  if(!IMP.mat||!meta[IMP.mat])IMP.mat=mats[0];
+  mats.forEach(m=>{const b=el("button",m===IMP.mat?"on":"",m+" ("+(meta[m].n||0).toLocaleString("it-IT")+")");b.onclick=()=>{IMP.mat=m;IMP.title="";renderImpBody()};c1.append(b)});
+  if(!IMP.rows[IMP.mat]){c2.append(el("span","","Apro..."));try{IMP.rows[IMP.mat]=(await DB.get("m:"+IMP.mat))||[]}catch(e){IMP.rows[IMP.mat]=[]}c2.innerHTML=""}
+  const rows=IMP.rows[IMP.mat];const by=new Map();rows.forEach(r=>{const t=r[2]||"?";if(!by.has(t))by.set(t,[]);by.get(t).push(r)});
+  const titles=[...by.keys()].sort((a,b)=>a.localeCompare(b,"it"));let letter="";
+  if(!IMP.title||!by.has(IMP.title))IMP.title=titles[0]||"";
+  for(const t of titles){const L=norm(t[0]||"?").toUpperCase();if(L!==letter){letter=L;c2.append(el("strong","",L))}
+    const b=el("button",t===IMP.title?"on":"",t+" ("+by.get(t).length+")");b.onclick=()=>{IMP.title=t;renderImpBody()};c2.append(b)}
+  if(IMP.title){const ns=by.get(IMP.title);c3.append(el("strong","",IMP.title));
+    const a=el("a","","Wikipedia: "+IMP.title);a.href="https://"+(ns[0][1]||"it")+".wikipedia.org/wiki/"+encodeURIComponent(IMP.title.replace(/ /g,"_"));a.target="_blank";a.rel="noopener";a.style.fontSize="13px";a.style.color="#aab4ff";c3.append(a);
+    ns.forEach(r=>c3.append(el("p","",r[3])))}
+  const on=c2.querySelector(".on");if(on)on.scrollIntoView({block:"nearest"})
+}
+// --- pagina Impostazioni (PC)
+function openSettings(){const b=openSub("Impostazioni","impostazioni");
+  const c1=el("div","card");c1.append(el("strong","","Profilo"),el("span","",(prof?.name||"")+" · "+(prof?.age||"?")+" anni · "+(prof?.interests||[]).join(", ")));
+  const e1=el("button","btn soft","Modifica il profilo");e1.onclick=()=>openProfile(true);c1.append(e1);
+  const L=LS.get("natan_impegno","kevin");const c2=el("div","card");
+  c2.append(el("strong","","Modello"),el("span","",L==="kevin"?(PRO?"Natan Pro (Mac di Kevin)":"Mac di Kevin"):LEVELS[L].name+" · "+LEVELS[L].params+" · sul tuo PC"+(ENG.e&&ENG.lvl===L?" · pronto ✓":"")));
+  const e2=el("button","btn soft","Cambia modello");e2.onclick=()=>openEffort(true);c2.append(e2);
+  const c3=el("div","card");const meta=libMeta();const n=Object.values(meta).reduce((a,m)=>a+(m.n||0),0);
+  c3.append(el("strong","","Biblioteca"),el("span","",n.toLocaleString("it-IT")+" appunti su questo computer ("+Object.keys(meta).length+" materie)"));
+  const e3=el("button","btn soft","Gestisci la biblioteca");e3.onclick=openLib;c3.append(e3);
+  const c4=el("div","card");c4.append(el("strong","","Dati"),el("span","",chats.length+" chat salvate su questo computer · "+LS.get("natan_coda",[]).length+" messaggi e "+LS.get("natan_appunti_coda",[]).length+" appunti in attesa di arrivare a Kevin"),
+    el("small","","Tutto quello che scrivi arriva a Kevin, che può leggerlo per migliorare Natan."));
+  const c5=el("div","card");c5.append(el("strong","","App"),el("span","","Natan v"+VERSION+" per computer"));
+  const e5=el("button","btn soft","Installa Natan come app sul computer");e5.onclick=()=>$("mInstall").click();
+  const e6=el("button","btn soft","Chi è Natan");e6.onclick=()=>location.href="../";c5.append(e5,e6);
+  b.append(c1,c2,c3,c4,c5)
+}
+function initPC(){
+  if(!PC)return;document.body.classList.add("pc");
+  Object.assign(LEVELS.veloce,{name:"Basico",txt:"Il più leggero: va su quasi tutti i computer."});
+  Object.assign(LEVELS.medio,{txt:"Più preciso: per computer con almeno 8 GB di RAM."});
+  Object.assign(LEVELS.massimo,{name:"Alto",txt:"Il più bravo sul tuo computer: per PC e Mac con 8 GB di RAM o più."});
+  $("pcbrand").insertBefore($("dot"),$("pcstate"));
+  $("pctoggles").append($("tNet"),$("tLib"),$("tVoice"));
+  $("pcchat").append($("banner"),$("main"),$("pics"),$("chatv").querySelector("footer"));
+  $("pcsub").append($("subbody"));
+  $("pcwho").textContent=prof?(prof.name+" · "+prof.age+" anni"):"";
+  $("nProf").onclick=()=>openProfile(true);$("nChat").onclick=openChat;$("nImp").onclick=openImpara;$("nSet").onclick=openSettings;
+  $("nMod").onclick=$("pcMod").onclick=()=>openEffort(true);$("pcCall").onclick=callToggle;
+  $("nList").onclick=()=>{const l=$("pclist");l.classList.toggle("hide");LS.set("natan_lista",!l.classList.contains("hide"))};
+  if(LS.get("natan_lista",true)===false)$("pclist").classList.add("hide");
+  renderVbox();renderSeg();renderPcList();
+  let w=innerWidth;addEventListener("resize",()=>{clearTimeout(initPC.t);initPC.t=setTimeout(()=>{if((innerWidth>=900)!==(w>=900))location.reload();w=innerWidth},400)})
+}
+initPC();
 start();
 </script>
 </body>
