@@ -1,5 +1,5 @@
 // Natan: tiene l'app sul telefono così si apre anche senza rete. Le risposte invece arrivano sempre dal Natan di Kevin.
-const CACHE = "natan-1.5.0-1791922395";
+const CACHE = "natan-1.5.0-1791922441";
 const FILES = ["./", "./index.html", "./app/", "./app/index.html", "./manifest.webmanifest", "./icone/icon-192.png", "./icone/icon-512.png", "./icone/apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
