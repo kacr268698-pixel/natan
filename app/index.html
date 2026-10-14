@@ -266,7 +266,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="1.9.0";
+const VERSION="2.0.0";
 const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -311,15 +311,25 @@ async function api(path,body,retry=true){
   if(!BASE)throw Object.assign(new Error("offline"),{code:0});
   let r;
   try{r=await fetch(BASE+path,{method:body?"POST":"GET",headers:{"Authorization":"Bearer "+TOKEN,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}
-  catch(e){if(retry){await findBase(true);return api(path,body,false)}throw Object.assign(new Error("offline"),{code:0})}
-  if(r.status===502||r.status===530||r.status===1033)throw Object.assign(new Error("offline"),{code:0});
+  catch(e){if(retry){await findBase(true);if(!await quickOk()&&await tryLocal()){}return api(path,body,false)}throw Object.assign(new Error("offline"),{code:0})}
+  if(r.status===502||r.status===530||r.status===1033){if(retry&&BASE!==LOCAL&&await tryLocal())return api(path,body,false);throw Object.assign(new Error("offline"),{code:0})}
   let d={};try{d=await r.json()}catch(e){}
   if(!r.ok){const er=new Error(d.error||("errore "+r.status));er.code=r.status;er.data=d;throw er}
   return d
 }
+async function quickOk(){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),4000);const r=await fetch(BASE+"/ping",{cache:"no-store",signal:c.signal});clearTimeout(t);return r.ok}catch(e){return false}}
 let statusAt=0;
+const LOCAL="http://127.0.0.1:8765";
+async function tryLocal(){                      // sul computer dove gira il server di Natan funziona anche senza tunnel
+  try{const c=new AbortController();const t=setTimeout(()=>c.abort(),1500);const r=await fetch(LOCAL+"/ping",{cache:"no-store",signal:c.signal});clearTimeout(t);
+    if(r.ok){const d=await r.json();if(d.app==="natan"){BASE=LOCAL;return true}}}catch(e){}
+  return false
+}
 async function ping(){
-  try{await findBase();if(!BASE)throw 0;const r=await fetch(BASE+"/ping",{cache:"no-store"});online=r.ok}catch(e){online=false;await findBase(true)}
+  try{await findBase();if(!BASE)throw 0;const r=await fetch(BASE+"/ping",{cache:"no-store"});online=r.ok;if(!r.ok)throw 0}
+  catch(e){online=false;await findBase(true);
+    try{if(BASE&&BASE!==LOCAL){const r=await fetch(BASE+"/ping",{cache:"no-store"});online=r.ok}}catch(e2){}
+    if(!online)online=await tryLocal()}
   if(online&&TOKEN){flushQueue();flushNotes();
     if(Date.now()-statusAt>60000){statusAt=Date.now();api("/status").then(d=>{PRO=!!d.pro;LS.set("natan_pro",PRO);if(d.volontario){HELP.stato=d.volontario;LS.set("natan_vol",d.volontario)}renderModel();renderHelpBadge()}).catch(()=>{})}}
   updateStatus();updateNotice()
