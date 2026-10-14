@@ -266,7 +266,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.0.0";
+const VERSION="2.0.1";
 const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -1136,7 +1136,7 @@ async function helpLoop(){
     try{
       const d=await api("/rete/prendi",{attesa:20});
       HELP.stato=d.stato||HELP.stato;LS.set("natan_vol",HELP.stato);HELP.aiuti=d.aiuti||0;HELP.aiutati=typeof d.aiutati==="number"?Math.max(d.aiutati,HELP.aiutati):HELP.aiutati;
-      HELP.rete=d.rete||HELP.rete;HELP.mac=d.mac_occupato?"occupato":"libero";HELP.msg="";saveCert(d);renderHelpStatus();renderHelpBadge();
+      HELP.rete=d.rete||HELP.rete;HELP.mac=d.mac_occupato?"occupato":"libero";HELP.sempre=d.sempre!==false;HELP.msg="";saveCert(d);renderHelpStatus();renderHelpBadge();
       if(HELP.stato==="sospeso"){HELP.on=false;netStop();netLog("Sei stato sospeso: parlane con chi gestisce Natan");break}
       if(!d.lavoro)continue;
       const w=d.lavoro;HELP.job=true;renderHelpStatus();renderHelpBadge();const t0=Date.now();let last=0;
@@ -1189,7 +1189,8 @@ function renderHelpStatus(){
   if(!HELP.on){p.append(el("span","small",HELP.test?.ok?"Accendi l'interruttore per iniziare.":"Prima fai il test del PC qui sopra."));if(HELP.msg)p.append(el("span","err",HELP.msg))}
   else{
     const mode=HELP.mac==="spento"?(NET.peer?"Il server di Natan è spento: i dispositivi si collegano direttamente a te (posto "+NET.slot+").":"Il server di Natan è spento"+(HELP.stato==="approvato"?": sto entrando nella rete senza server…":": serve essere approvati per aiutare senza il server."))
-      :HELP.mac==="occupato"?"Il server di Natan è occupato: le domande arrivano a te.":"Il server di Natan è libero e risponde da solo: ti passo le domande appena è occupato o si spegne.";
+      :HELP.mac==="occupato"?"Il server di Natan è occupato: le domande arrivano a te."
+      :HELP.sempre?"Il server di Natan è acceso: ti passa le domande di telefoni e PC quando sei libero.":"Il server di Natan è libero e risponde da solo: ti passo le domande appena è occupato o si spegne.";
     p.append(el("span","",mode));
     const g=el("div","grid4");
     const stat=(n,l)=>{const d=el("div","stat");d.append(el("b","",num(n)),el("span","",l));g.append(d)};
