@@ -279,7 +279,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.0.2";
+const VERSION="2.0.3";
 const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -355,6 +355,11 @@ const LEVELS={
   medio:{name:"Medio",params:"4 miliardi",gb:2.4,ram:4,ids:["Qwen3-4B-q4f16_1-MLC","Qwen2.5-3B-Instruct-q4f16_1-MLC"]},
   massimo:{name:"Alto",params:"8 miliardi",gb:4.8,ram:6,ids:["Qwen3-8B-q4f16_1-MLC","Qwen2.5-7B-Instruct-q4f16_1-MLC"]}
 };
+if(IS_IOS){                       // su iPhone Safari dà poca memoria alle pagine: modelli più piccoli, sennò l'app si chiude
+  Object.assign(LEVELS.veloce,{params:"0,6 miliardi",gb:0.5,ram:1.5,ids:["Qwen3-0.6B-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC"]});
+  Object.assign(LEVELS.medio,{params:"1,7 miliardi",gb:1.2,ram:3,ids:["Qwen3-1.7B-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC"]});
+  Object.assign(LEVELS.massimo,{params:"4 miliardi",gb:2.4,ram:8,ids:["Qwen3-4B-q4f16_1-MLC"]});
+}else LEVELS.veloce.ids=["Qwen3-1.7B-q4f16_1-MLC","Qwen3-0.6B-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC"];
 const ORDER=["veloce","medio","massimo"];
 const WEBLLM=["https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm","https://esm.run/@mlc-ai/web-llm@0.2.79","https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm"];
 let WL=null;
@@ -395,8 +400,8 @@ async function loadEngine(lvl){
     const wl=await webllm();const id=await pickId(lvl,wl);
     if(ENG.e){try{await ENG.e.unload()}catch(e){}}ENG.e=null;
     ENG.prog={p:0};updateNotice();
-    LS.set("natan_carico",{id,lvl,ts:Date.now()});               // se l'app si chiude mentre carico, al prossimo avvio lo so
-    const e=await wl.CreateMLCEngine(id,{initProgressCallback:p=>{ENG.prog={p:p.progress||0};if((p.progress||0)>0.97){const c=LS.get("natan_carico",null);if(c&&!c.fine){c.fine=true;LS.set("natan_carico",c)}}updateNotice();if(VIEW==="aiuta")renderHelpTest()}},{context_window_size:IS_MOBILE?4096:8192});
+    LS.set("natan_carico",{id,lvl,ts:Date.now(),gia:!!downloaded()[lvl]});               // se l'app si chiude mentre carico, al prossimo avvio lo so
+    const e=await wl.CreateMLCEngine(id,{initProgressCallback:p=>{ENG.prog={p:p.progress||0};if((p.progress||0)>0.97){const c=LS.get("natan_carico",null);if(c&&!c.fine){c.fine=true;LS.set("natan_carico",c)}}updateNotice();if(VIEW==="aiuta")renderHelpTest()}},{context_window_size:IS_IOS?2048:IS_MOBILE?4096:8192});
     ENG.e=e;ENG.id=id;ENG.prog=null;try{localStorage.removeItem("natan_carico")}catch(x){}
     const d=downloaded();d[lvl]=id;LS.set("natan_scaricato",d);updateNotice();renderModel();return e
   })();
@@ -610,10 +615,14 @@ async function hostWork(){
 // AVVIO E PRIMO AVVIO
 function checkCrash(){
   const c=LS.get("natan_carico",null);if(!c)return;try{localStorage.removeItem("natan_carico")}catch(e){}
-  if(Date.now()-c.ts>20*60000||!c.fine)return;          // chiusa durante lo scaricamento: riprendo, non è un problema di memoria
+  if(Date.now()-c.ts>20*60000||!(c.fine||c.gia))return;  // chiusa durante il primo scaricamento: riprendo, non è un problema di memoria
   const cr=LS.get("natan_crash",{});cr[c.id]=Date.now();LS.set("natan_crash",cr);
   const d=downloaded();delete d[c.lvl];LS.set("natan_scaricato",d);
-  setTimeout(()=>toast("L'ultima volta Natan "+(LEVELS[c.lvl]?.name||"")+" era troppo pesante e l'app si è chiusa: la prossima volta uso una versione più leggera."),2400)
+  const recent=Object.values(cr).filter(t=>Date.now()-t<3600000).length;
+  if(recent>=2||!LEVELS[c.lvl]||LEVELS[c.lvl].ids.every(id=>cr[id]||cr[id.replace("q4f16","q4f32")])){
+    LS.set("natan_impegno","kevin");                    // basta tentativi: uso il server di Natan
+    setTimeout(()=>toast("Natan sul dispositivo è troppo pesante per questo telefono: uso Altissimo (server di Natan)."),2400)
+  }else setTimeout(()=>toast("L'ultima volta Natan "+(LEVELS[c.lvl]?.name||"")+" era troppo pesante e l'app si è chiusa: ora uso una versione più leggera."),2400)
 }
 function start(){
   checkCrash();
@@ -737,7 +746,7 @@ function updateStatus(){
 }
 function updateNotice(){
   const b=$("notice");b.innerHTML="";let show=false;
-  if(ENG.prog){show=true;const pc=Math.round((ENG.prog.p||0)*100);b.append(el("span","","Natan "+(LEVELS[ENG.lvl]?.name||"")+" si sta preparando sul dispositivo: "+pc+"%. Solo la prima volta."));const bar=el("div","bar");const i=el("i");i.style.width=pc+"%";bar.append(i);b.append(bar)}
+  if(ENG.prog){show=true;const pc=Math.round((ENG.prog.p||0)*100);b.append(el("span","",downloaded()[ENG.lvl]?"Carico Natan "+(LEVELS[ENG.lvl]?.name||"")+" in memoria: "+pc+"% (è già scaricato, ci vuole qualche secondo).":"Scarico Natan "+(LEVELS[ENG.lvl]?.name||"")+" sul dispositivo: "+pc+"%. Solo la prima volta."));const bar=el("div","bar");const i=el("i");i.style.width=pc+"%";bar.append(i);b.append(bar)}
   else if(!online&&level()==="kevin"&&TOKEN){show=true;b.append(el("span","",reteInfo()?.posti?"Il server di Natan è spento: provo con i PC dei volontari"+(deviceLevel()?", altrimenti rispondo dal tuo dispositivo":"")+". Le chat gli arrivano dopo.":deviceLevel()?"Il server di Natan è spento: rispondo dal tuo dispositivo. Le chat gli arrivano quando si riaccende.":"Il server di Natan è spento. Scegli Basico, Medio o Alto dal menu in alto per usare Natan anche così."))}
   b.classList.toggle("hide",!show);updateStatus()
 }
@@ -870,8 +879,9 @@ async function askKevin(t,ph,opts,wait,st,t0,done,show){
 }
 async function buildLocal(t,um,anon){
   const useLib=$("tLib").classList.contains("on");
-  const [notes,wk]=await Promise.all([useLib?searchLib(t,3).catch(()=>[]):[],wikiContext(t)]);
-  const past=hist.filter(x=>x!==um).slice(-6).map(x=>({role:x.role==="user"?"user":"assistant",content:String(x.content).slice(0,1200)}));
+  const small=IS_IOS&&!anon;                              // su iPhone la memoria è poca: prompt più corto
+  let [notes,wk]=await Promise.all([useLib?searchLib(t,small?2:3).catch(()=>[]):[],wikiContext(t)]);if(small)wk=wk.slice(0,1);
+  const past=hist.filter(x=>x!==um).slice(small?-4:-6).map(x=>({role:x.role==="user"?"user":"assistant",content:String(x.content).slice(0,small?500:1200)}));
   return [{role:"system",content:sysLocal(notes,wk,anon)},...past,{role:"user",content:t}]
 }
 const HARD=/risolv|calcola|equazion|derivat|integral|dimostr|\d\s*[\+\-×x\*\/\^=]\s*\d/i;
@@ -879,7 +889,7 @@ async function askDevice(lvl,t,opts,show,t0,done,um){
   queue({uid:um.uid,chat,role:"user",content:um.content,ts:um.ts});
   show(ENG.e?"Cerco negli appunti…":"Preparo Natan sul dispositivo…");
   const msgs=await buildLocal(t,um,false);
-  const r=await gen(lvl,msgs,{maxTokens:900,think:!!opts.deep||HARD.test(t),onText:x=>show(x||"…")});
+  const r=await gen(lvl,msgs,{maxTokens:IS_IOS?600:900,think:!IS_IOS&&(!!opts.deep||HARD.test(t)),onText:x=>show(x||"…")});
   const x={role:"assistant",content:r.text||"Non sono riuscito a rispondere: riprova.",uid:rid("t"),rating:0,secs:Math.round((Date.now()-t0)/1000),
     tier:LEVELS[lvl].name+" · sul dispositivo",tierCode:"tel-"+lvl,local:true,q:t,deep:!!opts.deep,ts:Date.now()/1000};
   queue({uid:x.uid,chat,role:"assistant",content:x.content,tier:x.tierCode,ts:x.ts});
@@ -900,8 +910,8 @@ function sysLocal(notes,wk,anon){
   let s="Ti chiami Natan e sei un tutor AI. Se ti chiedono chi ti ha creato o dove sei stato progettato, rispondi che sei un progetto indipendente e che preferisci non dare dettagli: non fare nomi di persone, scuole o luoghi. Non dire mai di essere ChatGPT, Claude, Gemini o Qwen.";
   s+=anon?" Stai aiutando uno studente: non chiedergli mai nome, età o dati personali.":" Stai aiutando "+(prof?.name||"uno studente")+(prof?.age?" ("+prof.age+" anni)":"")+".";
   s+="\n\nCome scrivi: italiano corretto e naturale; prima la risposta, poi la spiegazione; esempi concreti; per gli esercizi mostra tutti i passaggi e il risultato; matematica in testo semplice (3/4, 2^3, √), niente LaTeX, niente asterischi o cancelletti. Se non sei sicuro, dillo invece di inventare.";
-  if(notes.length)s+="\n\nAppunti della biblioteca di Natan (sono affidabili, usali):\n"+notes.map(n=>"["+n.m+"] "+n.t+": "+n.x.slice(0,650)).join("\n---\n");
-  if(wk.length)s+="\n\nDa Wikipedia:\n"+wk.map(w=>w.t+": "+w.x.slice(0,900)).join("\n---\n");
+  if(notes.length)s+="\n\nAppunti della biblioteca di Natan (sono affidabili, usali):\n"+notes.map(n=>"["+n.m+"] "+n.t+": "+n.x.slice(0,IS_IOS?420:650)).join("\n---\n");
+  if(wk.length)s+="\n\nDa Wikipedia:\n"+wk.map(w=>w.t+": "+w.x.slice(0,IS_IOS?500:900)).join("\n---\n");
   return s
 }
 function grow(){const i=$("inp");i.style.height="auto";i.style.height=Math.min(200,i.scrollHeight)+"px";sendBtn()}
