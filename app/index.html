@@ -279,7 +279,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.0.3";
+const VERSION="2.0.4";
 const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -390,7 +390,7 @@ async function pickId(lvl,wl){
 }
 function level(){return LS.get("natan_impegno","")||"kevin"}
 function downloaded(){return LS.get("natan_scaricato",{})}
-function deviceLevel(){const l=level();if(l!=="kevin")return l;const d=downloaded();return ["massimo","medio","veloce"].find(x=>d[x])||""}
+function deviceLevel(){if(typeof NO_DEVICE!=="undefined"&&NO_DEVICE)return "";const l=level();if(l!=="kevin")return l;const d=downloaded();return ["massimo","medio","veloce"].find(x=>d[x])||""}
 async function loadEngine(lvl){
   if(ENG.e&&ENG.lvl===lvl)return ENG.e;
   if(ENG.loading&&ENG.lvl===lvl)return ENG.loading;
@@ -626,6 +626,8 @@ function checkCrash(){
 }
 function start(){
   checkCrash();
+  if(NO_DEVICE&&LS.get("natan_impegno","")&&LS.get("natan_impegno","")!=="kevin"){
+    LS.set("natan_impegno","kevin");setTimeout(()=>toast("Su iPhone Natan risponde con Altissimo (server di Natan o PC dei volontari)."),2400)}
   const sp=$("splash");setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.classList.add("hide"),500)},1900);
   if(!LS.get("natan_consenso",false))onbWelcome();
   else if(!prof||!TOKEN)onbProfile();
@@ -701,9 +703,14 @@ async function deviceAdvice(){
   return {g,mem,out,summary}
 }
 function defaultLevel(adv){if(!PC)return "kevin";if(!adv.g.ok)return "kevin";let best="";for(const k of ORDER)if(adv.out[k].tag==="")best=k;return best||"veloce"}
+// Su iPhone Safari chiude la pagina quando Natan prova a caricarsi dentro il telefono (troppa memoria):
+// per ora lì i livelli sul dispositivo sono spenti e risponde Altissimo (server di Natan o volontari).
+const NO_DEVICE=IS_IOS&&!window.NATAN_FAKE_IOS_OK;
 function modelItems(adv){
   const got=downloaded();
-  const items=ORDER.map(k=>({k,name:LEVELS[k].name,desc:LEVELS[k].params+" di parametri · sul tuo dispositivo · "+(got[k]?"già scaricato":"~"+String(LEVELS[k].gb).replace(".",",")+" GB"),tag:adv?adv.out[k]:null}));
+  const items=ORDER.map(k=>({k,name:LEVELS[k].name,desc:LEVELS[k].params+" di parametri · sul tuo dispositivo · "+(got[k]?"già scaricato":"~"+String(LEVELS[k].gb).replace(".",",")+" GB"),tag:adv?adv.out[k]:null,
+    lock:NO_DEVICE,why:"Su iPhone, per ora, Safari non ha abbastanza memoria per Natan dentro il telefono: usa Altissimo"}));
+  if(NO_DEVICE)items.forEach(it=>{it.tag={tag:"no",t:"non su iPhone, per ora"};it.desc=LEVELS[it.k].params+" di parametri · sul dispositivo"});
   const lock=!kevinAllowed();
   items.push({k:"kevin",name:PRO?"Altissimo · Pro":"Altissimo",desc:"14 miliardi di parametri · sul server di Natan e sui PC dei volontari · legge anche le foto"+(PRO?" · ragiona più a lungo":""),lock,why:"Altissimo sul PC è il premio per i volontari: vai in «Aiuta Natan»",tag:lock?{tag:"no",t:"premio volontari"}:null});
   return items
