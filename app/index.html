@@ -106,7 +106,8 @@ textarea.field{resize:vertical}
 .sugg button{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--soft)}.sugg button:hover{background:var(--hover)}
 .msg{margin:22px 0}
 .msg.u{display:flex;justify-content:flex-end}
-.msg.u .bub{background:var(--raise2);border-radius:20px;padding:10px 16px;max-width:82%;white-space:pre-wrap;word-wrap:break-word}
+.msg.u>div{display:flex;flex-direction:column;align-items:flex-end;max-width:82%;min-width:0}
+.msg.u .bub{background:var(--raise2);border-radius:20px;padding:10px 16px;max-width:100%;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal}
 .th{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:6px}.th img{width:64px;height:64px;object-fit:cover;border-radius:12px}
 .msg.a{display:flex;gap:14px}
 .msg.a .mark{margin-top:2px}
@@ -118,7 +119,7 @@ textarea.field{resize:vertical}
 .acts .tb{font-size:13px;padding:6px 10px;border-radius:9px;color:var(--soft)}.acts .tb:hover{background:var(--hover)}
 .acts .meta{margin-left:auto;font-size:12px}
 .why{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-#dock{max-width:var(--col);width:100%;margin:0 auto;padding:0 16px calc(10px + env(safe-area-inset-bottom))}
+#dock{max-width:var(--col);width:100%;margin:0 auto;padding:0 12px max(8px,calc(env(safe-area-inset-bottom) - 14px))}
 #notice{font-size:13px;color:var(--soft);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px}
 .bar{height:6px;border-radius:4px;background:var(--raise2);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
 #pics{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;align-items:center}
@@ -132,7 +133,19 @@ textarea.field{resize:vertical}
 #send{width:36px;height:36px;border-radius:50%;background:var(--text);color:#15161c;display:inline-flex;align-items:center;justify-content:center;margin-left:auto}
 #send:disabled{opacity:.3;cursor:default}
 #mic.rec{background:var(--bad);color:#fff}
-.fine{text-align:center;font-size:12px;color:var(--muted);margin:8px 0 0}
+.fine{text-align:center;font-size:11px;color:var(--muted);margin:5px 0 0}
+@media (max-width:899px){.fine{display:none}}
+/* menu della chat: fissa, rinomina, elimina */
+#chatList .crow{display:flex;align-items:center;border-radius:10px}
+#chatList .crow:hover,#chatList .crow.on{background:var(--hover)}#chatList .crow.on{background:var(--raise2)}
+#chatList .crow .sbtn{flex:1;min-width:0;background:none}
+#chatList .crow .more{width:30px;height:30px;flex:none;border-radius:8px;color:var(--muted);opacity:.0}
+#chatList .crow:hover .more,#chatList .crow.on .more,#chatList .crow .more:focus{opacity:1}
+@media (hover:none){#chatList .crow .more{opacity:1}}
+.pin{font-size:11px;color:var(--muted);margin-right:2px}
+.cmenu{position:fixed;z-index:60;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:5px;min-width:170px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.cmenu button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;font-size:14px}.cmenu button:hover{background:var(--hover)}
+.cmenu button.red{color:#ff8a8a}
 /* pagine */
 #pageView{flex:1;min-height:0;overflow-y:auto}
 .page{max-width:900px;margin:0 auto;padding:8px 20px 40px;display:flex;flex-direction:column;gap:16px}
@@ -266,7 +279,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.0.1";
+const VERSION="2.0.2";
 const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -338,7 +351,7 @@ async function ping(){
 // =====================================================================================================
 // NATAN SUL DISPOSITIVO (WebLLM + WebGPU). Si scarica una volta sola.
 const LEVELS={
-  veloce:{name:"Basico",params:"1,7 miliardi",gb:1.2,ram:2.5,ids:["Qwen3-1.7B-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC"]},
+  veloce:{name:"Basico",params:"1,7 miliardi",gb:1.2,ram:2.5,ids:["Qwen3-1.7B-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC","Qwen3-0.6B-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC"]},
   medio:{name:"Medio",params:"4 miliardi",gb:2.4,ram:4,ids:["Qwen3-4B-q4f16_1-MLC","Qwen2.5-3B-Instruct-q4f16_1-MLC"]},
   massimo:{name:"Alto",params:"8 miliardi",gb:4.8,ram:6,ids:["Qwen3-8B-q4f16_1-MLC","Qwen2.5-7B-Instruct-q4f16_1-MLC"]}
 };
@@ -366,8 +379,9 @@ async function gpuInfo(){
 }
 async function pickId(lvl,wl){
   const g=await gpuInfo();const list=((wl.prebuiltAppConfig&&wl.prebuiltAppConfig.model_list)||[]).map(m=>m.model_id);
-  for(let id of LEVELS[lvl].ids){if(!g.f16)id=id.replace("q4f16","q4f32");if(!list.length||list.includes(id))return id}
-  return LEVELS[lvl].ids[0]
+  const crashed=LS.get("natan_crash",{});
+  for(let id of LEVELS[lvl].ids){if(!g.f16)id=id.replace("q4f16","q4f32");if(crashed[id])continue;if(!list.length||list.includes(id))return id}
+  throw new Error("Natan "+LEVELS[lvl].name+" è troppo pesante per questo dispositivo: scegli un livello più leggero o Altissimo dal menu in alto.")
 }
 function level(){return LS.get("natan_impegno","")||"kevin"}
 function downloaded(){return LS.get("natan_scaricato",{})}
@@ -381,11 +395,12 @@ async function loadEngine(lvl){
     const wl=await webllm();const id=await pickId(lvl,wl);
     if(ENG.e){try{await ENG.e.unload()}catch(e){}}ENG.e=null;
     ENG.prog={p:0};updateNotice();
-    const e=await wl.CreateMLCEngine(id,{initProgressCallback:p=>{ENG.prog={p:p.progress||0};updateNotice();if(VIEW==="aiuta")renderHelpTest()}},{context_window_size:IS_MOBILE?4096:8192});
-    ENG.e=e;ENG.id=id;ENG.prog=null;
+    LS.set("natan_carico",{id,lvl,ts:Date.now()});               // se l'app si chiude mentre carico, al prossimo avvio lo so
+    const e=await wl.CreateMLCEngine(id,{initProgressCallback:p=>{ENG.prog={p:p.progress||0};if((p.progress||0)>0.97){const c=LS.get("natan_carico",null);if(c&&!c.fine){c.fine=true;LS.set("natan_carico",c)}}updateNotice();if(VIEW==="aiuta")renderHelpTest()}},{context_window_size:IS_MOBILE?4096:8192});
+    ENG.e=e;ENG.id=id;ENG.prog=null;try{localStorage.removeItem("natan_carico")}catch(x){}
     const d=downloaded();d[lvl]=id;LS.set("natan_scaricato",d);updateNotice();renderModel();return e
   })();
-  try{return await ENG.loading}catch(err){ENG.lvl="";ENG.prog=null;updateNotice();throw err}finally{ENG.loading=null}
+  try{return await ENG.loading}catch(err){ENG.lvl="";ENG.prog=null;try{localStorage.removeItem("natan_carico")}catch(x){}updateNotice();throw err}finally{ENG.loading=null}
 }
 function withEngine(fn){const p=ENG.queue.then(fn,fn);ENG.queue=p.catch(()=>{});return p}
 function cleanOut(s,final){
@@ -593,7 +608,15 @@ async function hostWork(){
 
 // =====================================================================================================
 // AVVIO E PRIMO AVVIO
+function checkCrash(){
+  const c=LS.get("natan_carico",null);if(!c)return;try{localStorage.removeItem("natan_carico")}catch(e){}
+  if(Date.now()-c.ts>20*60000||!c.fine)return;          // chiusa durante lo scaricamento: riprendo, non è un problema di memoria
+  const cr=LS.get("natan_crash",{});cr[c.id]=Date.now();LS.set("natan_crash",cr);
+  const d=downloaded();delete d[c.lvl];LS.set("natan_scaricato",d);
+  setTimeout(()=>toast("L'ultima volta Natan "+(LEVELS[c.lvl]?.name||"")+" era troppo pesante e l'app si è chiusa: la prossima volta uso una versione più leggera."),2400)
+}
 function start(){
+  checkCrash();
   const sp=$("splash");setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.classList.add("hide"),500)},1900);
   if(!LS.get("natan_consenso",false))onbWelcome();
   else if(!prof||!TOKEN)onbProfile();
@@ -673,7 +696,7 @@ function modelItems(adv){
   const got=downloaded();
   const items=ORDER.map(k=>({k,name:LEVELS[k].name,desc:LEVELS[k].params+" di parametri · sul tuo dispositivo · "+(got[k]?"già scaricato":"~"+String(LEVELS[k].gb).replace(".",",")+" GB"),tag:adv?adv.out[k]:null}));
   const lock=!kevinAllowed();
-  items.push({k:"kevin",name:PRO?"Altissimo · Pro":"Altissimo",desc:"14 miliardi di parametri · sul server di Natan · legge anche le foto"+(PRO?" · ragiona più a lungo":""),lock,why:"Altissimo sul PC è il premio per i volontari: vai in «Aiuta Natan»",tag:lock?{tag:"no",t:"premio volontari"}:null});
+  items.push({k:"kevin",name:PRO?"Altissimo · Pro":"Altissimo",desc:"14 miliardi di parametri · sul server di Natan e sui PC dei volontari · legge anche le foto"+(PRO?" · ragiona più a lungo":""),lock,why:"Altissimo sul PC è il premio per i volontari: vai in «Aiuta Natan»",tag:lock?{tag:"no",t:"premio volontari"}:null});
   return items
 }
 function modelRow(it,cur){
@@ -721,9 +744,13 @@ function updateNotice(){
 
 // =====================================================================================================
 // BARRA LATERALE E CHAT
+function sortChats(){chats.sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||(b.ts-a.ts))}
 function renderSide(){
-  const l=$("chatList");l.innerHTML="";
-  chats.forEach(c=>{const b=el("button","sbtn"+(VIEW==="chat"&&c.id===chat?" on":""));b.append(el("span","",c.title||"Chat"));b.title=c.title||"Chat";b.onclick=()=>{if(busy)return;openChat(c.id);closeSide()};l.append(b)});
+  const l=$("chatList");l.innerHTML="";sortChats();
+  chats.forEach(c=>{const row=el("div","crow"+(VIEW==="chat"&&c.id===chat?" on":""));
+    const b=el("button","sbtn");if(c.pin)b.append(el("span","pin","📌"));b.append(el("span","",c.title||"Chat"));b.title=c.title||"Chat";b.onclick=()=>{if(busy)return;openChat(c.id);closeSide()};
+    const m=el("button","more","⋯");m.setAttribute("aria-label","Opzioni della chat");m.onclick=e=>{e.stopPropagation();chatMenu(c,m)};
+    row.append(b,m);l.append(row)});
   if(!chats.length)l.append(el("span","small","Le tue chat appariranno qui"));
   document.querySelectorAll("#side [data-p]").forEach(b=>b.classList.toggle("on",VIEW===b.dataset.p));
   $("meAv").textContent=(prof?.name||"?")[0].toUpperCase();$("meName").textContent=prof?.name||"";
@@ -731,6 +758,17 @@ function renderSide(){
 }
 function renderHelpBadge(){const b=$("helpBadge");b.classList.toggle("hide",!HELP.on);b.textContent=HELP.job?"al lavoro":HELP.on?"attivo":""}
 function closeSide(){$("app").classList.remove("open")}
+function chatMenu(c,anchor){
+  document.querySelectorAll(".cmenu").forEach(x=>x.remove());
+  const m=el("div","cmenu");const r=anchor.getBoundingClientRect();m.style.top=Math.min(innerHeight-160,r.bottom+4)+"px";m.style.left=Math.min(innerWidth-190,r.left-130)+"px";
+  const item=(t,f,cls)=>{const b=el("button",cls||"",t);b.onclick=()=>{m.remove();f()};m.append(b)};
+  item(c.pin?"📌 Togli da fissate":"📌 Fissa in alto",()=>{c.pin=!c.pin;LS.set("natan_chats",chats);renderSide();toast(c.pin?"Chat fissata in alto":"Chat non più fissata")});
+  item("✏️ Rinomina",()=>{const t=prompt("Nuovo nome della chat",c.title||"");if(t&&t.trim()){c.title=t.trim().slice(0,60);c.named=true;LS.set("natan_chats",chats);renderSide()}});
+  item("🗑 Elimina",()=>{if(!confirm("Eliminare la chat «"+(c.title||"Chat")+"»?"))return;
+    chats=chats.filter(x=>x.id!==c.id);LS.set("natan_chats",chats);try{localStorage.removeItem("natan_hist_"+c.id)}catch(e){}
+    if(c.id===chat){hist=[];newChat()}else renderSide();toast("Chat eliminata")},"red");
+  document.body.append(m);setTimeout(()=>document.addEventListener("click",()=>m.remove(),{once:true}),0)
+}
 $("sideOpen").onclick=()=>{if(innerWidth>=900){$("app").classList.remove("closed");LS.set("natan_side",true)}else $("app").classList.add("open")};
 $("sideClose").onclick=()=>{if(innerWidth>=900){$("app").classList.add("closed");LS.set("natan_side",false)}else closeSide()};
 $("shade").onclick=closeSide;
@@ -744,16 +782,23 @@ function showChat(){VIEW="chat";$("chatView").classList.remove("hide");$("pageVi
 function saveHist(){
   LS.set("natan_hist_"+chat,hist.slice(-60));
   const first=hist.find(x=>x.role==="user");
-  const i=chats.findIndex(c=>c.id===chat);const item={id:chat,title:(first?.content||"Nuova chat").replace(/^🧠 Pensaci meglio: /,"").slice(0,48),ts:Date.now()};
+  const i=chats.findIndex(c=>c.id===chat);const old=i>=0?chats[i]:{};
+  const item={id:chat,title:old.named?old.title:(first?.content||"Nuova chat").replace(/^🧠 Pensaci meglio: /,"").slice(0,48),ts:Date.now(),pin:!!old.pin,named:!!old.named};
   if(i>=0)chats[i]=item;else chats.unshift(item);
-  chats.sort((a,b)=>b.ts-a.ts);chats=chats.slice(0,60);LS.set("natan_chats",chats);renderSide()
+  sortChats();const pinned=chats.filter(c=>c.pin),rest=chats.filter(c=>!c.pin).slice(0,Math.max(0,80-pinned.length));chats=[...pinned,...rest];
+  LS.set("natan_chats",chats);renderSide()
 }
 const SUGG=["Spiegami le equazioni di secondo grado","Aiutami con una versione di latino","Fammi un riassunto della Prima guerra mondiale","Interrogami sul present perfect"];
 function render(){
   const th=$("thread");th.innerHTML="";$("chatView").classList.toggle("empty",!hist.length);
   if(!hist.length){const h=el("div","hello");const m=el("span","mark","N");m.style.cssText="width:44px;height:44px;font-size:22px;border-radius:12px";h.append(m,el("h2","","Ciao "+(prof?.name||"")+", cosa studiamo oggi?"));
     const s=el("div","sugg");SUGG.forEach(t=>{const b=el("button","",t);b.onclick=()=>{$("inp").value=t;grow();$("inp").focus()};s.append(b)});h.append(s);th.append(h)}
-  hist.forEach(x=>bubble(x));scrollEnd()
+  hist.forEach(x=>bubble(x));
+  const last=hist[hist.length-1];
+  if(last&&last.role==="user"&&!busy){                   // la risposta si era interrotta (app chiusa o errore)
+    const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");body.append(el("div","txt wait","La risposta a questo messaggio si è interrotta."));
+    const a=el("div","acts");const r=el("button","tb","↻ Riprova");r.onclick=()=>{hist.pop();saveHist();render();send(last.content.replace(/^🧠 Pensaci meglio: /,"").replace(/\n\[\d+ foto\]$/,""))};a.append(r);body.append(a);m.append(body);th.append(m)}
+  scrollEnd()
 }
 function scrollEnd(){const s=$("scroll");s.scrollTop=s.scrollHeight}
 function bubble(x){
