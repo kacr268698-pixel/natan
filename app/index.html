@@ -113,6 +113,8 @@ textarea.field{resize:vertical}
 .msg.a .mark{margin-top:2px}
 .msg.a .body{flex:1;min-width:0}
 .msg.a .txt{white-space:pre-wrap;word-wrap:break-word;line-height:1.65;color:#e4e5ec}
+.math.disp{display:block;overflow-x:auto;overflow-y:hidden;margin:4px 0;padding:2px 0;text-align:center}.math .katex{font-size:1.08em;white-space:nowrap}
+.math .katex-display{margin:0}
 .msg.a .txt.wait{color:var(--muted)}
 .acts{display:flex;align-items:center;gap:2px;margin-top:8px;flex-wrap:wrap;color:var(--muted)}
 .acts .ib{width:32px;height:32px}.acts .ib.up{color:var(--good)}.acts .ib.dn{color:var(--bad)}
@@ -165,6 +167,8 @@ textarea.field{resize:vertical}
 .pill.ok{background:#1f3b2f;color:#8be3b8}.pill.wait{background:#3d3018;color:#ffd27a}.pill.no{background:#3d1f24;color:#ff9ea2}
 .list{display:flex;flex-direction:column;gap:8px}
 .li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--bg)}
+.li.off{opacity:.55}.libarea{border-radius:12px;background:var(--raise);padding:4px 10px}.libarea>summary{cursor:pointer;padding:10px 4px;list-style-position:inside}
+.libarea>.list{padding:0 0 10px}.subjpick{display:flex;flex-direction:column;gap:10px}#subj{max-height:260px;overflow:auto}
 .li .grow{flex:1;min-width:0;display:flex;flex-direction:column}.li input{width:20px;height:20px;accent-color:var(--acc)}
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
 .tabs button{padding:10px 14px;color:var(--muted);font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px}
@@ -279,8 +283,9 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.0.4";
-const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
+const VERSION="2.0.5";
+/*AREE*/const AREE={"Scuola superiore":["Matematica","Fisica","Chimica","Biologia","Fisiologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Economia","Arte","Musica","Geografia"],"Matematica e logica":["Analisi matematica","Algebra lineare","Algebra astratta","Geometria","Geometria analitica","Geometria differenziale","Topologia","Teoria dei numeri","Combinatoria","Teoria dei grafi","Probabilità","Statistica","Logica matematica","Teoria degli insiemi","Analisi numerica","Ricerca operativa","Matematica finanziaria","Matematica discreta","Trigonometria","Teoria dei giochi","Equazioni differenziali","Analisi complessa","Analisi funzionale","Storia della matematica"],"Fisica e astronomia":["Meccanica classica","Termodinamica","Elettromagnetismo","Ottica","Acustica","Meccanica quantistica","Relatività","Fisica nucleare","Fisica delle particelle","Fisica della materia condensata","Fisica del plasma","Fluidodinamica","Fisica atomica","Fisica medica","Biofisica","Geofisica","Astronomia","Astrofisica","Cosmologia","Planetologia","Astronautica","Astrobiologia","Storia della fisica"],"Chimica e materiali":["Chimica organica","Chimica inorganica","Chimica fisica","Chimica analitica","Biochimica","Elettrochimica","Chimica dei polimeri","Chimica industriale","Chimica farmaceutica","Chimica ambientale","Chimica degli alimenti","Radiochimica","Scienza dei materiali","Cristallografia","Spettroscopia"],"Biologia, animali e piante":["Botanica","Zoologia","Biologia cellulare","Biologia molecolare","Genetica","Microbiologia","Virologia","Batteriologia","Micologia","Parassitologia","Immunologia","Ecologia e ambiente","Biologia evolutiva","Embriologia","Istologia","Anatomia comparata","Fisiologia vegetale","Biologia marina","Limnologia","Paleontologia","Paleoantropologia","Etologia","Entomologia","Mirmecologia","Aracnologia","Ornitologia","Erpetologia","Ittiologia","Mammalogia","Malacologia","Primatologia","Cetologia","Lepidotterologia","Briologia","Ficologia","Lichenologia","Dendrologia","Biologia della conservazione","Biotecnologie","Bioinformatica","Biostatistica","Etnobotanica","Palinologia"],"Medicina e salute":["Medicina","Anatomia","Patologia","Farmacologia","Cardiologia","Neurologia","Oncologia","Pediatria","Ginecologia","Ostetricia","Dermatologia","Oftalmologia","Otorinolaringoiatria","Ortopedia","Psichiatria","Chirurgia","Anestesiologia","Radiologia","Medicina d'urgenza","Geriatria","Endocrinologia","Gastroenterologia","Nefrologia","Urologia","Pneumologia","Ematologia","Reumatologia","Malattie infettive","Epidemiologia","Sanità pubblica","Medicina legale","Medicina dello sport","Medicina del lavoro","Allergologia","Genetica medica","Anatomia patologica","Neurochirurgia","Cardiochirurgia","Chirurgia plastica","Odontoiatria","Ortodonzia","Dietetica e nutrizione","Fisioterapia","Infermieristica","Logopedia","Ortottica","Podologia","Osteopatia","Terapia occupazionale","Medicina di laboratorio","Audiologia","Neuropsichiatria infantile","Primo soccorso","Farmacia","Tossicologia","Medicina riabilitativa"],"Psicologia e mente":["Psicologia","Psicologia cognitiva","Psicologia dello sviluppo","Psicologia sociale","Psicologia clinica","Psicologia del lavoro","Psicologia dello sport","Psicologia dell'educazione","Psicologia giuridica","Psicometria","Neuropsicologia","Psicoterapia","Psicologia della personalità","Neuroscienze","Psicobiologia","Scienze cognitive"],"Ingegneria e tecnologia":["Ingegneria","Ingegneria meccanica","Ingegneria civile","Ingegneria elettrica","Elettronica","Elettrotecnica","Ingegneria informatica","Ingegneria gestionale","Ingegneria aerospaziale","Ingegneria chimica","Ingegneria biomedica","Ingegneria ambientale","Ingegneria nucleare","Ingegneria navale","Ingegneria dei materiali","Ingegneria edile","Ingegneria energetica","Telecomunicazioni","Robotica","Controlli automatici","Meccatronica","Idraulica","Geotecnica","Ingegneria dei trasporti","Nanotecnologie","Energie rinnovabili","Aeronautica","Scienza delle costruzioni","Disegno tecnico","Stampa 3D","Topografia","Metrologia"],"Informatica e digitale":["Intelligenza artificiale","Reti e sicurezza informatica","Algoritmi e strutture dati","Basi di dati","Sistemi operativi","Crittografia","Apprendimento automatico","Computer grafica","Sviluppo web","App per smartphone","Teoria della calcolabilità","Linguaggi di programmazione","Cloud computing","Blockchain","Scienza dei dati","Ingegneria del software","Sviluppo di videogiochi","Interazione uomo-computer","Architettura dei calcolatori","Informatica teorica","Elaborazione digitale delle immagini"],"Economia e impresa":["Microeconomia","Macroeconomia","Econometria","Economia politica","Economia aziendale","Finanza","Contabilità","Management e marketing","Risorse umane","Logistica","Economia internazionale","Storia economica","Banca e assicurazioni","Commercio","Commercio elettronico","Imprenditorialità","Economia comportamentale","Economia dello sviluppo","Economia ambientale","Turismo","Educazione finanziaria","Revisione contabile","Scienza delle finanze","Pubblicità"],"Diritto e politica":["Diritto","Diritto civile","Diritto penale","Diritto costituzionale","Diritto amministrativo","Diritto commerciale","Diritto del lavoro","Diritto tributario","Diritto internazionale","Diritto dell'Unione europea","Diritto privato","Procedura civile","Procedura penale","Diritto romano","Diritto canonico","Filosofia del diritto","Criminologia","Educazione civica","Scienze politiche","Relazioni internazionali","Geopolitica","Pubblica amministrazione","Diplomazia","Diritti umani"],"Società e comunicazione":["Sociologia","Antropologia culturale","Antropologia fisica","Demografia","Scienze della comunicazione","Giornalismo","Pedagogia","Servizio sociale","Studi di genere","Urbanistica","Geografia umana","Etnologia","Semiotica","Mass media"],"Storia e archeologia":["Preistoria","Storia antica","Antica Grecia","Storia romana","Medioevo","Età moderna","Età contemporanea","Storia d'Italia","Storia dell'arte","Storia della scienza","Storia della medicina","Storia militare","Archeologia","Egittologia","Assiriologia","Impero bizantino","Paleografia","Archivistica","Numismatica","Araldica","Epigrafia","Papirologia","Genealogia","Etruscologia","Storia degli Stati Uniti d'America","Storia della Cina","Storia del Giappone","Storia dell'Africa"],"Filosofia e religioni":["Logica","Etica","Estetica","Metafisica","Epistemologia","Filosofia della mente","Filosofia politica","Filosofia della scienza","Filosofia del linguaggio","Bioetica","Filosofia antica","Filosofia medievale","Filosofia orientale","Teologia","Religioni","Mitologia","Mitologia greca","Mitologia norrena","Storia delle religioni"],"Lingue e letterature":["Greco antico","Spagnolo","Francese","Tedesco","Portoghese","Russo","Cinese","Giapponese","Arabo","Coreano","Ebraico","Hindi","Olandese","Svedese","Polacco","Turco","Greco moderno","Rumeno","Albanese","Ucraino","Esperanto","Lingua dei segni italiana","Letteratura","Letteratura italiana","Letteratura inglese","Letteratura statunitense","Letteratura latina","Letteratura greca","Letteratura russa","Letteratura spagnola","Letteratura tedesca","Letteratura francese","Letteratura per ragazzi","Filologia","Filologia romanza","Glottologia","Linguistica","Fonetica","Sociolinguistica","Psicolinguistica","Traduzione","Retorica","Critica letteraria","Scrittura creativa","Dialetti italiani","Metrica"],"Arte, design e spettacolo":["Pittura","Scultura","Disegno","Fotografia","Grafica","Design industriale","Moda","Architettura","Restauro","Museologia","Cinema","Teatro","Danza","Composizione musicale","Armonia","Musicologia","Etnomusicologia","Canto","Strumenti musicali","Pianoforte","Chitarra","Musica elettronica","Storia della musica","Jazz","Fumetto","Animazione","Game design","Scenografia","Televisione","Radio","Calligrafia","Ceramica","Oreficeria","Arredamento"],"Terra, ambiente e spazio":["Geologia","Mineralogia","Petrografia","Vulcanologia","Sismologia","Oceanografia","Meteorologia","Climatologia","Idrologia","Glaciologia","Geografia fisica","Cartografia","Geomorfologia","Speleologia","Pedologia","Paleoclimatologia","Scienze ambientali","Conservazione della natura","Gestione dei rifiuti"],"Agraria, cibo e animali":["Agraria","Veterinaria","Agronomia","Zootecnia","Enologia","Viticoltura","Scienze forestali","Orticoltura","Frutticoltura","Apicoltura","Acquacoltura","Tecnologie alimentari","Gastronomia","Cucina","Pasticceria","Giardinaggio","Floricoltura","Pesca","Agricoltura biologica","Cinofilia"],"Sport e movimento":["Scienze motorie","Educazione fisica","Atletica leggera","Calcio","Nuoto","Pallavolo","Pallacanestro","Tennis","Ciclismo","Arti marziali","Ginnastica","Rugby","Sci","Scacchi","Equitazione","Vela","Arrampicata","Yoga"],"Vita pratica e mestieri":["Metodo di studio","Codice della strada","Automobili e motori","Falegnameria","Sartoria","Impianti elettrici","Economia domestica","Orientamento"]};const ALIAS={"formiche":"Mirmecologia","insetti":"Entomologia","ragni":"Aracnologia","uccelli":"Ornitologia","rettili":"Erpetologia","serpenti":"Erpetologia","anfibi":"Erpetologia","rane":"Erpetologia","pesci":"Ittiologia","mammiferi":"Mammalogia","molluschi":"Malacologia","conchiglie":"Malacologia","scimmie":"Primatologia","balene":"Cetologia","delfini":"Cetologia","farfalle":"Lepidotterologia","muschi":"Briologia","alghe":"Ficologia","licheni":"Lichenologia","alberi":"Dendrologia","funghi":"Micologia","fossili":"Paleontologia","dinosauri":"Paleontologia","vulcani":"Vulcanologia","terremoti":"Sismologia","mare":"Oceanografia","oceani":"Oceanografia","meteo":"Meteorologia","clima":"Climatologia","ghiacciai":"Glaciologia","grotte":"Speleologia","monete":"Numismatica","stemmi":"Araldica","api":"Apicoltura","miele":"Apicoltura","vino":"Enologia","denti":"Odontoiatria","occhi":"Oftalmologia","cuore":"Cardiologia","pelle":"Dermatologia","bambini":"Pediatria","anziani":"Geriatria","tumori":"Oncologia","cervello":"Neuroscienze","piedi":"Podologia","voce":"Logopedia","cani":"Cinofilia","piante":"Botanica","fiori":"Floricoltura","animali":"Zoologia","stelle":"Astronomia","pianeti":"Planetologia","spazio":"Astronautica","razzi":"Astronautica","computer":"Informatica","programmare":"Coding","programmazione":"Coding","soldi":"Educazione finanziaria","risparmio":"Educazione finanziaria","leggi":"Diritto","patente":"Codice della strada","cibo":"Gastronomia","dolci":"Pasticceria","torte":"Pasticceria","auto":"Automobili e motori","macchine":"Automobili e motori","motori":"Automobili e motori","ossa":"Ortopedia","muscoli":"Fisioterapia","riabilitazione":"Fisioterapia","egitto":"Egittologia","piramidi":"Egittologia","mappe":"Cartografia","batteri":"Batteriologia","virus":"Virologia","dna":"Genetica","robot":"Robotica","videogiochi":"Sviluppo di videogiochi","giochi":"Game design","fumetti":"Fumetto","cartoni":"Animazione","film":"Cinema","vestiti":"Moda","case":"Architettura","ponti":"Ingegneria civile","aerei":"Aeronautica","navi":"Ingegneria navale","elettricità":"Elettrotecnica","luce":"Ottica","suono":"Acustica","atomi":"Fisica atomica","medicine":"Farmacologia","farmaci":"Farmacologia","veleni":"Tossicologia","crimini":"Criminologia","mente":"Psicologia","emozioni":"Psicologia","studiare":"Metodo di studio","memoria":"Metodo di studio","lingua dei segni":"Lingua dei segni italiana","segni":"Lingua dei segni italiana","dialetti":"Dialetti italiani","cavalli":"Equitazione","montagna":"Arrampicata","giardino":"Giardinaggio","orto":"Orticoltura","frutta":"Frutticoltura","boschi":"Scienze forestali","rifiuti":"Gestione dei rifiuti","riciclo":"Gestione dei rifiuti","ambiente":"Ecologia e ambiente","dio":"Teologia","miti":"Mitologia","dei greci":"Mitologia greca","vichinghi":"Mitologia norrena","romani":"Storia romana","medioevo":"Medioevo","cavalieri":"Medioevo","guerre":"Storia militare","elezioni":"Scienze politiche","notizie":"Giornalismo","infermiere":"Infermieristica","parto":"Ostetricia","ospedale":"Medicina","dottore":"Medicina","medico":"Medicina"};/*FINE AREE*/
+const SUBJ=[...new Set(Object.values(AREE).flat())];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -646,13 +651,42 @@ function onbWelcome(){
   const go=el("button","btn","Continua");go.id="go1";go.disabled=true;cb.onchange=()=>go.disabled=!cb.checked;
   go.onclick=()=>{LS.set("natan_consenso",{ts:Date.now(),v:2});onbProfile()};c.append(go)
 }
+// --- Materie: sono centinaia, quindi si cercano (anche con parole normali: «formiche» trova Mirmecologia) o si sfogliano per area
+function subjFind(q){
+  const t=norm(q.trim());if(!t)return [];const out=[];
+  for(const [k,v] of Object.entries(ALIAS))if(norm(k).startsWith(t)||t.startsWith(norm(k))&&t.length>=k.length)out.push(v);
+  for(const [a,l] of Object.entries(AREE))if(norm(a).includes(t))out.push(...l);
+  SUBJ.forEach(s=>{if(norm(s).includes(t))out.push(s)});
+  return [...new Set(out)]
+}
+function areaOf(m){for(const [a,l] of Object.entries(AREE))if(l.includes(m))return a;return "Altro"}
+function subjPicker(sel){
+  const w=el("div","subjpick");
+  const r=el("div","row");const q=el("input","field");q.id="subjq";q.placeholder="Cerca tra "+SUBJ.length+" materie…";q.style.flex="1 1 220px";
+  const ar=el("select","field");ar.id="subjarea";ar.style.flex="0 1 230px";ar.setAttribute("aria-label","Area");
+  Object.keys(AREE).forEach(a=>{const o=el("option","",a+" ("+AREE[a].length+")");o.value=a;ar.append(o)});r.append(q,ar);
+  const g=el("div","chips");g.id="subj";const info=el("span","small");info.id="subjinfo";
+  const chip=s=>{const ch=el("button","chip"+(sel.has(s)?" on":""),s);ch.type="button";ch.onclick=()=>{sel.has(s)?sel.delete(s):sel.add(s);ch.classList.toggle("on");tell()};return ch};
+  const tell=()=>{info.textContent=sel.size?"Hai scelto: "+[...sel].join(", "):"Tocca le materie che ti interessano. Sono "+SUBJ.length+": cercale qui sopra (anche con parole normali, come «formiche» o «cuore») o cambia area."};
+  const draw=()=>{g.innerHTML="";const t=q.value.trim();
+    let list=t?subjFind(t):AREE[ar.value]||[];ar.disabled=!!t;
+    if(t&&!list.length)g.append(el("span","small","Non trovo «"+t+"». Prova con un'altra parola."));
+    list.slice(0,80).forEach(s=>g.append(chip(s)));
+    if(list.length>80)g.append(el("span","small","…e altre "+(list.length-80)+": scrivi qualcosa di più preciso."))};
+  q.oninput=draw;ar.onchange=draw;draw();tell();
+  w.append(r,g,info);w.chosen=sel;return w
+}
+function subjSelect(extra){
+  const sel=el("select","field");(extra||[]).forEach(x=>{const o=el("option","",x);o.value=x;sel.append(o)});
+  for(const [a,l] of Object.entries(AREE)){const gr=document.createElement("optgroup");gr.label=a;l.forEach(x=>{const o=el("option","",x);o.value=x;gr.append(o)});sel.append(gr)}
+  return sel
+}
 function profileForm(c,edit,after){
   const code=el("input","field");code.placeholder="Codice della scuola (te lo dà chi ti ha invitato)";code.autocapitalize="characters";code.autocomplete="off";code.id="code";
   const name=el("input","field");name.placeholder="Il tuo nome";name.autocomplete="given-name";name.id="pname";name.value=prof?.name||"";
   const age=el("input","field");age.placeholder="Età";age.inputMode="numeric";age.id="page";age.value=prof?.age||"";
   const goal=el("textarea","field");goal.rows=2;goal.placeholder="Per cosa userai Natan? (facoltativo)";goal.value=prof?.goal||"";
-  const sel=new Set(prof?.interests||[]);const g=el("div","chips");g.id="subj";
-  SUBJ.forEach(s=>{const ch=el("button","chip"+(sel.has(s)?" on":""),s);ch.type="button";ch.onclick=()=>{sel.has(s)?sel.delete(s):sel.add(s);ch.classList.toggle("on")};g.append(ch)});
+  const sel=new Set(prof?.interests||[]);const g=subjPicker(sel);
   if(!TOKEN)c.append(code);c.append(name,age,el("strong","","Cosa ti interessa?"),g,goal);
   const err=el("div","err");err.id="perr";const go=el("button","btn",edit?"Salva":"Continua");go.id="go2";c.append(err,go);
   go.onclick=async()=>{
@@ -821,10 +855,10 @@ function bubble(x){
   const th=$("thread");
   if(x.role==="user"){const m=el("div","msg u");const w=el("div","");if(x.thumbs&&x.thumbs.length){const t=el("div","th");x.thumbs.forEach(d=>{const i=el("img");i.src=d;i.alt="foto";t.append(i)});w.append(t)}
     const b=el("div","bub",x.content);w.append(b);m.append(w);th.append(m);return b}
-  const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");const t=el("div","txt",x.content);body.append(t);m.append(body);
+  const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");const t=setRich(el("div","txt"),x.content);body.append(t);m.append(body);
   if(x.uid){
     const a=el("div","acts");
-    const cp=el("button","ib");cp.append(svg(IC.copy,16));cp.setAttribute("aria-label","Copia");cp.title="Copia";cp.onclick=()=>{navigator.clipboard?.writeText(x.content);toast("Copiato")};
+    const cp=el("button","ib");cp.append(svg(IC.copy,16));cp.setAttribute("aria-label","Copia");cp.title="Copia";cp.onclick=()=>{navigator.clipboard?.writeText(mathPlain(x.content));toast("Copiato")};
     const up=el("button","ib"+(x.rating===1?" up":""));up.append(svg(IC.up,17));up.setAttribute("aria-label","Risposta giusta");up.title="Risposta giusta";
     const dn=el("button","ib"+(x.rating===-1?" dn":""));dn.append(svg(IC.dn,16));dn.setAttribute("aria-label","Risposta sbagliata");dn.title="Risposta sbagliata";
     const sp=el("button","ib");sp.append(svg(IC.spk,17));sp.setAttribute("aria-label","Leggi ad alta voce");sp.title="Leggi ad alta voce";sp.onclick=()=>SPK.say(x.content);
@@ -858,7 +892,7 @@ async function send(forced,opts={}){
   const wait=bubble({role:"assistant",content:"Sto pensando…"});wait.classList.add("wait");scrollEnd();
   busy=true;updateStatus();sendBtn();const t0=Date.now();const st={est:0,text:false};SPK.begin();
   const tick=setInterval(()=>{const s=Math.round((Date.now()-t0)/1000);if(!st.text)wait.textContent="Sto pensando"+".".repeat(s%4)+(st.est?"  ·  circa "+st.est+" s":"")},500);
-  const show=x=>{st.text=true;wait.classList.remove("wait");wait.textContent=x;SPK.feed(x,false);scrollEnd()};
+  const show=x=>{st.text=true;wait.classList.remove("wait");setRich(wait,x);SPK.feed(x,false);scrollEnd()};
   const done=x=>{wait.closest(".msg").remove();hist.push(x);saveHist();bubble(x);scrollEnd();SPK.feed(x.content,true);
     if(document.hidden&&"Notification" in window&&Notification.permission==="granted")new Notification("Natan ha risposto",{body:x.content.slice(0,100)})};
   try{
@@ -916,7 +950,7 @@ async function askVolunteer(t,opts,show,t0,done,um){
 function sysLocal(notes,wk,anon){
   let s="Ti chiami Natan e sei un tutor AI. Se ti chiedono chi ti ha creato o dove sei stato progettato, rispondi che sei un progetto indipendente e che preferisci non dare dettagli: non fare nomi di persone, scuole o luoghi. Non dire mai di essere ChatGPT, Claude, Gemini o Qwen.";
   s+=anon?" Stai aiutando uno studente: non chiedergli mai nome, età o dati personali.":" Stai aiutando "+(prof?.name||"uno studente")+(prof?.age?" ("+prof.age+" anni)":"")+".";
-  s+="\n\nCome scrivi: italiano corretto e naturale; prima la risposta, poi la spiegazione; esempi concreti; per gli esercizi mostra tutti i passaggi e il risultato; matematica in testo semplice (3/4, 2^3, √), niente LaTeX, niente asterischi o cancelletti. Se non sei sicuro, dillo invece di inventare.";
+  s+="\n\nCome scrivi: italiano corretto e naturale; prima la risposta, poi la spiegazione; esempi concreti; per gli esercizi mostra tutti i passaggi e il risultato; le formule scrivile sempre tra due $ (per esempio $x^2+5x+6=0$, $\\frac{3}{4}$), così si vedono come formule vere; niente asterischi o cancelletti. Se non sei sicuro, dillo invece di inventare.";
   if(notes.length)s+="\n\nAppunti della biblioteca di Natan (sono affidabili, usali):\n"+notes.map(n=>"["+n.m+"] "+n.t+": "+n.x.slice(0,IS_IOS?420:650)).join("\n---\n");
   if(wk.length)s+="\n\nDa Wikipedia:\n"+wk.map(w=>w.t+": "+w.x.slice(0,IS_IOS?500:900)).join("\n---\n");
   return s
@@ -952,6 +986,81 @@ if(SR){const mic=$("mic");mic.classList.remove("hide");let rec=null;
 
 // =====================================================================================================
 // VOCE: la più naturale che c'è sul dispositivo, e Natan inizia a parlare mentre sta ancora scrivendo
+// =====================================================================================================
+// FORMULE: «$2x+3=7$» diventa una formula vera (KaTeX). Senza KaTeX (o offline la prima volta): testo semplice, x² √ ±
+const KATEX="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/";
+const MATH={st:0,cache:new Map()};
+const MATH_RX=/\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|\$([^$\n]+?)\$/g;
+function loadKatex(){
+  if(MATH.st||window.NATAN_NO_KATEX)return;MATH.st=1;
+  const l=document.createElement("link");l.rel="stylesheet";l.href=KATEX+"katex.min.css";document.head.append(l);
+  const sc=document.createElement("script");sc.src=KATEX+"katex.min.js";sc.async=true;
+  sc.onload=()=>{MATH.st=window.katex?2:3;if(MATH.st===2)document.querySelectorAll(".math[data-tex]").forEach(paintMath)};
+  sc.onerror=()=>{MATH.st=3};document.head.append(sc)
+}
+function mathParts(text){            // [[testo,false],[formula,true,display]...]
+  const out=[];let last=0;text=String(text);
+  for(const m of text.matchAll(MATH_RX)){
+    const inl=m[4];if(inl!==undefined&&(/^\s|\s$/.test(inl)||!/[0-9a-zA-Z\\^_=+\-*/()]/.test(inl)))continue;   // «5$ e 6$» non è una formula
+    if(m.index>last)out.push([text.slice(last,m.index),false]);
+    out.push([m[1]??m[2]??m[3]??inl,true,m[1]!==undefined||m[2]!==undefined]);last=m.index+m[0].length}
+  if(last<text.length)out.push([text.slice(last),false]);return out
+}
+function setRich(node,text){
+  text=String(text??"");
+  if(!/\$|\\[(\[]/.test(text)){node.textContent=text;return node}
+  const parts=mathParts(text);if(!parts.some(p=>p[1])){node.textContent=text;return node}
+  node.textContent="";
+  for(const [t,isM,disp] of parts){
+    if(!isM){node.append(document.createTextNode(t));continue}
+    const sp=el("span",disp?"math disp":"math");sp.dataset.tex=t;if(disp)sp.dataset.d="1";
+    if(MATH.st===2)paintMath(sp);else sp.textContent=texPlain(t);node.append(sp)}
+  if(!MATH.st)loadKatex();return node
+}
+function paintMath(sp){
+  const tex=sp.dataset.tex,d=!!sp.dataset.d,k=(d?"D":"I")+tex;let h=MATH.cache.get(k);
+  if(h===undefined){try{h=katex.renderToString(tex,{displayMode:d,throwOnError:false,strict:"ignore"})}catch(e){h=null}MATH.cache.set(k,h)}
+  if(h)sp.innerHTML=h;else sp.textContent=texPlain(tex)
+}
+const TEX_SYM={cdot:"·",times:"×",div:"÷",pm:"±",mp:"∓",neq:"≠",ne:"≠",leq:"≤",le:"≤",geq:"≥",ge:"≥",approx:"≈",equiv:"≡",to:"→",rightarrow:"→",
+  Rightarrow:"⇒",Leftrightarrow:"⇔",leftarrow:"←",implies:"⇒",iff:"⇔",infty:"∞",pi:"π",alpha:"α",beta:"β",gamma:"γ",delta:"δ",Delta:"Δ",
+  epsilon:"ε",varepsilon:"ε",theta:"θ",lambda:"λ",mu:"μ",rho:"ρ",sigma:"σ",Sigma:"Σ",tau:"τ",phi:"φ",varphi:"φ",omega:"ω",Omega:"Ω",
+  ldots:"…",dots:"…",cdots:"…",in:"∈",notin:"∉",cup:"∪",cap:"∩",subset:"⊂",subseteq:"⊆",emptyset:"∅",forall:"∀",exists:"∃",
+  sum:"Σ",prod:"Π",int:"∫",partial:"∂",nabla:"∇",degree:"°",circ:"°",angle:"∠",perp:"⊥",parallel:"∥",neg:"¬",land:"∧",lor:"∨",
+  sin:"sin",cos:"cos",tan:"tan",log:"log",ln:"ln",lim:"lim",max:"max",min:"min",quad:" ",qquad:"  "};
+const SUP={"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻","(":"⁽",")":"⁾","n":"ⁿ","i":"ⁱ"};
+const SUB={"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉","+":"₊","-":"₋","(":"₍",")":"₎"};
+function texGroup(s,i){while(s[i]===" ")i++;if(s[i]!=="{")return null;let d=0;for(let j=i;j<s.length;j++){if(s[j]==="{")d++;else if(s[j]==="}"&&--d===0)return [s.slice(i+1,j),j+1]}return null}
+function texPlain(tex){
+  let s=String(tex);
+  s=s.replace(/\\(?:left|right)\s*\.?/g,"").replace(/\\(?:begin|end)\{[^}]*\}/g,"").replace(/\\(?:text|mathrm|mathbf|textbf|mathit|operatorname|mathbb|boxed)\s*\{([^{}]*)\}/g,"$1");
+  for(let guard=0;guard<50;guard++){const m=/\\[dt]?frac/.exec(s);if(!m)break;const a=texGroup(s,m.index+m[0].length),b=a&&texGroup(s,a[1]);
+    if(!a||!b){s=s.slice(0,m.index)+s.slice(m.index+m[0].length);continue}
+    const w=(x,num)=>(num?/^-?[\w.]+$/:/^([\d.]+|[A-Za-z])$/).test(x.trim())?x.trim():"("+x.trim()+")";
+    s=s.slice(0,m.index)+w(a[0],true)+"/"+w(b[0],false)+s.slice(b[1])}
+  for(let guard=0;guard<50;guard++){const m=/\\sqrt\s*(\[[^\]]*\])?/.exec(s);if(!m)break;const g=texGroup(s,m.index+m[0].length);
+    if(!g){s=s.slice(0,m.index)+"√"+s.slice(m.index+m[0].length);continue}
+    const inner=g[0].trim(),pre=m[1]?(m[1].slice(1,-1)==="3"?"∛":"√["+m[1].slice(1,-1)+"]"):"√";
+    s=s.slice(0,m.index)+pre+(/^[\w.]+$/.test(inner)?inner:"("+inner+")")+s.slice(g[1])}
+  s=s.replace(/\\vec\s*\{([^{}]*)\}/g,"$1⃗").replace(/\\(?:overline|bar)\s*\{([^{}]*)\}/g,"$1̅").replace(/\\hat\s*\{([^{}]*)\}/g,"$1̂");
+  s=s.replace(/\\([A-Za-z]+)/g,(m,k)=>k in TEX_SYM?TEX_SYM[k]:m).replace(/\\[,;:! ]/g," ").replace(/\\\\/g,"; ").replace(/\\([{}%&_#$])/g,"$1");
+  s=s.replace(/\^\s*\{([^{}]*)\}/g,(m,x)=>[...x.trim()].every(c=>c in SUP)?[...x.trim()].map(c=>SUP[c]).join(""):"^("+x+")")
+     .replace(/\^\s*(-?\d+|[A-Za-z])/g,(m,x)=>[...x].every(c=>c in SUP)?[...x].map(c=>SUP[c]).join(""):"^"+x)
+     .replace(/_\s*\{([^{}]*)\}/g,(m,x)=>[...x].every(c=>c in SUB)?[...x].map(c=>SUB[c]).join(""):"_"+x)
+     .replace(/_(\d)/g,(m,x)=>SUB[x]);
+  s=s.replace(/\^\s*\\?circ|\^°/g,"°").replace(/[{}]/g,"").replace(/&/g," ").replace(/\s{2,}/g," ").trim();
+  return s
+}
+function mathPlain(text){return mathParts(text).map(([t,isM])=>isM?texPlain(t):t).join("")}
+function mathSpeak(text){
+  const say=t=>" "+texPlain(t).replace(/([a-zA-Z0-9)])²/g,"$1 al quadrato").replace(/([a-zA-Z0-9)])³/g,"$1 al cubo")
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻ⁿ]+/g,m=>" alla "+[...m].map(c=>({"⁻":"meno ","ⁿ":"n"})[c]??"⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)).join(""))
+    .replace(/∛/g," radice cubica di ").replace(/√/g," radice di ").replace(/±/g," più o meno ").replace(/≠/g," diverso da ").replace(/≤/g," minore o uguale a ")
+    .replace(/≥/g," maggiore o uguale a ").replace(/</g," minore di ").replace(/>/g," maggiore di ").replace(/=/g," uguale ").replace(/[×·*]/g," per ")
+    .replace(/[÷/]/g," diviso ").replace(/\+/g," più ").replace(/(\S)\s*[-−]\s*/g,"$1 meno ").replace(/^\s*[-−]/," meno ").replace(/π/g," pi greco ")
+    .replace(/∞/g," infinito ").replace(/[⇒→]/g,", quindi, ").replace(/Δ/g," delta ").replace(/°/g," gradi ").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,c=>" "+"₀₁₂₃₄₅₆₇₈₉".indexOf(c)).replace(/[()\[\]]/g," ")+" ";
+  return mathParts(text).map(([t,isM])=>isM?say(t):t).join("").replace(/\$/g,"").replace(/\s*[⇒→]\s*/g,", quindi, ").replace(/[ \t]{2,}/g," ")
+}
 const SPK={voice:null,spoken:0,said:"",on:false,q:0,
   pick(){
     if(!("speechSynthesis" in window))return null;
@@ -973,7 +1082,7 @@ const SPK={voice:null,spoken:0,said:"",on:false,q:0,
     if(final&&!this.q)CALL.spokeAll()
   },
   utter(t){
-    try{const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang="it-IT";const v=this.voice||(this.voice=this.pick());try{if(v)u.voice=v}catch(e){}u.rate=1.04;u.pitch=1;
+    try{t=mathSpeak(t);const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang="it-IT";const v=this.voice||(this.voice=this.pick());try{if(v)u.voice=v}catch(e){}u.rate=1.04;u.pitch=1;
       this.q++;u.onstart=()=>CALL.setPhase("parla");u.onboundary=()=>CALL.bump();u.onend=u.onerror=()=>{this.q=Math.max(0,this.q-1);if(!this.q)CALL.spokeAll()};
       speechSynthesis.speak(u)}catch(e){this.q=Math.max(0,this.q-1)}},       // la voce non deve mai bloccare la risposta
   say(t){this.on=true;this.spoken=0;this.said="";this.cancel(true);this.feed(t,true)},
@@ -1032,16 +1141,33 @@ function backBtn(pg,to){const b=el("button","btn ghost",to==="impara"?"← Torna
 
 // --- Biblioteca
 async function openLib(pg){
-  backBtn(pg,"impara");pg.append(el("h1","","Biblioteca sul dispositivo"),el("p","lead","Gli appunti che Natan ha preso su Wikipedia, salvati qui. Gli servono per rispondere bene anche senza Internet e senza il server di Natan."));
-  const st=el("div","small");pg.append(st);const panel=el("div","panel");const list=el("div","list");panel.append(list);pg.append(panel);
+  backBtn(pg,"impara");pg.append(el("h1","","Biblioteca"),el("p","lead","Gli appunti che Natan ha preso su Wikipedia, materia per materia. Scegli quelle che ti servono e scaricale: così Natan risponde bene anche senza Internet."));
+  const st=el("div","small");pg.append(st);
+  const q=el("input","field");q.id="libq";q.placeholder="Cerca una materia (es. formiche)";pg.append(q);
+  const panel=el("div","panel");const list=el("div","list");panel.append(list);pg.append(panel);
   const meta=libMeta();let idx=null;
   try{idx=await (await fetch("../biblioteca/indice.json?t="+Date.now(),{cache:"no-store"})).json()}catch(e){st.textContent="Non vedo la biblioteca online: ti mostro quella già scaricata."}
   const items=idx?idx.materie:Object.entries(meta).filter(([m])=>m!==MINE).map(([m,v])=>({m,n:v.n,kb:v.kb||0,max:v.max}));
-  if(!items.length&&!meta[MINE])list.append(el("span","small","La biblioteca è ancora vuota: deve ancora essere pubblicata."));
-  const boxes={};
-  for(const it of items){const li=el("label","li");const cb=el("input");cb.type="checkbox";cb.checked=!!meta[it.m]||(!Object.keys(meta).length&&(prof?.interests||[]).some(i=>norm(i)===norm(it.m)));boxes[it.m]=cb;
-    const g=el("span","grow");g.append(el("strong","",it.m),el("span","small",num(it.n)+" appunti, "+mb(it.kb)+(meta[it.m]?(meta[it.m].max<it.max?" · da aggiornare":" · sul dispositivo"):"")));li.append(cb,g);list.append(li)}
+  const pub={};items.forEach(it=>pub[it.m]=it);
+  const areas={};Object.entries(AREE).forEach(([a,l])=>areas[a]=l.slice());
+  items.forEach(it=>{if(!SUBJ.includes(it.m))(areas.Altro=areas.Altro||[]).push(it.m)});
+  const ready=items.length;
+  if(idx)st.textContent=ready+" materie pronte su "+SUBJ.length+" · "+num(idx.totale||0)+" appunti in tutto. Le altre arrivano man mano che Natan le studia.";
   if(meta[MINE]){const li=el("div","li");const g=el("span","grow");g.append(el("strong","",MINE),el("span","small",num(meta[MINE].n)+" appunti presi con «Impara»"));li.append(g);list.append(li)}
+  const boxes={},rows=[],groups=[];const first=!Object.keys(meta).filter(m=>m!==MINE).length;
+  for(const [a,l] of Object.entries(areas)){
+    const d=document.createElement("details");d.className="libarea";const n=l.filter(m=>pub[m]).length;
+    const sm=document.createElement("summary");sm.append(el("strong","",a),el("span","small"," "+n+" pronte su "+l.length));d.append(sm);
+    const inner=el("div","list");d.append(inner);let open=false;
+    for(const m of l){const it=pub[m];let li;
+      if(it){li=el("label","li");const cb=el("input");cb.type="checkbox";cb.checked=!!meta[m]||(first&&(prof?.interests||[]).some(i=>norm(i)===norm(m)));boxes[m]=cb;if(cb.checked)open=true;
+        const g=el("span","grow");g.append(el("strong","",m),el("span","small",num(it.n)+" appunti, "+mb(it.kb)+(meta[m]?(meta[m].max<it.max?" · da aggiornare":" · sul dispositivo"):"")));li.append(cb,g)}
+      else{li=el("div","li off");const g=el("span","grow");g.append(el("strong","",m),el("span","small","In arrivo: Natan non l'ha ancora studiata"));li.append(g)}
+      li.dataset.m=m;inner.append(li);rows.push(li)}
+    d.open=open||a==="Scuola superiore";d.dataset.open=d.open?"1":"";groups.push(d);list.append(d)}
+  q.oninput=()=>{const t=q.value.trim();const hit=new Set(t?subjFind(t):[]);
+    groups.forEach(d=>{let any=false;d.querySelectorAll(".li").forEach(li=>{const ok=!t||hit.has(li.dataset.m);li.style.display=ok?"":"none";if(ok)any=true});
+      d.style.display=any?"":"none";d.open=t?any:!!d.dataset.open})};
   if(!idx)return;
   const go=el("button","btn","Scarica le materie scelte");go.style.alignSelf="flex-start";panel.append(go);
   go.onclick=async()=>{go.disabled=true;
@@ -1102,8 +1228,9 @@ function renderImpTop(){
   const top=$("imptop");if(!top||VIEW!=="impara")return;top.innerHTML="";
   const r=el("div","row");
   const inp=el("input","field");inp.placeholder="Cosa devo studiare? Lascia vuoto e scelgo io";inp.value=STUDY.topic;inp.disabled=STUDY.on;inp.style.flex="1 1 280px";inp.id="studyTopic";
-  const sel=el("select","field");sel.style.flex="0 0 170px";["Generale",...SUBJ].forEach(x=>{const o=el("option","",x);o.value=x;sel.append(o)});
-  sel.value=STUDY.materia||(prof?.interests||[])[0]||"Generale";sel.disabled=STUDY.on;sel.setAttribute("aria-label","Materia degli appunti");
+  const sel=subjSelect(["Generale"]);sel.style.flex="0 0 190px";
+  const want=STUDY.materia||(prof?.interests||[])[0]||"Generale";sel.value=want;
+  if(sel.value!==want){const o=el("option","",want);o.value=want;sel.prepend(o);sel.value=want}sel.disabled=STUDY.on;sel.setAttribute("aria-label","Materia degli appunti");
   const stop=el("button","btn red","Basta");stop.id="studyStop";stop.disabled=!STUDY.on;stop.onclick=()=>{STUDY.on=false;STUDY.msg="Fermato: riparto quando vuoi."};
   const go=el("button","btn","Studia");go.id="studyGo";go.disabled=STUDY.on;go.onclick=()=>{STUDY.topic=inp.value.trim();STUDY.materia=sel.value;studyLoop()};
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")go.click()});
