@@ -246,7 +246,7 @@ textarea.field{resize:vertical}
             <button id="send" aria-label="Invia" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
           </div>
         </div>
-        <p class="fine">Natan può sbagliare. Le chat arrivano a Kevin per migliorarlo.</p>
+        <p class="fine">Natan può sbagliare. Le chat vengono lette per migliorare Natan.</p>
       </div>
     </div>
     <div id="pageView" class="hide"><div class="page" id="page"></div></div>
@@ -266,8 +266,8 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="1.8.0";
-const SUBJ=["Matematica","Fisica","Chimica","Biologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Arte","Geografia","Economia","Musica"];
+const VERSION="1.9.0";
+const SUBJ=["Matematica", "Fisica", "Chimica", "Biologia", "Fisiologia", "Informatica", "Coding", "Storia", "Latino", "Italiano", "Inglese", "Filosofia", "Economia", "Arte", "Musica", "Geografia", "Analisi matematica", "Algebra lineare", "Statistica", "Astronomia", "Chimica organica", "Biochimica", "Genetica", "Medicina", "Farmacologia", "Neuroscienze", "Psicologia", "Sociologia", "Diritto", "Scienze politiche", "Finanza", "Management e marketing", "Ingegneria", "Elettronica", "Intelligenza artificiale", "Reti e sicurezza informatica", "Architettura", "Letteratura", "Greco antico", "Linguistica", "Archeologia", "Pedagogia", "Ecologia e ambiente", "Geologia", "Agraria", "Veterinaria", "Religioni", "Cinema", "Spagnolo", "Francese", "Tedesco", "Scienze motorie"];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
 const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -460,7 +460,7 @@ async function autoLib(){
 }
 
 // =====================================================================================================
-// CODA: quello che succede senza il Mac di Kevin gli arriva appena si riaccende
+// CODA: quello che succede senza il server di Natan gli arriva appena si riaccende
 function queue(ev){const c=LS.get("natan_coda",[]);const i=c.findIndex(x=>x.uid===ev.uid);if(i>=0)c[i]=ev;else c.push(ev);LS.set("natan_coda",c.slice(-800))}
 let flushing=false;
 async function flushQueue(){
@@ -474,7 +474,7 @@ async function flushNotes(){
 
 // =====================================================================================================
 // RETE DEI VOLONTARI SENZA IL MAC: i telefoni si collegano direttamente ai PC dei volontari (WebRTC, cifrato).
-// Ogni volontario ha un certificato firmato dal Mac di Kevin (dura 4 giorni) e una sua chiave: niente impostori.
+// Ogni volontario ha un certificato firmato dal server di Natan (dura 4 giorni) e una sua chiave: niente impostori.
 const PEERJS=["https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js","https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"];
 let PEERLIB=null;
 async function peerLib(){
@@ -495,7 +495,7 @@ async function volKeys(){
 }
 async function volPub(){const k=await volKeys();const j=await crypto.subtle.exportKey("jwk",k.publicKey);return {x:j.x,y:j.y}}
 async function checkVolunteer(info,slot,m,nonce){
-  // 1) il certificato è firmato dal Mac di Kevin?  2) è per questo posto e non è scaduto?  3) la prova è firmata dal volontario?
+  // 1) il certificato è firmato dal server di Natan?  2) è per questo posto e non è scaduto?  3) la prova è firmata dal volontario?
   try{
     const kev=await crypto.subtle.importKey("jwk",{...info.chiave,ext:true},ECDSA,false,["verify"]);
     if(!await crypto.subtle.verify(SHA,kev,unb64u(m.firma),new TextEncoder().encode(m.cert)))return false;
@@ -550,9 +550,9 @@ async function netHost(){
   const cert=LS.get("natan_cert",null);const info=reteInfo();
   if(!HELP.on||!cert||!info||NET.peer)return;
   try{if(JSON.parse(cert.cert).scad*1000<Date.now())return}catch(e){return}
-  let P;try{P=await peerLib()}catch(e){netLog("Rete senza Mac non disponibile: "+e.message);return}
+  let P;try{P=await peerLib()}catch(e){netLog("Rete senza server non disponibile: "+e.message);return}
   const p=new P(peerId(info,cert.posto));NET.peer=p;NET.slot=cert.posto;
-  p.on("open",()=>{netLog("Sei nella rete senza Mac (posto "+cert.posto+"): se il Mac di Kevin si spegne, i telefoni arrivano a te");renderHelpStatus()});
+  p.on("open",()=>{netLog("Sei nella rete senza server (posto "+cert.posto+"): se il server di Natan si spegne, i telefoni arrivano a te");renderHelpStatus()});
   p.on("error",e=>{if(e&&e.type==="unavailable-id")netLog("Il tuo posto nella rete è già aperto in un'altra finestra");});
   p.on("disconnected",()=>{try{if(HELP.on)p.reconnect()}catch(e){}});
   p.on("connection",c=>{
@@ -574,7 +574,7 @@ async function hostWork(){
       const r=await gen(HELP.test.livello,trimMsgs(m.messages||[]),{maxTokens:Math.min(m.max||900,1200),think:!!m.think,
         onText:t=>{if(Date.now()-last>700){last=Date.now();try{c.send({t:"pezzo",id:m.id,testo:t})}catch(e){}}}});
       try{c.send({t:"fine",id:m.id,testo:r.text})}catch(e){}
-      NET.served++;HELP.aiutati++;netLog("Hai risposto a un dispositivo senza il Mac ("+Math.round((Date.now()-t0)/1000)+" s)")
+      NET.served++;HELP.aiutati++;netLog("Hai risposto a un dispositivo senza il server ("+Math.round((Date.now()-t0)/1000)+" s)")
     }catch(e){try{c.send({t:"no",id:m.id,motivo:"errore"})}catch(er){}}
     NET.queue.shift();NET.active=0;HELP.job=false;renderHelpStatus();renderHelpBadge();
     await sleep((Date.now()-t0)/3)                       // lavoro al massimo 3/4 del tempo
@@ -596,14 +596,14 @@ function onbShow(step){$("app").classList.add("hide");$("onb").classList.remove(
   if(step){const s=el("div","steps");for(let i=1;i<=3;i++)s.append(el("i",i<=step?"on":""));c.append(s)}return c}
 function onbWelcome(){
   const c=onbShow(1);c.append(el("span","mark","N"));
-  c.append(el("h1","","Ciao, io sono Natan"),el("p","lead","Sono un tutor creato da Kevin. Spiego le materie, risolvo gli esercizi passo per passo e leggo le foto dei compiti."));
-  const b=el("div","consent");b.append(el("strong","","Prima di iniziare"),el("span","","Le tue chat, i voti che dai alle risposte e il tuo profilo vengono inviati a Kevin, che può leggerli per migliorare Natan. Anche le chat fatte senza Internet gli arrivano appena il suo Natan è acceso."),el("span","small","Se hai meno di 14 anni, chiedi prima il permesso a un genitore."));
+  c.append(el("h1","","Ciao, io sono Natan"),el("p","lead","Sono un tutor AI. Spiego le materie, risolvo gli esercizi passo per passo e leggo le foto dei compiti."));
+  const b=el("div","consent");b.append(el("strong","","Prima di iniziare"),el("span","","Le tue chat, i voti che dai alle risposte e il tuo profilo vengono inviati a chi gestisce Natan, che può leggerli per migliorarlo. Anche le chat fatte senza Internet arrivano appena il server di Natan è acceso."),el("span","small","Se hai meno di 14 anni, chiedi prima il permesso a un genitore."));
   const lab=el("label","check");const cb=el("input");cb.type="checkbox";cb.id="ok1";lab.append(cb,document.createTextNode("Ho capito e accetto"));b.append(lab);c.append(b);
   const go=el("button","btn","Continua");go.id="go1";go.disabled=true;cb.onchange=()=>go.disabled=!cb.checked;
   go.onclick=()=>{LS.set("natan_consenso",{ts:Date.now(),v:2});onbProfile()};c.append(go)
 }
 function profileForm(c,edit,after){
-  const code=el("input","field");code.placeholder="Codice della scuola (te lo dà Kevin)";code.autocapitalize="characters";code.autocomplete="off";code.id="code";
+  const code=el("input","field");code.placeholder="Codice della scuola (te lo dà chi ti ha invitato)";code.autocapitalize="characters";code.autocomplete="off";code.id="code";
   const name=el("input","field");name.placeholder="Il tuo nome";name.autocomplete="given-name";name.id="pname";name.value=prof?.name||"";
   const age=el("input","field");age.placeholder="Età";age.inputMode="numeric";age.id="page";age.value=prof?.age||"";
   const goal=el("textarea","field");goal.rows=2;goal.placeholder="Per cosa userai Natan? (facoltativo)";goal.value=prof?.goal||"";
@@ -626,13 +626,13 @@ function profileForm(c,edit,after){
       prof=p;LS.set("natan_profilo",p);toast("Profilo salvato");after()
     }catch(e){
       err.textContent=e.code===403&&e.data?.error==="nome_bannato"?"Questo nome non è permesso: scegline un altro":
-        e.code===0?"Il Natan di Kevin è spento: per iscriverti deve essere acceso. Riprova più tardi.":e.code===401?"Il tuo invito non vale più: chiedi un nuovo link a Kevin.":e.message
+        e.code===0?"Il server di Natan è spento: per iscriverti deve essere acceso. Riprova più tardi.":e.code===401?"Il tuo invito non vale più: chiedi un nuovo invito.":e.message
     }finally{go.disabled=false}
   }
 }
 function onbProfile(){const c=onbShow(2);c.append(el("h1","","Chi sei?"),el("p","lead","Così Natan ti spiega le cose al livello giusto."));profileForm(c,false,()=>LS.get("natan_impegno","")?enterApp():onbModel())}
 async function onbModel(){
-  const c=onbShow(3);c.append(el("h1","","Scegli il modello"),el("p","lead","Basico, Medio e Alto si scaricano sul tuo dispositivo e funzionano anche senza Internet. Altissimo è il Natan più forte, sul Mac di Kevin. Lo cambi quando vuoi dal menu in alto."));
+  const c=onbShow(3);c.append(el("h1","","Scegli il modello"),el("p","lead","Basico, Medio e Alto si scaricano sul tuo dispositivo e funzionano anche senza Internet. Altissimo è il Natan più forte, sul server di Natan. Lo cambi quando vuoi dal menu in alto."));
   const adv=await deviceAdvice();let pick=defaultLevel(adv);
   const box=el("div","list");box.id="opts";c.append(box);
   const draw=()=>{box.innerHTML="";for(const it of modelItems(adv)){const b=modelRow(it,pick);b.onclick=()=>{if(it.lock){toast(it.why);return}pick=it.k;draw()};box.append(b)}};draw();
@@ -663,7 +663,7 @@ function modelItems(adv){
   const got=downloaded();
   const items=ORDER.map(k=>({k,name:LEVELS[k].name,desc:LEVELS[k].params+" di parametri · sul tuo dispositivo · "+(got[k]?"già scaricato":"~"+String(LEVELS[k].gb).replace(".",",")+" GB"),tag:adv?adv.out[k]:null}));
   const lock=!kevinAllowed();
-  items.push({k:"kevin",name:PRO?"Altissimo · Pro":"Altissimo",desc:"14 miliardi di parametri · sul Mac di Kevin · legge anche le foto"+(PRO?" · ragiona più a lungo":""),lock,why:"Altissimo sul PC è il premio per i volontari: vai in «Aiuta Natan»",tag:lock?{tag:"no",t:"premio volontari"}:null});
+  items.push({k:"kevin",name:PRO?"Altissimo · Pro":"Altissimo",desc:"14 miliardi di parametri · sul server di Natan · legge anche le foto"+(PRO?" · ragiona più a lungo":""),lock,why:"Altissimo sul PC è il premio per i volontari: vai in «Aiuta Natan»",tag:lock?{tag:"no",t:"premio volontari"}:null});
   return items
 }
 function modelRow(it,cur){
@@ -681,7 +681,7 @@ async function renderModel(){
 function pickModel(it){
   closeMenu();if(it.lock){toast(it.why);return}
   if(busy)return;LS.set("natan_impegno",it.k);renderModel();updateStatus();
-  if(it.k!=="kevin")prepareDevice(it.k);else toast(PRO?"Natan Pro: risponde il modello più forte del Mac di Kevin":"Risponde il Mac di Kevin")
+  if(it.k!=="kevin")prepareDevice(it.k);else toast(PRO?"Natan Pro: risponde il modello più forte del server di Natan":"Risponde il server di Natan")
 }
 function prepareDevice(k){toast("Preparo Natan "+LEVELS[k].name+" sul dispositivo: la prima volta ci vuole un po', meglio con il Wi-Fi");
   loadEngine(k).then(()=>toast("Natan "+LEVELS[k].name+" è pronto ✓")).catch(e=>toast(e.message));autoLib()}
@@ -696,16 +696,16 @@ function updateStatus(){
   if(busy){cls="busy";txt="Sta pensando"}
   else if(STUDY.on){cls="dev";txt="Sta studiando"}
   else if(level()!=="kevin"){cls="dev";txt="Sul dispositivo"}
-  else if(online){cls="on";txt="Mac di Kevin acceso"}
-  else if(reteInfo()?.posti){cls="net";txt="Mac spento · rete dei volontari"}
-  else if(deviceLevel()){cls="dev";txt="Mac spento · sul dispositivo"}
-  else txt="Mac di Kevin spento";
+  else if(online){cls="on";txt="server di Natan acceso"}
+  else if(reteInfo()?.posti){cls="net";txt="Server spento · rete dei volontari"}
+  else if(deviceLevel()){cls="dev";txt="Server spento · sul dispositivo"}
+  else txt="server di Natan spento";
   i.className=cls;t.textContent=txt;s.title=txt
 }
 function updateNotice(){
   const b=$("notice");b.innerHTML="";let show=false;
   if(ENG.prog){show=true;const pc=Math.round((ENG.prog.p||0)*100);b.append(el("span","","Natan "+(LEVELS[ENG.lvl]?.name||"")+" si sta preparando sul dispositivo: "+pc+"%. Solo la prima volta."));const bar=el("div","bar");const i=el("i");i.style.width=pc+"%";bar.append(i);b.append(bar)}
-  else if(!online&&level()==="kevin"&&TOKEN){show=true;b.append(el("span","",reteInfo()?.posti?"Il Mac di Kevin è spento: provo con i PC dei volontari"+(deviceLevel()?", altrimenti rispondo dal tuo dispositivo":"")+". Le chat gli arrivano dopo.":deviceLevel()?"Il Mac di Kevin è spento: rispondo dal tuo dispositivo. Le chat gli arrivano quando si riaccende.":"Il Mac di Kevin è spento. Scegli Basico, Medio o Alto dal menu in alto per usare Natan anche così."))}
+  else if(!online&&level()==="kevin"&&TOKEN){show=true;b.append(el("span","",reteInfo()?.posti?"Il server di Natan è spento: provo con i PC dei volontari"+(deviceLevel()?", altrimenti rispondo dal tuo dispositivo":"")+". Le chat gli arrivano dopo.":deviceLevel()?"Il server di Natan è spento: rispondo dal tuo dispositivo. Le chat gli arrivano quando si riaccende.":"Il server di Natan è spento. Scegli Basico, Medio o Alto dal menu in alto per usare Natan anche così."))}
   b.classList.toggle("hide",!show);updateStatus()
 }
 
@@ -799,9 +799,9 @@ async function send(forced,opts={}){
         catch(e2){if(!deviceLevel())throw Object.assign(new Error("spento"),{code:0});await askDevice(deviceLevel(),t,opts,show,t0,done,um)}}
     }else await askDevice(lvl,t,opts,show,t0,done,um)
   }catch(e){st.text=true;wait.classList.remove("wait");SPK.cancel();
-    if(e.code===403&&e.data?.error==="nome_bannato"){toast("Kevin ti chiede di cambiare nome");openPage("impostazioni")}
-    else if(e.code===401)wait.textContent="Il tuo invito non vale più: chiedi un nuovo link a Kevin.";
-    else if(e.code===0)wait.textContent=ph.length?"Le foto le legge solo il Natan di Kevin, che adesso è spento. Riprova più tardi.":"Il Mac di Kevin è spento e nessun volontario è collegato. Scegli Basico, Medio o Alto dal menu in alto per usare Natan sul tuo dispositivo.";
+    if(e.code===403&&e.data?.error==="nome_bannato"){toast("Ti chiediamo di cambiare nome");openPage("impostazioni")}
+    else if(e.code===401)wait.textContent="Il tuo invito non vale più: chiedi un nuovo invito.";
+    else if(e.code===0)wait.textContent=ph.length?"Le foto le legge solo il server di Natan, che adesso è spento. Riprova più tardi.":"Il server di Natan è spento e nessun volontario è collegato. Scegli Basico, Medio o Alto dal menu in alto per usare Natan sul tuo dispositivo.";
     else wait.textContent="Errore: "+e.message}
   finally{clearInterval(tick);busy=false;updateStatus();sendBtn();ping();CALL.afterAnswer()}
 }
@@ -831,7 +831,7 @@ async function askDevice(lvl,t,opts,show,t0,done,um){
   done(x);if(online)flushQueue()
 }
 async function askVolunteer(t,opts,show,t0,done,um){
-  show("Il Mac di Kevin è spento: cerco un volontario…");
+  show("Il server di Natan è spento: cerco un volontario…");
   await findVolunteer();
   queue({uid:um.uid,chat,role:"user",content:um.content,ts:um.ts});
   const msgs=await buildLocal(t,um,true);                    // il volontario non sa chi sei
@@ -842,7 +842,7 @@ async function askVolunteer(t,opts,show,t0,done,um){
   queue({uid:x.uid,chat,role:"assistant",content:x.content,tier:x.tierCode,ts:x.ts});done(x)
 }
 function sysLocal(notes,wk,anon){
-  let s="Ti chiami Natan e sei un tutor AI. Ti ha creato Kevin: se ti chiedono chi ti ha fatto, rispondi che ti ha creato Kevin. Non dire mai di essere ChatGPT, Claude, Gemini o Qwen.";
+  let s="Ti chiami Natan e sei un tutor AI. Se ti chiedono chi ti ha creato o dove sei stato progettato, rispondi che sei un progetto indipendente e che preferisci non dare dettagli: non fare nomi di persone, scuole o luoghi. Non dire mai di essere ChatGPT, Claude, Gemini o Qwen.";
   s+=anon?" Stai aiutando uno studente: non chiedergli mai nome, età o dati personali.":" Stai aiutando "+(prof?.name||"uno studente")+(prof?.age?" ("+prof.age+" anni)":"")+".";
   s+="\n\nCome scrivi: italiano corretto e naturale; prima la risposta, poi la spiegazione; esempi concreti; per gli esercizi mostra tutti i passaggi e il risultato; matematica in testo semplice (3/4, 2^3, √), niente LaTeX, niente asterischi o cancelletti. Se non sei sicuro, dillo invece di inventare.";
   if(notes.length)s+="\n\nAppunti della biblioteca di Natan (sono affidabili, usali):\n"+notes.map(n=>"["+n.m+"] "+n.t+": "+n.x.slice(0,650)).join("\n---\n");
@@ -871,7 +871,7 @@ $("attach").onclick=()=>{if(!busy)$("file").click()};
 $("file").onchange=async e=>{const fs=[...e.target.files];e.target.value="";
   if(photos.length+fs.length>MAXP)toast("Massimo "+MAXP+" foto: tengo le prime "+MAXP);
   for(const f of fs.slice(0,MAXP-photos.length)){try{photos.push(await shrinkPhoto(f));showPics()}catch(er){toast("Una foto non si legge, la salto")}}
-  if(photos.length&&level()!=="kevin")toast("Le foto le legge il Natan di Kevin (Altissimo)")};
+  if(photos.length&&level()!=="kevin")toast("Le foto le legge il server di Natan (Altissimo)")};
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){const mic=$("mic");mic.classList.remove("hide");let rec=null;
   mic.onclick=()=>{if(rec){rec.stop();return}rec=new SR();rec.lang="it-IT";rec.interimResults=true;mic.classList.add("rec");
@@ -893,7 +893,7 @@ const SPK={voice:null,spoken:0,said:"",on:false,q:0,
   feed(text,final){
     if(!this.on||!("speechSynthesis" in window))return;
     const clean=String(text).replace(/[🧠📷⏳✓✗•]/g,"");
-    if(/^(Sto pensando|Ci penso|Cerco|Preparo|Risponde un volontario|Il Mac di Kevin è spento: cerco)/.test(clean)||!/[a-zà-ù0-9]/i.test(clean))return;
+    if(/^(Sto pensando|Ci penso|Cerco|Preparo|Risponde un volontario|Il server di Natan è spento: cerco)/.test(clean)||!/[a-zà-ù0-9]/i.test(clean))return;
     if(this.said&&!clean.startsWith(this.said)){this.spoken=0;this.said=""}       // il testo è cambiato (era un messaggio d'attesa)
     let upto=-1;const rest=clean.slice(this.spoken);
     if(final)upto=clean.length;else{const m=[...rest.matchAll(/[.!?…:;\n](\s|$)/g)];if(m.length){const last=m[m.length-1];upto=this.spoken+last.index+1}}
@@ -960,12 +960,12 @@ function backBtn(pg,to){const b=el("button","btn ghost",to==="impara"?"← Torna
 
 // --- Biblioteca
 async function openLib(pg){
-  backBtn(pg,"impara");pg.append(el("h1","","Biblioteca sul dispositivo"),el("p","lead","Gli appunti che Natan ha preso su Wikipedia, salvati qui. Gli servono per rispondere bene anche senza Internet e senza il Mac di Kevin."));
+  backBtn(pg,"impara");pg.append(el("h1","","Biblioteca sul dispositivo"),el("p","lead","Gli appunti che Natan ha preso su Wikipedia, salvati qui. Gli servono per rispondere bene anche senza Internet e senza il server di Natan."));
   const st=el("div","small");pg.append(st);const panel=el("div","panel");const list=el("div","list");panel.append(list);pg.append(panel);
   const meta=libMeta();let idx=null;
   try{idx=await (await fetch("../biblioteca/indice.json?t="+Date.now(),{cache:"no-store"})).json()}catch(e){st.textContent="Non vedo la biblioteca online: ti mostro quella già scaricata."}
   const items=idx?idx.materie:Object.entries(meta).filter(([m])=>m!==MINE).map(([m,v])=>({m,n:v.n,kb:v.kb||0,max:v.max}));
-  if(!items.length&&!meta[MINE])list.append(el("span","small","La biblioteca è ancora vuota: Kevin deve pubblicarla dal suo Natan."));
+  if(!items.length&&!meta[MINE])list.append(el("span","small","La biblioteca è ancora vuota: deve ancora essere pubblicata."));
   const boxes={};
   for(const it of items){const li=el("label","li");const cb=el("input");cb.type="checkbox";cb.checked=!!meta[it.m]||(!Object.keys(meta).length&&(prof?.interests||[]).some(i=>norm(i)===norm(it.m)));boxes[it.m]=cb;
     const g=el("span","grow");g.append(el("strong","",it.m),el("span","small",num(it.n)+" appunti, "+mb(it.kb)+(meta[it.m]?(meta[it.m].max<it.max?" · da aggiornare":" · sul dispositivo"):"")));li.append(cb,g);list.append(li)}
@@ -1021,7 +1021,7 @@ async function studyLoop(){
   renderImpTop();updateStatus()
 }
 function openImpara(pg){
-  pg.append(el("h1","","Impara"),el("p","lead","Natan legge Wikipedia e prende appunti. Restano sul tuo dispositivo e vengono proposti a Kevin per la biblioteca di tutti."));
+  pg.append(el("h1","","Impara"),el("p","lead","Natan legge Wikipedia e prende appunti. Restano sul tuo dispositivo e vengono proposti per la biblioteca di tutti."));
   const top=el("div","panel");top.id="imptop";pg.append(top);
   const tabs=el("div","tabs");tabs.id="imptabs";pg.append(tabs);const body=el("div","");body.id="impbody";pg.append(body);
   renderImpTop();renderImpTabs();renderImpBody()
@@ -1038,7 +1038,7 @@ function renderImpTop(){
   r.append(inp,sel,stop,go);top.append(r);
   const wait=LS.get("natan_appunti_coda",[]).length;
   const line=STUDY.on?"In diretta: "+STUDY.notes+" appunti da "+STUDY.pages+" pagine"+(STUDY.cur?", ora leggo «"+STUDY.cur+"»":"")
-    :(STUDY.msg||"Scrivi un argomento e premi «Studia».")+(STUDY.sent||wait?" "+STUDY.sent+" appunti già arrivati a Kevin"+(wait?", "+wait+" in attesa.":"."):"");
+    :(STUDY.msg||"Scrivi un argomento e premi «Studia».")+(STUDY.sent||wait?" "+STUDY.sent+" appunti già arrivati al server"+(wait?", "+wait+" in attesa.":"."):"");
   top.append(el("span","live",line));
   if(!STUDY.on&&IMP.tab==="az")renderImpBody()
 }
@@ -1110,7 +1110,7 @@ function saveCert(d){if(d&&d.certificato){LS.set("natan_cert",d.certificato);if(
 async function helpOn(){
   if(!HELP.test||!HELP.test.ok){toast("Prima fai il test del PC");return}
   try{const d=await api("/rete/volontario",{attivo:true,test:HELP.test,chiave:await volPub()});HELP.stato=d.stato;LS.set("natan_vol",d.stato);HELP.aiutati=d.aiutati||0;HELP.rete=d.rete||HELP.rete;HELP.mac=d.mac_occupato?"occupato":"libero";saveCert(d)}
-  catch(e){if(e.code!==0||!LS.get("natan_cert",null)){HELP.msg=e.code===0?"Il Mac di Kevin è spento: la prima volta serve acceso. Riprova quando lo è.":e.message;renderHelpStatus();return}HELP.mac="spento"}
+  catch(e){if(e.code!==0||!LS.get("natan_cert",null)){HELP.msg=e.code===0?"Il server di Natan è spento: la prima volta serve acceso. Riprova quando lo è.":e.message;renderHelpStatus();return}HELP.mac="spento"}
   HELP.on=true;HELP.msg="";netLog("Hai acceso «Aiuta Natan»");renderHelpStatus();renderHelpBadge();
   try{HELP.lock=await navigator.wakeLock?.request("screen")}catch(e){}
   netHost();helpLoop()
@@ -1127,7 +1127,7 @@ async function helpLoop(){
       const d=await api("/rete/prendi",{attesa:20});
       HELP.stato=d.stato||HELP.stato;LS.set("natan_vol",HELP.stato);HELP.aiuti=d.aiuti||0;HELP.aiutati=typeof d.aiutati==="number"?Math.max(d.aiutati,HELP.aiutati):HELP.aiutati;
       HELP.rete=d.rete||HELP.rete;HELP.mac=d.mac_occupato?"occupato":"libero";HELP.msg="";saveCert(d);renderHelpStatus();renderHelpBadge();
-      if(HELP.stato==="sospeso"){HELP.on=false;netStop();netLog("Sei stato sospeso: parlane con Kevin");break}
+      if(HELP.stato==="sospeso"){HELP.on=false;netStop();netLog("Sei stato sospeso: parlane con chi gestisce Natan");break}
       if(!d.lavoro)continue;
       const w=d.lavoro;HELP.job=true;renderHelpStatus();renderHelpBadge();const t0=Date.now();let last=0;
       try{
@@ -1137,12 +1137,12 @@ async function helpLoop(){
       }catch(e){}
       HELP.job=false;renderHelpStatus();renderHelpBadge();
       await sleep((Date.now()-t0)/3)
-    }catch(e){if(e.code===0){if(HELP.mac!=="spento")netLog("Il Mac di Kevin si è spento: i dispositivi possono collegarsi direttamente a te");HELP.mac="spento"}else HELP.msg="Problema: "+e.message;renderHelpStatus();await sleep(15000)}
+    }catch(e){if(e.code===0){if(HELP.mac!=="spento")netLog("Il server di Natan si è spento: i dispositivi possono collegarsi direttamente a te");HELP.mac="spento"}else HELP.msg="Problema: "+e.message;renderHelpStatus();await sleep(15000)}
   }
   HELP.job=false;renderHelpStatus();renderHelpBadge()
 }
 function openHelp(pg){
-  pg.append(el("h1","","Aiuta Natan e ti daremo un Natan potente 🤵‍♂️"),el("p","lead","Il tuo computer risponde alle domande dei compagni quando il Mac di Kevin è occupato o spento. Vedi quante persone aiuti, mai chi sono."));
+  pg.append(el("h1","","Aiuta Natan e ti daremo un Natan potente 🤵‍♂️"),el("p","lead","Il tuo computer risponde alle domande dei compagni quando il server di Natan è occupato o spento. Vedi quante persone aiuti, mai chi sono."));
   if(IS_MOBILE){const p=el("div","panel");p.append(el("h2","","Si aiuta dal computer"),el("span","","Così non consumi la batteria del telefono. Apri questo sito dal tuo PC o Mac con Chrome o Edge."));pg.append(p);return}
   const t=el("div","panel");t.id="helpTest";pg.append(t);const s=el("div","panel");s.id="helpStatus";pg.append(s);const l=el("div","panel");l.id="helpLog";pg.append(l);
   const rules=el("div","panel");rules.append(el("h2","","Le regole"));
@@ -1174,12 +1174,12 @@ function renderHelpStatus(){
   const head=el("div","row");head.append(el("h2","","Aiuta Natan"));const sp=el("span","");sp.style.flex="1";head.append(sp);
   const sw=el("button","sw"+(HELP.on?" on":""));sw.id="helpSwitch";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(HELP.on));sw.setAttribute("aria-label","Aiuta Natan");
   sw.onclick=()=>HELP.on?helpOff():helpOn();sw.disabled=HELP.testing;head.append(sw);p.append(head);
-  const st={in_prova:["wait","In prova: Natan sta facendo i controlli di qualità"],approvato:["ok","Approvato: hai Natan Pro"],sospeso:["no","Sospeso: i controlli non sono andati bene, parlane con Kevin"]}[HELP.stato];
+  const st={in_prova:["wait","In prova: Natan sta facendo i controlli di qualità"],approvato:["ok","Approvato: hai Natan Pro"],sospeso:["no","Sospeso: i controlli non sono andati bene, parlane con chi gestisce Natan"]}[HELP.stato];
   if(st){const pl=el("span","pill "+st[0],st[1]);pl.style.alignSelf="flex-start";p.append(pl)}
   if(!HELP.on){p.append(el("span","small",HELP.test?.ok?"Accendi l'interruttore per iniziare.":"Prima fai il test del PC qui sopra."));if(HELP.msg)p.append(el("span","err",HELP.msg))}
   else{
-    const mode=HELP.mac==="spento"?(NET.peer?"Il Mac di Kevin è spento: i dispositivi si collegano direttamente a te (posto "+NET.slot+").":"Il Mac di Kevin è spento"+(HELP.stato==="approvato"?": sto entrando nella rete senza Mac…":": serve essere approvati per aiutare senza il Mac."))
-      :HELP.mac==="occupato"?"Il Mac di Kevin è occupato: le domande arrivano a te.":"Il Mac di Kevin è libero e risponde da solo: ti passo le domande appena è occupato o si spegne.";
+    const mode=HELP.mac==="spento"?(NET.peer?"Il server di Natan è spento: i dispositivi si collegano direttamente a te (posto "+NET.slot+").":"Il server di Natan è spento"+(HELP.stato==="approvato"?": sto entrando nella rete senza server…":": serve essere approvati per aiutare senza il server."))
+      :HELP.mac==="occupato"?"Il server di Natan è occupato: le domande arrivano a te.":"Il server di Natan è libero e risponde da solo: ti passo le domande appena è occupato o si spegne.";
     p.append(el("span","",mode));
     const g=el("div","grid4");
     const stat=(n,l)=>{const d=el("div","stat");d.append(el("b","",num(n)),el("span","",l));g.append(d)};
@@ -1202,7 +1202,7 @@ function openSettings(pg){
   const tr=el("button","btn ghost","Prova la voce");tr.style.alignSelf="flex-start";tr.onclick=()=>SPK.say("Ciao, io sono Natan. Questa è la mia voce.");
   p2.append(vs.length?sel:el("span","small","Questo dispositivo non ha voci italiane: installane una dalle impostazioni del sistema."),tr);pg.append(p2);
   const meta=libMeta();const n=Object.values(meta).reduce((a,m)=>a+(m.n||0),0);
-  const p3=el("div","panel");p3.append(el("h2","","Dati"),el("span","",chats.length+" chat salvate qui, "+num(n)+" appunti nella biblioteca. In attesa di arrivare a Kevin: "+LS.get("natan_coda",[]).length+" messaggi e "+LS.get("natan_appunti_coda",[]).length+" appunti."),el("span","small","Tutto quello che scrivi arriva a Kevin, che può leggerlo per migliorare Natan."));
+  const p3=el("div","panel");p3.append(el("h2","","Dati"),el("span","",chats.length+" chat salvate qui, "+num(n)+" appunti nella biblioteca. In attesa di arrivare al server: "+LS.get("natan_coda",[]).length+" messaggi e "+LS.get("natan_appunti_coda",[]).length+" appunti."),el("span","small","Tutto quello che scrivi arriva a chi gestisce Natan, che può leggerlo per migliorarlo."));
   const lb=el("button","btn ghost","Gestisci la biblioteca");lb.style.alignSelf="flex-start";lb.onclick=()=>openPage("biblioteca");p3.append(lb);pg.append(p3);
   const p4=el("div","panel");p4.append(el("h2","","App"),el("span","","Natan "+VERSION+(PC?" per computer":" per telefono")));
   const r=el("div","row");const ins=el("button","btn ghost","Installa Natan come app");ins.onclick=install;const info=el("button","btn ghost","Chi è Natan");info.onclick=()=>location.href="../";r.append(ins,info);p4.append(r);pg.append(p4)
