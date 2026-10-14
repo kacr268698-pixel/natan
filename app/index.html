@@ -115,6 +115,8 @@ textarea.field{resize:vertical}
 .msg.a .txt{white-space:pre-wrap;word-wrap:break-word;line-height:1.65;color:#e4e5ec}
 .math.disp{display:block;overflow-x:auto;overflow-y:hidden;margin:4px 0;padding:2px 0;text-align:center}.math .katex{font-size:1.08em;white-space:nowrap}
 .math .katex-display{margin:0}
+.creaz{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:10px;white-space:normal}.cimg{width:min(100%,380px);border-radius:14px;display:block}
+.cvid{width:min(100%,560px);border-radius:14px;background:#000}.cdl{font-size:14px;padding:8px 14px;min-height:0;text-decoration:none}
 .msg.a .txt.wait{color:var(--muted)}
 .acts{display:flex;align-items:center;gap:2px;margin-top:8px;flex-wrap:wrap;color:var(--muted)}
 .acts .ib{width:32px;height:32px}.acts .ib.up{color:var(--good)}.acts .ib.dn{color:var(--bad)}
@@ -283,7 +285,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.0.8";
+const VERSION="2.1.1";
 /*AREE*/const AREE={"Scuola superiore":["Matematica","Fisica","Chimica","Biologia","Fisiologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Economia","Arte","Musica","Geografia"],"Matematica e logica":["Analisi matematica","Algebra lineare","Algebra astratta","Geometria","Geometria analitica","Geometria differenziale","Topologia","Teoria dei numeri","Combinatoria","Teoria dei grafi","Probabilità","Statistica","Logica matematica","Teoria degli insiemi","Analisi numerica","Ricerca operativa","Matematica finanziaria","Matematica discreta","Trigonometria","Teoria dei giochi","Equazioni differenziali","Analisi complessa","Analisi funzionale","Storia della matematica"],"Fisica e astronomia":["Meccanica classica","Termodinamica","Elettromagnetismo","Ottica","Acustica","Meccanica quantistica","Relatività","Fisica nucleare","Fisica delle particelle","Fisica della materia condensata","Fisica del plasma","Fluidodinamica","Fisica atomica","Fisica medica","Biofisica","Geofisica","Astronomia","Astrofisica","Cosmologia","Planetologia","Astronautica","Astrobiologia","Storia della fisica"],"Chimica e materiali":["Chimica organica","Chimica inorganica","Chimica fisica","Chimica analitica","Biochimica","Elettrochimica","Chimica dei polimeri","Chimica industriale","Chimica farmaceutica","Chimica ambientale","Chimica degli alimenti","Radiochimica","Scienza dei materiali","Cristallografia","Spettroscopia"],"Biologia, animali e piante":["Botanica","Zoologia","Biologia cellulare","Biologia molecolare","Genetica","Microbiologia","Virologia","Batteriologia","Micologia","Parassitologia","Immunologia","Ecologia e ambiente","Biologia evolutiva","Embriologia","Istologia","Anatomia comparata","Fisiologia vegetale","Biologia marina","Limnologia","Paleontologia","Paleoantropologia","Etologia","Entomologia","Mirmecologia","Aracnologia","Ornitologia","Erpetologia","Ittiologia","Mammalogia","Malacologia","Primatologia","Cetologia","Lepidotterologia","Briologia","Ficologia","Lichenologia","Dendrologia","Biologia della conservazione","Biotecnologie","Bioinformatica","Biostatistica","Etnobotanica","Palinologia"],"Medicina e salute":["Medicina","Anatomia","Patologia","Farmacologia","Cardiologia","Neurologia","Oncologia","Pediatria","Ginecologia","Ostetricia","Dermatologia","Oftalmologia","Otorinolaringoiatria","Ortopedia","Psichiatria","Chirurgia","Anestesiologia","Radiologia","Medicina d'urgenza","Geriatria","Endocrinologia","Gastroenterologia","Nefrologia","Urologia","Pneumologia","Ematologia","Reumatologia","Malattie infettive","Epidemiologia","Sanità pubblica","Medicina legale","Medicina dello sport","Medicina del lavoro","Allergologia","Genetica medica","Anatomia patologica","Neurochirurgia","Cardiochirurgia","Chirurgia plastica","Odontoiatria","Ortodonzia","Dietetica e nutrizione","Fisioterapia","Infermieristica","Logopedia","Ortottica","Podologia","Osteopatia","Terapia occupazionale","Medicina di laboratorio","Audiologia","Neuropsichiatria infantile","Primo soccorso","Farmacia","Tossicologia","Medicina riabilitativa"],"Psicologia e mente":["Psicologia","Psicologia cognitiva","Psicologia dello sviluppo","Psicologia sociale","Psicologia clinica","Psicologia del lavoro","Psicologia dello sport","Psicologia dell'educazione","Psicologia giuridica","Psicometria","Neuropsicologia","Psicoterapia","Psicologia della personalità","Neuroscienze","Psicobiologia","Scienze cognitive"],"Ingegneria e tecnologia":["Ingegneria","Ingegneria meccanica","Ingegneria civile","Ingegneria elettrica","Elettronica","Elettrotecnica","Ingegneria informatica","Ingegneria gestionale","Ingegneria aerospaziale","Ingegneria chimica","Ingegneria biomedica","Ingegneria ambientale","Ingegneria nucleare","Ingegneria navale","Ingegneria dei materiali","Ingegneria edile","Ingegneria energetica","Telecomunicazioni","Robotica","Controlli automatici","Meccatronica","Idraulica","Geotecnica","Ingegneria dei trasporti","Nanotecnologie","Energie rinnovabili","Aeronautica","Scienza delle costruzioni","Disegno tecnico","Stampa 3D","Topografia","Metrologia"],"Informatica e digitale":["Intelligenza artificiale","Reti e sicurezza informatica","Algoritmi e strutture dati","Basi di dati","Sistemi operativi","Crittografia","Apprendimento automatico","Computer grafica","Sviluppo web","App per smartphone","Teoria della calcolabilità","Linguaggi di programmazione","Cloud computing","Blockchain","Scienza dei dati","Ingegneria del software","Sviluppo di videogiochi","Interazione uomo-computer","Architettura dei calcolatori","Informatica teorica","Elaborazione digitale delle immagini"],"Economia e impresa":["Microeconomia","Macroeconomia","Econometria","Economia politica","Economia aziendale","Finanza","Contabilità","Management e marketing","Risorse umane","Logistica","Economia internazionale","Storia economica","Banca e assicurazioni","Commercio","Commercio elettronico","Imprenditorialità","Economia comportamentale","Economia dello sviluppo","Economia ambientale","Turismo","Educazione finanziaria","Revisione contabile","Scienza delle finanze","Pubblicità"],"Diritto e politica":["Diritto","Diritto civile","Diritto penale","Diritto costituzionale","Diritto amministrativo","Diritto commerciale","Diritto del lavoro","Diritto tributario","Diritto internazionale","Diritto dell'Unione europea","Diritto privato","Procedura civile","Procedura penale","Diritto romano","Diritto canonico","Filosofia del diritto","Criminologia","Educazione civica","Scienze politiche","Relazioni internazionali","Geopolitica","Pubblica amministrazione","Diplomazia","Diritti umani"],"Società e comunicazione":["Sociologia","Antropologia culturale","Antropologia fisica","Demografia","Scienze della comunicazione","Giornalismo","Pedagogia","Servizio sociale","Studi di genere","Urbanistica","Geografia umana","Etnologia","Semiotica","Mass media"],"Storia e archeologia":["Preistoria","Storia antica","Antica Grecia","Storia romana","Medioevo","Età moderna","Età contemporanea","Storia d'Italia","Storia dell'arte","Storia della scienza","Storia della medicina","Storia militare","Archeologia","Egittologia","Assiriologia","Impero bizantino","Paleografia","Archivistica","Numismatica","Araldica","Epigrafia","Papirologia","Genealogia","Etruscologia","Storia degli Stati Uniti d'America","Storia della Cina","Storia del Giappone","Storia dell'Africa"],"Filosofia e religioni":["Logica","Etica","Estetica","Metafisica","Epistemologia","Filosofia della mente","Filosofia politica","Filosofia della scienza","Filosofia del linguaggio","Bioetica","Filosofia antica","Filosofia medievale","Filosofia orientale","Teologia","Religioni","Mitologia","Mitologia greca","Mitologia norrena","Storia delle religioni"],"Lingue e letterature":["Greco antico","Spagnolo","Francese","Tedesco","Portoghese","Russo","Cinese","Giapponese","Arabo","Coreano","Ebraico","Hindi","Olandese","Svedese","Polacco","Turco","Greco moderno","Rumeno","Albanese","Ucraino","Esperanto","Lingua dei segni italiana","Letteratura","Letteratura italiana","Letteratura inglese","Letteratura statunitense","Letteratura latina","Letteratura greca","Letteratura russa","Letteratura spagnola","Letteratura tedesca","Letteratura francese","Letteratura per ragazzi","Filologia","Filologia romanza","Glottologia","Linguistica","Fonetica","Sociolinguistica","Psicolinguistica","Traduzione","Retorica","Critica letteraria","Scrittura creativa","Dialetti italiani","Metrica"],"Arte, design e spettacolo":["Pittura","Scultura","Disegno","Fotografia","Grafica","Design industriale","Moda","Architettura","Restauro","Museologia","Cinema","Teatro","Danza","Composizione musicale","Armonia","Musicologia","Etnomusicologia","Canto","Strumenti musicali","Pianoforte","Chitarra","Musica elettronica","Storia della musica","Jazz","Fumetto","Animazione","Game design","Scenografia","Televisione","Radio","Calligrafia","Ceramica","Oreficeria","Arredamento"],"Terra, ambiente e spazio":["Geologia","Mineralogia","Petrografia","Vulcanologia","Sismologia","Oceanografia","Meteorologia","Climatologia","Idrologia","Glaciologia","Geografia fisica","Cartografia","Geomorfologia","Speleologia","Pedologia","Paleoclimatologia","Scienze ambientali","Conservazione della natura","Gestione dei rifiuti"],"Agraria, cibo e animali":["Agraria","Veterinaria","Agronomia","Zootecnia","Enologia","Viticoltura","Scienze forestali","Orticoltura","Frutticoltura","Apicoltura","Acquacoltura","Tecnologie alimentari","Gastronomia","Cucina","Pasticceria","Giardinaggio","Floricoltura","Pesca","Agricoltura biologica","Cinofilia"],"Sport e movimento":["Scienze motorie","Educazione fisica","Atletica leggera","Calcio","Nuoto","Pallavolo","Pallacanestro","Tennis","Ciclismo","Arti marziali","Ginnastica","Rugby","Sci","Scacchi","Equitazione","Vela","Arrampicata","Yoga"],"Vita pratica e mestieri":["Metodo di studio","Codice della strada","Automobili e motori","Falegnameria","Sartoria","Impianti elettrici","Economia domestica","Orientamento"]};const ALIAS={"formiche":"Mirmecologia","insetti":"Entomologia","ragni":"Aracnologia","uccelli":"Ornitologia","rettili":"Erpetologia","serpenti":"Erpetologia","anfibi":"Erpetologia","rane":"Erpetologia","pesci":"Ittiologia","mammiferi":"Mammalogia","molluschi":"Malacologia","conchiglie":"Malacologia","scimmie":"Primatologia","balene":"Cetologia","delfini":"Cetologia","farfalle":"Lepidotterologia","muschi":"Briologia","alghe":"Ficologia","licheni":"Lichenologia","alberi":"Dendrologia","funghi":"Micologia","fossili":"Paleontologia","dinosauri":"Paleontologia","vulcani":"Vulcanologia","terremoti":"Sismologia","mare":"Oceanografia","oceani":"Oceanografia","meteo":"Meteorologia","clima":"Climatologia","ghiacciai":"Glaciologia","grotte":"Speleologia","monete":"Numismatica","stemmi":"Araldica","api":"Apicoltura","miele":"Apicoltura","vino":"Enologia","denti":"Odontoiatria","occhi":"Oftalmologia","cuore":"Cardiologia","pelle":"Dermatologia","bambini":"Pediatria","anziani":"Geriatria","tumori":"Oncologia","cervello":"Neuroscienze","piedi":"Podologia","voce":"Logopedia","cani":"Cinofilia","piante":"Botanica","fiori":"Floricoltura","animali":"Zoologia","stelle":"Astronomia","pianeti":"Planetologia","spazio":"Astronautica","razzi":"Astronautica","computer":"Informatica","programmare":"Coding","programmazione":"Coding","soldi":"Educazione finanziaria","risparmio":"Educazione finanziaria","leggi":"Diritto","patente":"Codice della strada","cibo":"Gastronomia","dolci":"Pasticceria","torte":"Pasticceria","auto":"Automobili e motori","macchine":"Automobili e motori","motori":"Automobili e motori","ossa":"Ortopedia","muscoli":"Fisioterapia","riabilitazione":"Fisioterapia","egitto":"Egittologia","piramidi":"Egittologia","mappe":"Cartografia","batteri":"Batteriologia","virus":"Virologia","dna":"Genetica","robot":"Robotica","videogiochi":"Sviluppo di videogiochi","giochi":"Game design","fumetti":"Fumetto","cartoni":"Animazione","film":"Cinema","vestiti":"Moda","case":"Architettura","ponti":"Ingegneria civile","aerei":"Aeronautica","navi":"Ingegneria navale","elettricità":"Elettrotecnica","luce":"Ottica","suono":"Acustica","atomi":"Fisica atomica","medicine":"Farmacologia","farmaci":"Farmacologia","veleni":"Tossicologia","crimini":"Criminologia","mente":"Psicologia","emozioni":"Psicologia","studiare":"Metodo di studio","memoria":"Metodo di studio","lingua dei segni":"Lingua dei segni italiana","segni":"Lingua dei segni italiana","dialetti":"Dialetti italiani","cavalli":"Equitazione","montagna":"Arrampicata","giardino":"Giardinaggio","orto":"Orticoltura","frutta":"Frutticoltura","boschi":"Scienze forestali","rifiuti":"Gestione dei rifiuti","riciclo":"Gestione dei rifiuti","ambiente":"Ecologia e ambiente","dio":"Teologia","miti":"Mitologia","dei greci":"Mitologia greca","vichinghi":"Mitologia norrena","romani":"Storia romana","medioevo":"Medioevo","cavalieri":"Medioevo","guerre":"Storia militare","elezioni":"Scienze politiche","notizie":"Giornalismo","infermiere":"Infermieristica","parto":"Ostetricia","ospedale":"Medicina","dottore":"Medicina","medico":"Medicina"};/*FINE AREE*/
 const SUBJ=[...new Set(Object.values(AREE).flat())];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
@@ -569,13 +571,14 @@ async function findVolunteer(){
     }
   })
 }
-function clientData(m){const w=m&&CLI.wait[m.id];if(!w)return;if(m.t==="pezzo")w.onText(m.testo);if(m.t==="fine"){delete CLI.wait[m.id];w.ok(m.testo)}if(m.t==="no"){delete CLI.wait[m.id];w.bad(new Error(m.motivo||"occupato"))}}
-async function askNet(messages,think,onText){
+function clientData(m){const w=m&&CLI.wait[m.id];if(!w)return;if(m.t==="pezzo")w.onText(m.testo);if(m.t==="file"&&w.files&&m.f&&w.files.length<6){w.files.push(m.f);w.onText("📥 Ricevo i file…")}if(m.t==="fine"){delete CLI.wait[m.id];w.ok(m.testo)}if(m.t==="no"){delete CLI.wait[m.id];w.bad(new Error(m.motivo||"occupato"))}}
+async function askNet(messages,think,onText,crea){
   const c=await findVolunteer();const id=rid("d");
   return await new Promise((ok,bad)=>{
-    let last=Date.now();const w={onText:t=>{last=Date.now();onText(t)},ok:t=>{clearInterval(iv);ok(t)},bad:e=>{clearInterval(iv);bad(e)}};CLI.wait[id]=w;
-    const iv=setInterval(()=>{if(Date.now()-last>60000||!c.open){delete CLI.wait[id];clearInterval(iv);CLI.conn=null;bad(new Error("il volontario non risponde"))}},2000);
-    c.send({t:"domanda",id,messages,think:!!think,max:900})
+    let last=Date.now();const files=[];
+    const w={files,onText:t=>{last=Date.now();onText(t)},ok:t=>{clearInterval(iv);ok(crea?{testo:t,files}:t)},bad:e=>{clearInterval(iv);bad(e)}};CLI.wait[id]=w;
+    const iv=setInterval(()=>{if(Date.now()-last>90000||!c.open){delete CLI.wait[id];clearInterval(iv);CLI.conn=null;bad(new Error("il volontario non risponde"))}},2000);
+    c.send({t:"domanda",id,messages,think:!!think,max:900,crea:crea||undefined})
   })
 }
 // --- lato volontario: quando il Mac è spento rispondo io ai telefoni che si collegano
@@ -605,6 +608,12 @@ async function hostData(c,m,cert){
 async function hostWork(){
   while(NET.queue.length&&HELP.on){
     const {c,m}=NET.queue[0];NET.active=1;HELP.job=true;renderHelpStatus();renderHelpBadge();const t0=Date.now();let last=0;
+    if(m.crea&&m.crea.kind){                             // un telefono chiede un documento o una presentazione
+      try{const res=await browserCreate(String(m.crea.kind),String(m.crea.arg||"").slice(0,200),HELP.test.livello,t=>{try{c.send({t:"pezzo",id:m.id,testo:t})}catch(e){}});
+        for(const f of res.files)c.send({t:"file",id:m.id,f});c.send({t:"fine",id:m.id,testo:res.testo});
+        NET.served++;HELP.aiutati++;netLog("Hai creato un file per un dispositivo ("+Math.round((Date.now()-t0)/1000)+" s)")}
+      catch(e){try{c.send({t:"no",id:m.id,motivo:e.crea?e.message:"errore"})}catch(er){}}
+      NET.queue.shift();NET.active=0;HELP.job=false;renderHelpStatus();renderHelpBadge();await sleep((Date.now()-t0)/3);continue}
     try{
       const r=await gen(HELP.test.livello,trimMsgs(m.messages||[]),{maxTokens:Math.min(m.max||900,1200),think:!!m.think,
         onText:t=>{if(Date.now()-last>700){last=Date.now();try{c.send({t:"pezzo",id:m.id,testo:t})}catch(e){}}}});
@@ -855,10 +864,10 @@ function bubble(x){
   const th=$("thread");
   if(x.role==="user"){const m=el("div","msg u");const w=el("div","");if(x.thumbs&&x.thumbs.length){const t=el("div","th");x.thumbs.forEach(d=>{const i=el("img");i.src=d;i.alt="foto";t.append(i)});w.append(t)}
     const b=el("div","bub",x.content);w.append(b);m.append(w);th.append(m);return b}
-  const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");const t=setRich(el("div","txt"),x.content);body.append(t);m.append(body);
+  const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");const t=setAnswer(el("div","txt"),x.content);body.append(t);m.append(body);
   if(x.uid){
     const a=el("div","acts");
-    const cp=el("button","ib");cp.append(svg(IC.copy,16));cp.setAttribute("aria-label","Copia");cp.title="Copia";cp.onclick=()=>{navigator.clipboard?.writeText(mathPlain(x.content));toast("Copiato")};
+    const cp=el("button","ib");cp.append(svg(IC.copy,16));cp.setAttribute("aria-label","Copia");cp.title="Copia";cp.onclick=()=>{navigator.clipboard?.writeText(mathPlain(x.content.replace(FILE_RX,"").replace(LOC_RX,"")).trim());toast("Copiato")};
     const up=el("button","ib"+(x.rating===1?" up":""));up.append(svg(IC.up,17));up.setAttribute("aria-label","Risposta giusta");up.title="Risposta giusta";
     const dn=el("button","ib"+(x.rating===-1?" dn":""));dn.append(svg(IC.dn,16));dn.setAttribute("aria-label","Risposta sbagliata");dn.title="Risposta sbagliata";
     const sp=el("button","ib");sp.append(svg(IC.spk,17));sp.setAttribute("aria-label","Leggi ad alta voce");sp.title="Leggi ad alta voce";sp.onclick=()=>SPK.say(x.content);
@@ -892,20 +901,23 @@ async function send(forced,opts={}){
   const wait=bubble({role:"assistant",content:"Sto pensando…"});wait.classList.add("wait");scrollEnd();
   busy=true;updateStatus();sendBtn();const t0=Date.now();const st={est:0,text:false};SPK.begin();
   const tick=setInterval(()=>{const s=Math.round((Date.now()-t0)/1000);if(!st.text)wait.textContent="Sto pensando"+".".repeat(s%4)+(st.est?"  ·  circa "+st.est+" s":"")},500);
-  const show=x=>{st.text=true;wait.classList.remove("wait");setRich(wait,x);SPK.feed(x,false);scrollEnd()};
+  const show=x=>{st.text=true;wait.classList.remove("wait");setAnswer(wait,x);SPK.feed(x,false);scrollEnd()};
   const done=x=>{wait.closest(".msg").remove();hist.push(x);saveHist();bubble(x);scrollEnd();SPK.feed(x.content,true);
     if(document.hidden&&"Notification" in window&&Notification.permission==="granted")new Notification("Natan ha risposto",{body:x.content.slice(0,100)})};
   try{
-    const lvl=level();
-    if(ph.length||lvl==="kevin"){
+    const lvl=level();const crea=CREA_RX.test(t);
+    if(ph.length||lvl==="kevin"||crea){
       try{await askKevin(t,ph,opts,wait,st,t0,done,show)}
       catch(e){if(e.code!==0||ph.length)throw e;
+        if(crea){await askCreaSenzaMac(t,show,t0,done,um);return}
         try{await askVolunteer(t,opts,show,t0,done,um)}
         catch(e2){if(!deviceLevel())throw Object.assign(new Error("spento"),{code:0});await askDevice(deviceLevel(),t,opts,show,t0,done,um)}}
     }else await askDevice(lvl,t,opts,show,t0,done,um)
   }catch(e){st.text=true;wait.classList.remove("wait");SPK.cancel();
     if(e.code===403&&e.data?.error==="nome_bannato"){toast("Ti chiediamo di cambiare nome");openPage("impostazioni")}
     else if(e.code===401)wait.textContent="Il tuo invito non vale più: chiedi un nuovo invito.";
+    else if(e.code===-1)wait.textContent=e.message;
+    else if(e.code===0&&CREA_RX.test(t))wait.textContent=/immagin|disegn|illustraz|foto|figura|video|filmato/i.test(t)?"Immagini e video li crea solo il server di Natan (ha il controllo che blocca i disegni non adatti), che adesso è spento. Riprova più tardi.":"Il server di Natan è spento e nessun volontario è collegato per preparare il file. Riprova più tardi, oppure scegli Basico, Medio o Alto per crearlo sul tuo computer.";
     else if(e.code===0)wait.textContent=ph.length?"Le foto le legge solo il server di Natan, che adesso è spento. Riprova più tardi.":"Il server di Natan è spento e nessun volontario è collegato. Scegli Basico, Medio o Alto dal menu in alto per usare Natan sul tuo dispositivo.";
     else wait.textContent="Errore: "+e.message}
   finally{clearInterval(tick);busy=false;updateStatus();sendBtn();ping();CALL.afterAnswer()}
@@ -981,6 +993,19 @@ async function askDevice(lvl,t,opts,show,t0,done,um){
   queue({uid:x.uid,chat,role:"assistant",content:x.content,tier:x.tierCode,ts:x.ts});
   done(x);if(online)flushQueue()
 }
+async function askCreaSenzaMac(t,show,t0,done,um){
+  const k=crKind(t);
+  if(!k||k.kind==="image"||k.kind==="video")throw Object.assign(new Error("crea"),{code:0});
+  queue({uid:um.uid,chat,role:"user",content:um.content,ts:um.ts});
+  let res=null,tier="Volontario",code="volontario-diretto";
+  try{show("Il server di Natan è spento: cerco un volontario che prepari il file…");res=await askNet([],false,x=>show(x||"…"),k)}
+  catch(e){if(e.message&&/server di Natan/.test(e.message))throw Object.assign(new Error(e.message),{code:-1});
+    const lv=deviceLevel();if(!lv||IS_IOS)throw Object.assign(new Error("crea"),{code:0});
+    res=await browserCreate(k.kind,k.arg,lv,x=>show(x));tier=LEVELS[lv].name+" · sul dispositivo";code="tel-"+lv}
+  if(!res||!res.files||!res.files.length)throw new Error(typeof res==="string"?res:"il file non è arrivato");
+  const x={role:"assistant",content:await keepFiles(res),uid:rid("v"),rating:0,secs:Math.round((Date.now()-t0)/1000),tier,tierCode:code,local:true,q:t,ts:Date.now()/1000};
+  queue({uid:x.uid,chat,role:"assistant",content:res.testo+" [file creato]",tier:code,ts:x.ts});done(x)
+}
 async function askVolunteer(t,opts,show,t0,done,um){
   show("Il server di Natan è spento: cerco un volontario…");
   await findVolunteer();
@@ -1031,6 +1056,122 @@ if(SR){const mic=$("mic");mic.classList.remove("hide");let rec=null;
 
 // =====================================================================================================
 // VOCE: la più naturale che c'è sul dispositivo, e Natan inizia a parlare mentre sta ancora scrivendo
+// =====================================================================================================
+// CREAZIONI NEI BROWSER (PC dei volontari e PC con Natan sul dispositivo): documenti Word + PDF e presentazioni.
+// Le immagini e i video restano al Mac: lì c'è il controllo che blocca i disegni non adatti ai ragazzi.
+const LIBS={docx:"https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js",pdf:"https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js",
+  pptx:"https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"};
+const LOADED={};
+function loadLib(k){return LOADED[k]||(LOADED[k]=new Promise((ok,bad)=>{const sc=document.createElement("script");sc.src=LIBS[k];sc.async=true;
+  sc.onload=()=>ok();sc.onerror=()=>{delete LOADED[k];bad(new Error("non riesco a caricare gli strumenti per i file"))};document.head.append(sc)}))}
+const TOPIC_PREP="(?:(?:sullo|sulla|sulle|sugli|sul|sui|su|dello|della|delle|degli|dei|del|di|riguardo a|per)\\s+)?";
+function crKind(t){
+  const s=String(t||"").trim();let m;
+  const V="(?:crea|creami|fai|fammi|genera|prepara|scrivi|scrivimi|realizza)\\s+(?:un\\s+|il\\s+|una\\s+|l')?";
+  if((m=new RegExp("^"+V+"presentazion\\w*\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"presentation",arg:m[1].trim()};
+  if((m=new RegExp("^"+V+"pdf\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"pdf",arg:m[1].trim()};
+  if((m=new RegExp("^"+V+"(?:documento|doc|file|word|relazione|tesina)(?:\\s+(?:di\\s+|su\\s+|per\\s+|in\\s+)?(?:google(?:\\s+(?:documenti|docs?|drive))?|word|pdf))?\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"document",arg:m[1].trim()};
+  if((m=new RegExp("^"+V+"(?:breve\\s+)?(?:video[\\s-]?lezione|video|filmato)\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"video",arg:m[1].trim()};
+  if(/^\s*(crea|creami|fai|fammi|genera|generami|disegna|disegnami|mostrami|voglio)\b.{0,12}\b(immagin\w*|disegn\w*|illustrazion\w*|foto|figura)\b|^\s*disegna(mi)?\s/i.test(s))return {kind:"image",arg:s};
+  return null
+}
+const DOC_P='Scrivi un documento in italiano su: "{t}".\nUsa questo formato: la prima riga è "# Titolo", poi sezioni che iniziano con "## " seguite da paragrafi normali; per gli elenchi usa righe che iniziano con "- ". Da 4 a 7 sezioni, testo chiaro e corretto, niente LaTeX, niente asterischi.';
+const PRES_P='Crea una presentazione in italiano su: "{t}".\nRispondi SOLO con un JSON valido: {"titolo": "...", "sottotitolo": "...", "slide": [{"titolo": "...", "punti": ["...", "..."]}]}\nDa 6 a 10 slide, da 3 a 5 punti brevi per slide (massimo 18 parole ciascuno). Niente LaTeX.';
+function safeName(t){return (String(t).replace(/[^\wàèéìòù \-]/gi,"").trim().slice(0,50)||"senza titolo")}
+function b64(buf){const u=new Uint8Array(buf);let s="";for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)}
+function docLines(raw,topic){const L=String(raw).replace(/\*\*/g,"").split(/\n+/).map(x=>x.trim()).filter(Boolean);if(!L.length||!L[0].startsWith("# "))L.unshift("# "+topic[0].toUpperCase()+topic.slice(1));return L}
+async function makeDocx(L){
+  await loadLib("docx");const D=window.docx;const ch=[];
+  for(const t of L){
+    if(t.startsWith("# "))ch.push(new D.Paragraph({text:t.slice(2),heading:D.HeadingLevel.TITLE}));
+    else if(t.startsWith("## "))ch.push(new D.Paragraph({text:t.slice(3),heading:D.HeadingLevel.HEADING_1}));
+    else if(t.startsWith("### "))ch.push(new D.Paragraph({text:t.slice(4),heading:D.HeadingLevel.HEADING_2}));
+    else if(/^[-•*] /.test(t))ch.push(new D.Paragraph({text:t.slice(2),bullet:{level:0}}));
+    else ch.push(new D.Paragraph({children:[new D.TextRun({text:t,size:24})],spacing:{after:120}}))}
+  const blob=await D.Packer.toBlob(new D.Document({creator:"Natan",title:L[0].slice(2),sections:[{children:ch}]}));
+  return new Uint8Array(await blob.arrayBuffer())
+}
+function winAnsi(t){return String(t).replace(/[‘’]/g,"'").replace(/[“”«»]/g,'"').replace(/[–—]/g,"-").replace(/•/g,"-").replace(/…/g,"...")
+  .replace(/√/g,"radice di ").replace(/²/g,"^2").replace(/³/g,"^3").replace(/[≤]/g,"<=").replace(/[≥]/g,">=").replace(/≠/g,"!=").replace(/→/g,"->").replace(/π/g,"pi")
+  .replace(/[^\x09\x0a\x20-\x7e\xa0-\xff€]/g,"")}
+async function makePdf(L){
+  await loadLib("pdf");const P=window.PDFLib;const doc=await P.PDFDocument.create();doc.setTitle(L[0].slice(2));doc.setCreator("Natan");
+  const R=await doc.embedFont(P.StandardFonts.Helvetica),B=await doc.embedFont(P.StandardFonts.HelveticaBold);
+  const W=595.28,H=841.89,M=62;let page=doc.addPage([W,H]),y=H-M;
+  const put=(text,font,size,color,before,after,indent=0)=>{
+    y-=before;const words=winAnsi(text).split(/\s+/);let line="";const lines=[];
+    for(const w of words){const tr=line?line+" "+w:w;if(font.widthOfTextAtSize(tr,size)>W-2*M-indent&&line){lines.push(line);line=w}else line=tr}
+    if(line)lines.push(line);
+    for(const l of lines){if(y<M+size){page=doc.addPage([W,H]);y=H-M}page.drawText(l,{x:M+indent,y:y-size,size,font,color});y-=size*1.42}
+    y-=after};
+  const ink=P.rgb(0.13,0.15,0.29),acc=P.rgb(0.29,0.32,0.79),txt=P.rgb(0.1,0.1,0.12);
+  for(const t of L){
+    if(t.startsWith("# "))put(t.slice(2),B,24,ink,0,14);else if(t.startsWith("## "))put(t.slice(3),B,16,acc,10,4);
+    else if(t.startsWith("### "))put(t.slice(4),B,13,ink,6,3);else if(/^[-•*] /.test(t))put("-  "+t.slice(2),R,11.5,txt,0,3,10);else put(t,R,11.5,txt,0,7)}
+  return await doc.save()
+}
+async function makePptx(data,topic){
+  await loadLib("pptx");const p=new window.PptxGenJS();p.layout="LAYOUT_WIDE";const dark="14182E",acc="6C7BFF",light="EEF0FA";
+  let s=p.addSlide();s.background={color:dark};
+  s.addText(String(data.titolo||topic),{x:0.9,y:2.4,w:11.5,h:1.4,fontSize:44,bold:true,color:light});
+  s.addText(String(data.sottotitolo||""),{x:0.9,y:3.9,w:11.5,h:1,fontSize:22,color:acc});
+  for(const sl of (data.slide||[]).slice(0,14)){s=p.addSlide();s.background={color:dark};
+    s.addShape(p.ShapeType?p.ShapeType.rect:"rect",{x:0.6,y:0.55,w:0.12,h:0.9,fill:{color:acc},line:{color:acc}});
+    s.addText(String(sl.titolo||""),{x:0.95,y:0.5,w:11.5,h:1,fontSize:32,bold:true,color:light});
+    const pts=(sl.punti||[]).slice(0,6).map(x=>({text:String(x),options:{bullet:true,breakLine:true}}));
+    if(pts.length)s.addText(pts,{x:0.95,y:1.8,w:11.4,h:5.2,fontSize:22,color:light,valign:"top",paraSpaceAfter:12})}
+  const out=await p.write({outputType:"arraybuffer"});return [new Uint8Array(out),(data.slide||[]).length+1]
+}
+function jsonOf(raw){const t=String(raw);return JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1))}
+// crea i file nel browser: ritorna {testo, files:[{name,mime,data(base64)}]}
+async function browserCreate(kind,arg,lvl,progress=()=>{}){
+  if(kind==="image"||kind==="video")throw Object.assign(new Error("Immagini e video li crea solo il server di Natan (ha il controllo che blocca i disegni non adatti). Riprova quando è acceso."),{crea:true});
+  const name=safeName(arg),files=[];
+  if(kind==="presentation"){progress("📊 Preparo la presentazione…");
+    const r=await gen(lvl,[{role:"user",content:PRES_P.replace("{t}",arg)}],{maxTokens:1400,onText:t=>progress("📊 Preparo la presentazione… ("+t.split(/\s+/).length+" parole)")});
+    const [data,n]=await makePptx(jsonOf(r.text),arg);files.push({name:"Presentazione - "+name+".pptx",mime:"application/vnd.openxmlformats-officedocument.presentationml.presentation",data:b64(data)});
+    return {testo:"Ecco la presentazione su «"+arg+"» ("+n+" slide) 📊",files}}
+  progress("📝 Scrivo il documento…");
+  const r=await gen(lvl,[{role:"user",content:DOC_P.replace("{t}",arg)}],{maxTokens:1400,onText:t=>progress("📝 Scrivo il documento… ("+t.split(/\s+/).length+" parole)")});
+  const L=docLines(r.text,arg);progress("📄 Preparo i file…");
+  if(kind!=="pdf")files.push({name:"Documento - "+name+".docx",mime:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",data:b64(await makeDocx(L))});
+  files.push({name:"Documento - "+name+".pdf",mime:"application/pdf",data:b64(await makePdf(L))});
+  return {testo:"Ecco il documento su «"+arg+"» 📝"+(kind!=="pdf"?"\nPer aprirlo con Google Documenti: scarica il Word, caricalo su Google Drive (o aprilo dall'app Documenti Google) e diventa un documento Google.":""),files}
+}
+// salvo i file sul dispositivo (restano nella chat) e ritorno il testo con i segnaposto [[locale:codice/nome]]
+async function keepFiles(res){
+  let out=res.testo;
+  for(const f of res.files){const fid=rid("f").replace(/[^a-z0-9]/gi,"");await DB.set("f:"+fid,{name:f.name,mime:f.mime,data:f.data,ts:Date.now()});out+="\n[[locale:"+fid+"/"+f.name+"]]"}
+  return out
+}
+// --- Creazioni del Mac (immagini, video, documenti): nella risposta arrivano come [[file:codice/nome]]
+const CREA_RX=/^\s*(crea|creami|fai|fammi|genera|generami|disegna|disegnami|mostrami|prepara|realizza|scrivi|scrivimi|voglio)\b.{0,25}\b(immagin\w*|disegn\w*|illustrazion\w*|foto|figura|video\w*|filmato|pdf|documento|doc|word|relazione|tesina|presentazion\w*)\b|^\s*disegna(mi)?\s/i;
+const FILE_RX=/\[\[file:([0-9a-f]{32})\/([^\]\n]{1,200})\]\]/g;
+function fileUrl(tok,name){return BASE?BASE+"/file/"+tok+"/"+encodeURIComponent(name):""}
+const LOC_RX=/\[\[locale:([a-z0-9]{6,40})\/([^\]\n]{1,200})\]\]/gi;
+function setAnswer(node,text){
+  text=String(text??"");if(!text.includes("[[file:")&&!text.includes("[[locale:"))return setRich(node,text);
+  node.textContent="";const files=[...text.matchAll(FILE_RX)].map(m=>[m[1],m[2],"mac"]).concat([...text.matchAll(LOC_RX)].map(m=>[m[1],m[2],"loc"]));
+  const words=el("div","");setRich(words,text.replace(FILE_RX,"").replace(LOC_RX,"").trim());node.append(words);
+  const box=el("div","creaz");
+  for(const [tok,name,where] of files){
+    if(where==="loc"){const slot=el("div","creaz");box.append(slot);localFile(slot,tok,name);continue}
+    const url=fileUrl(tok,name),ext=(name.split(".").pop()||"").toLowerCase();
+    if(!url){box.append(el("span","small","«"+name+"» è sul server di Natan: riaprilo quando è acceso."));continue}
+    if(ext==="png"||ext==="jpg"){const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";const i=el("img","cimg");i.src=url;i.alt="Immagine creata da Natan";i.loading="lazy";a.append(i);box.append(a)}
+    else if(ext==="mp4"){const v=document.createElement("video");v.className="cvid";v.src=url;v.controls=true;v.playsInline=true;v.preload="metadata";box.append(v)}
+    const lbl={png:"⬇ Scarica l'immagine",jpg:"⬇ Scarica l'immagine",mp4:"⬇ Scarica il video",docx:"⬇ Word (si apre con Google Documenti)",pdf:"⬇ PDF",pptx:"⬇ Presentazione"}[ext]||"⬇ Scarica";
+    const d=document.createElement("a");d.className="btn ghost cdl";d.href=url;d.textContent=lbl;d.setAttribute("download",name);d.target="_blank";d.rel="noopener";box.append(d)}
+  node.append(box);return node
+}
+async function localFile(slot,fid,name){
+  let f=null;try{f=await DB.get("f:"+fid)}catch(e){}
+  if(!f){slot.append(el("span","small","«"+name+"» non è più su questo dispositivo."));return}
+  const bin=atob(f.data),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([u],{type:f.mime}));const ext=(name.split(".").pop()||"").toLowerCase();
+  const lbl={docx:"⬇ Word (si apre con Google Documenti)",pdf:"⬇ PDF",pptx:"⬇ Presentazione"}[ext]||"⬇ Scarica";
+  const d=document.createElement("a");d.className="btn ghost cdl";d.href=url;d.textContent=lbl;d.download=name;slot.append(d)
+}
 // =====================================================================================================
 // FORMULE: «$2x+3=7$» diventa una formula vera (KaTeX). Senza KaTeX (o offline la prima volta): testo semplice, x² √ ±
 const KATEX="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/";
@@ -1118,7 +1259,7 @@ const SPK={voice:null,spoken:0,said:"",on:false,q:0,
   begin(){this.spoken=0;this.said="";this.on=this.active();if(this.on)this.cancel(true)},
   feed(text,final){
     if(!this.on||!("speechSynthesis" in window))return;
-    const clean=String(text).replace(/[🧠📷⏳✓✗•]/g,"");
+    const clean=String(text).replace(FILE_RX,"").replace(/\[\[locale:[^\]]+\]\]/g,"").replace(/[🧠📷⏳✓✗•🎨🎬📝📊]/g,"");
     if(/^(Sto pensando|Ci penso|Cerco|Preparo|Risponde un volontario|Il server di Natan è spento: cerco)/.test(clean)||!/[a-zà-ù0-9]/i.test(clean))return;
     if(this.said&&!clean.startsWith(this.said)){this.spoken=0;this.said=""}       // il testo è cambiato (era un messaggio d'attesa)
     let upto=-1;const rest=clean.slice(this.spoken);
@@ -1374,6 +1515,11 @@ async function helpLoop(){
       if(HELP.stato==="sospeso"){HELP.on=false;netStop();netLog("Sei stato sospeso: parlane con chi gestisce Natan");break}
       if(!d.lavoro)continue;
       const w=d.lavoro;HELP.job=true;renderHelpStatus();renderHelpBadge();const t0=Date.now();let last=0;
+      if(w.crea&&w.crea.kind){                             // il Mac è occupato: preparo io il documento o la presentazione
+        try{const res=await browserCreate(String(w.crea.kind),String(w.crea.arg||""),HELP.test.livello,t=>{if(Date.now()-last>1500){last=Date.now();api("/rete/consegna",{id:w.id,testo:t,finito:false}).catch(()=>{})}});
+          await api("/rete/consegna",{id:w.id,testo:res.testo,finito:true,files:res.files});HELP.aiutati++;netLog("Hai creato un file per qualcuno ("+Math.round((Date.now()-t0)/1000)+" s)")}
+        catch(e){try{await api("/rete/consegna",{id:w.id,testo:"",finito:true})}catch(er){}}
+        HELP.job=false;renderHelpStatus();renderHelpBadge();await sleep((Date.now()-t0)/3);continue}
       try{
         const r=await gen(HELP.test.livello,trimMsgs(w.messages),{maxTokens:Math.min(w.max_tokens||900,1200),think:!!w.think,
           onText:t=>{if(Date.now()-last>1500){last=Date.now();api("/rete/consegna",{id:w.id,testo:t,finito:false}).catch(()=>{})}}});
