@@ -1,7 +1,7 @@
 // Natan: tiene l'app sul dispositivo così si apre anche senza rete (anche il motore che fa girare Natan sul dispositivo).
 // La biblioteca non passa di qui: l'app la salva da sola nel dispositivo. I modelli li salva il motore stesso.
-const CACHE = "natan-2.1.1-1792004490";
-const FILES = ["./", "./index.html", "./app/", "./app/index.html", "./manifest.webmanifest", "./icone/icon-192.png", "./icone/icon-512.png", "./icone/apple-touch-icon.png"];
+const CACHE = "natan-2.2.0-1792010165";
+const FILES = ["./", "./index.html", "./app/", "./app/index.html", "./app/giochi.js", "./manifest.webmanifest", "./icone/icon-192.png", "./icone/icon-512.png", "./icone/apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("natan-") && k !== CACHE && k !== "natan-motore").map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -16,5 +16,5 @@ self.addEventListener("fetch", e => {
   }
   if (u.origin !== location.origin || u.pathname.endsWith("ponte.json") || u.pathname.includes("/biblioteca/")) return;   // ponte.json sempre fresco
   e.respondWith(fetch(e.request).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r; })
-    .catch(() => caches.match(e.request)));
+    .catch(() => caches.match(e.request, { ignoreSearch: true })));
 });
