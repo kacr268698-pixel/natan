@@ -81,6 +81,12 @@ const CSS=`
 .gm .pl.turn{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
 .gm .pl b{font-size:15px}.gm .pl small{color:var(--muted)}
 .gm .pl .xp{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:3px}.gm .pl .xp i{display:block;height:100%;background:linear-gradient(90deg,#7c83ff,#c06bff)}
+.gm .emobar{display:flex;gap:6px;overflow-x:auto;padding:2px;-webkit-overflow-scrolling:touch;align-items:center}
+.gm .emobar small{color:var(--muted);white-space:nowrap;margin-right:2px}
+.gm .emobar button{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--raise);font-size:22px;line-height:1;cursor:pointer;transition:transform .1s}
+.gm .emobar button:active{transform:scale(1.25)}.gm .emobar button:disabled{opacity:.45}
+.gm .emob{position:absolute;right:8px;top:-16px;font-size:30px;line-height:1;background:var(--raise);border:1px solid var(--line);border-radius:18px;padding:3px 9px;box-shadow:0 4px 14px rgba(0,0,0,.35);animation:emopop 2.6s ease forwards;pointer-events:none;z-index:5}
+@keyframes emopop{0%{transform:translateY(10px) scale(.3);opacity:0}10%{transform:translateY(0) scale(1.18);opacity:1}18%{transform:scale(1)}82%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
 .gm .code{font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;padding:8px;border-radius:14px;border:2px dashed var(--acc)}
 .gm input.tx{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:12px;padding:10px 12px;font:inherit}
 .gm .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(100%,340px);align-self:center}
@@ -207,6 +213,9 @@ function tutorial(pg,info,start){
 // ------------------------------------------------------------------ rete (stanze online con PeerJS)
 const CODEALF="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function genCode(){let s="";for(let i=0;i<5;i++)s+=CODEALF[rnd(CODEALF.length)];return s}
+const PEERCFG={config:{iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"},{urls:"stun:global.stun.twilio.com:3478"},{urls:"stun:stun.cloudflare.com:3478"},
+  {urls:["turn:openrelay.metered.ca:80","turn:openrelay.metered.ca:443","turn:openrelay.metered.ca:443?transport=tcp"],username:"openrelayproject",credential:"openrelayproject"},
+  {urls:"turn:eu-0.turn.peerjs.com:3478",username:"peerjs",credential:"peerjsp"},{urls:"turn:us-0.turn.peerjs.com:3478",username:"peerjs",credential:"peerjsp"}],sdpSemantics:"unified-plan"}};
 const pulisci=s=>String(s||"").replace(/[^\p{L}\p{N} _\-]/gu,"").trim().slice(0,14);
 function nickSalvato(){return pulisci(LSG.get("natan_gaming_nick",""))||pulisci((LSG.get("natan_profilo",{})||{}).name)||"Giocatore"}
 class Net{
@@ -218,6 +227,7 @@ class Net{
   bcast(m){for(const c of this.conns){if(c.conn&&c.conn.open){try{c.conn.send(m)}catch(e){}}}}
   send(m){if(this.up&&this.up.open){try{this.up.send(m)}catch(e){}}}
   close(){try{if(this.host)this.bcast({t:"bye"});else this.send({t:"addio"})}catch(e){}
+    try{clearInterval(this.hb);if(this.vis)document.removeEventListener("visibilitychange",this.vis)}catch(e){}
     const p=this.peer;this.peer=null;setTimeout(()=>{try{p&&p.destroy()}catch(e){}},200)}
 }
 async function stanzaNuova(nick,onChange){
@@ -225,11 +235,17 @@ async function stanzaNuova(nick,onChange){
   const P=await window.natanPeerLib();const net=new Net(true);net.nick=nick;net.max=2;
   for(let tent=0;tent<6&&!net.peer;tent++){
     const code=genCode();
-    await new Promise(res=>{let p;try{p=new P("natan-gioco-"+code)}catch(e){return res()}
+    await new Promise(res=>{let p;try{p=new P("natan-gioco-"+code,PEERCFG)}catch(e){return res()}
       const t=setTimeout(()=>{try{p.destroy()}catch(e){}res()},9000);
       p.on("open",()=>{clearTimeout(t);net.peer=p;net.code=code;res()});
       p.on("error",e=>{if(!net.peer){clearTimeout(t);try{p.destroy()}catch(x){}res()}})})}
   if(!net.peer)throw new Error("Non riesco a collegarmi alla rete: riprova tra poco.");
+  // La stanza esiste solo finché il telefono resta collegato al servizio di PeerJS: se la connessione cade (pagina in secondo piano,
+  // rete che cambia) il codice sparisce e gli amici vedono «non trovo la stanza». Quindi la riattacchiamo subito, in automatico.
+  const keep=()=>{const q=net.peer;if(q&&q.disconnected&&!q.destroyed){try{q.reconnect()}catch(e){}}};
+  net.peer.on("disconnected",()=>setTimeout(keep,500));
+  net.peer.on("error",e=>{if(e&&["network","server-error","socket-error","socket-closed"].includes(e.type))setTimeout(keep,2000)});
+  net.hb=setInterval(keep,8000);net.vis=()=>{if(!document.hidden)keep()};document.addEventListener("visibilitychange",net.vis);
   net.peer.on("connection",c=>{
     const ent={conn:c,nome:null,seat:-1,fine:false};
     const gone=()=>{if(ent.fine)return;ent.fine=true;const i=net.conns.indexOf(ent);
@@ -252,23 +268,130 @@ async function stanzaNuova(nick,onChange){
 }
 async function unisciti(code,nick,onLobby){
   if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");
+  code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
   const P=await window.natanPeerLib();const net=new Net(false);net.nick=nick;
-  const p=new P();net.peer=p;
-  await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(new Error("Non riesco a collegarmi alla rete: riprova tra poco.")),9000);p.on("open",()=>{clearTimeout(t);ok()});p.on("error",e=>{if(!p.open){clearTimeout(t);bad(new Error("Non riesco a collegarmi alla rete."))}})});
-  await new Promise((ok,bad)=>{
-    const c=p.connect("natan-gioco-"+code.toUpperCase().trim(),{reliable:true});net.up=c;let done=false;
-    const nope=msg=>{if(!done){done=true;clearTimeout(t);bad(new Error(msg))}};
-    const t=setTimeout(()=>nope("Non trovo la stanza «"+code.toUpperCase()+"». Controlla il codice."),9000);
+  const p=new P(undefined,PEERCFG);net.peer=p;let cur=null;
+  await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(new Error("Non riesco a collegarmi alla rete: riprova tra poco.")),12000);p.on("open",()=>{clearTimeout(t);ok()});
+    p.on("error",e=>{if(!p.open){clearTimeout(t);bad(new Error("Non riesco a collegarmi alla rete: riprova tra poco."))}else if(cur)cur(e)})});
+  // un tentativo: ritorna "ok", "pieno", "nostanza" (il servizio non conosce quel codice) o "blocco" (la stanza c'è ma la connessione non parte)
+  const tenta=()=>new Promise(res=>{
+    let done=false;const fine=r=>{if(!done){done=true;clearTimeout(t);cur=null;res(r)}};
+    const c=p.connect("natan-gioco-"+code,{reliable:true});net.up=c;
+    const t=setTimeout(()=>{try{c.close()}catch(e){}fine("blocco")},16000);
+    cur=e=>{if(e&&e.type==="peer-unavailable")fine("nostanza")};
     c.on("open",()=>{c.send({t:"hello",nome:nick})});
-    c.on("error",()=>nope("Non trovo la stanza «"+code.toUpperCase()+"». Controlla il codice."));
+    c.on("error",()=>fine("blocco"));
     c.on("data",m=>{
       if(!m||typeof m!=="object")return;
-      if(m.t==="pieno"){nope("La stanza è già piena.");return}
-      if(m.t==="lobby"){if(!done){done=true;clearTimeout(t);ok()}onLobby&&onLobby(m)}
+      if(m.t==="pieno"){fine("pieno");return}
+      if(m.t==="lobby"){fine("ok");onLobby&&onLobby(m)}
       else net.dispatch(m)});
-    c.on("close",()=>{net.dispatch({t:"bye"})});
+    c.on("close",()=>{if(!done)fine("blocco");else net.dispatch({t:"bye"})});
   });
-  return net
+  let r="";
+  for(let k=0;k<3;k++){
+    r=await tenta();if(r==="ok"||r==="pieno")break;
+    try{net.up&&net.up.close()}catch(e){}
+    if(k<2)await new Promise(z=>setTimeout(z,2500))}
+  if(r==="ok")return net;
+  net.close();
+  if(r==="pieno")throw new Error("La stanza è già piena.");
+  if(r==="nostanza")throw new Error("Non trovo la stanza «"+code+"». Controlla il codice e chiedi all'amico di tenere aperta la pagina della stanza (se esce o blocca il telefono, il codice smette di funzionare).");
+  throw new Error("La stanza «"+code+"» c'è, ma la connessione tra i due telefoni non parte (di solito è la rete che la blocca). Riprova, oppure collegatevi alla stessa rete Wi-Fi.")
+}
+
+// ------------------------------------------------------------------ reazioni con le emoji (giocatori e bot)
+const EMO=["👋","👍","👏","😮","😂","😅","🤔","😎","🔥","🤝","😢","🎉"];
+const EMOMS=2600;
+// ogni bot ha un carattere suo e fisso: quanto parla e con che tono (gentile, sfottitore, tranquillo)
+function emoCarattere(id){const h=h32("emo"+id);return {parla:.35+(h%50)/100,tono:["gentile","sfottitore","tranquillo"][(h>>>7)%3]}}
+const EMOSET={
+  ciao:{gentile:["👋"],sfottitore:["👋"],tranquillo:["👋"]},
+  buona:{gentile:["👏","😮"],sfottitore:["😮","🤔","😅"],tranquillo:["🤔","😮","👍"]},          // il giocatore ha fatto una bella mossa
+  errore:{gentile:["🤔","😮"],sfottitore:["😏","😜","😎"],tranquillo:["😎","🤔"]},             // il giocatore ha sbagliato
+  grande:{gentile:["😎","😊"],sfottitore:["😎","😏","🔥"],tranquillo:["😎","👍"]},            // il bot ha fatto una mossa forte
+  sbaglio:{gentile:["😬","🙈"],sfottitore:["🙈","😅"],tranquillo:["😅","🤷"]},                // il bot ha sbagliato
+  dubbio:{gentile:["🤔"],sfottitore:["🤔","😅"],tranquillo:["🤔"]},                           // i suoi agenti non erano d'accordo
+  vinto:{gentile:["🎉","🤝"],sfottitore:["😎","🏆","😜"],tranquillo:["😎","👍"]},
+  perso:{gentile:["👏","🤝"],sfottitore:["😅","🙈","😤"],tranquillo:["😅","👏"]},
+  pari:{gentile:["🤝"],sfottitore:["🤝","😅"],tranquillo:["🤝"]}};
+// come risponde un bot a una reazione di un giocatore: dipende da chi sta vincendo e dal suo carattere
+function emoRisposta(e,avanti,tono){
+  switch(e){
+    case "👋":return ["👋"];
+    case "👍":case "👏":return tono==="sfottitore"?["😎","😜"]:["🙏","😊"];
+    case "😂":return avanti?["😂","😎"]:["😅"];
+    case "😮":return avanti?["😏","😎"]:["😬","😅"];
+    case "😅":return avanti?["😎","😜"]:["😅","🤝"];
+    case "🤔":return avanti?["😏"]:["🤔"];
+    case "😎":return avanti?["😎","😤"]:["😮","🤔"];
+    case "🔥":return avanti?["😎"]:["😮","😅"];
+    case "🤝":return ["🤝"];
+    case "😢":return tono==="sfottitore"?["😜","🤗"]:["🤗"];
+    case "🎉":return avanti?["😅","🤔"]:["👏","🎉"];
+  }
+  return []}
+function creaEmoBot(sh,ctx,seats,net,info){
+  const L={n:0,ult:0,per:{},mom:0,off:false,fin:false};            // mom > 0: stanno vincendo i bot; < 0: sta vincendo chi gioca
+  const cl=x=>Math.max(-4,Math.min(4,x));
+  const botSeats=()=>seats.map((s,i)=>s.tipo==="bot"?i:-1).filter(i=>i>=0);
+  const pick=()=>{const b=botSeats();return b.length?b[rnd(b.length)]:-1};
+  const dire=(seat,sit,o)=>{o=o||{};
+    const s=seats[seat];if(!s||s.tipo!=="bot"||!sh.g.isConnected)return false;
+    const c=emoCarattere(s.bot.id),now=Date.now();
+    if(!o.fine){
+      if(L.n>=14||now-L.ult<(o.min==null?2500:o.min)||now-(L.per[seat]||0)<(o.min==null?7000:o.min))return false;
+      if(Math.random()>Math.min(1,(o.forza==null?.5:o.forza)*(.4+c.parla)))return false}
+    const lista=Array.isArray(sit)?sit:(EMOSET[sit]||{})[c.tono]||[];if(!lista.length)return false;
+    const e=lista[rnd(lista.length)];L.n++;L.ult=now;L.per[seat]=now;
+    setTimeout(()=>{if(!sh.g.isConnected||(L.fin&&!o.fine))return;sh.emo(seat,e);if(net&&net.host)net.bcast({t:"emo",seat,e})},o.ritardo||600);
+    return true};
+  return {
+    ciao(){const b=pick();if(b>=0)dire(b,"ciao",{ritardo:1000+rnd(900),forza:1.4})},
+    // una persona sta per muovere: il bot guarda se la mossa è tra le migliori o tra le peggiori e reagisce
+    umana(S,seat,a){
+      if(L.off||botSeats().length===0||!a)return;
+      const t0=Date.now();let cands;try{cands=info.bot(S,seat,0)}catch(e){return}
+      if(Date.now()-t0>400)L.off=true;                                // se il calcolo costa troppo, il gioco non ne risente mai più
+      if(!cands||cands.length<3)return;
+      const val=c=>(c.f&&+c.f.valore)||0;const vals=cands.map(val);const mx=Math.max(...vals),mn=Math.min(...vals),range=mx-mn;
+      if(!(range>=.15))return;
+      const mia=cands.find(c=>c.a&&c.a.k===a.k);if(!mia)return;
+      const gap=(mx-val(mia))/range;const b=pick();if(b<0)return;
+      if(gap<=.05){L.mom=cl(L.mom-1);dire(b,"buona",{forza:.7,ritardo:800+rnd(600)})}
+      else if(gap>=.8){L.mom=cl(L.mom+1);dire(b,"errore",{forza:.8,ritardo:800+rnd(600)})}},
+    // un bot ha scelto la sua mossa (r = il voto dei 35 agenti)
+    bot(seat,r){
+      const f=(r&&r.mossa&&r.mossa.f)||{};
+      if(!r||r.unica)return;
+      if(r.errore){L.mom=cl(L.mom-.7);dire(seat,"sbaglio",{forza:.9,ritardo:900});return}
+      if((f.punti||0)>=.5||(f.attacco||0)>=.7||(f.finale||0)>=.8){L.mom=cl(L.mom+.5);dire(seat,"grande",{forza:.6,ritardo:800});return}
+      if(r.voti<=11)dire(seat,"dubbio",{forza:.35,ritardo:600})},
+    // una persona ha mandato una reazione: un bot può risponderle
+    rispondi(da,e){
+      const b=pick();if(b<0||!seats[b])return;
+      const lista=emoRisposta(e,L.mom>.5,emoCarattere(seats[b].bot.id).tono);
+      if(lista.length)dire(b,lista,{forza:.95,min:1500,ritardo:1000+rnd(1200)})},
+    // fine partita: ognuno dei bot saluta a modo suo
+    fine(win,pari){
+      L.fin=true;botSeats().forEach((i,k)=>dire(i,pari?"pari":(win||[]).includes(i)?"vinto":"perso",{fine:true,ritardo:700+k*500+rnd(500)}))}}
+}
+function installaEmo(sh,ctx,seats,net,me,info){
+  const logic=(!net||net.host)?creaEmoBot(sh,ctx,seats,net,info):null;sh.logic=logic;
+  let ultimo=0;
+  sh.manda=e=>{const now=Date.now();if(!EMO.includes(e)||now-ultimo<700)return;ultimo=now;
+    sh.emo(me,e);
+    if(net){if(net.host)net.bcast({t:"emo",seat:me,e});else net.send({t:"emo",e})}
+    if(logic)logic.rispondi(me,e)};
+  if(net){
+    if(net.host)net.h.emo=(m,ent)=>{                                   // da un amico: la mostro e la giro agli altri
+      if(!EMO.includes(m.e)||!(m.seat>=0)||!seats[m.seat])return;
+      const now=Date.now();if(ent&&now-(ent.ultEmo||0)<600)return;if(ent)ent.ultEmo=now;
+      sh.emo(m.seat,m.e);
+      for(const c of net.conns){if(c!==ent&&c.conn&&c.conn.open){try{c.conn.send({t:"emo",seat:m.seat,e:m.e})}catch(x){}}}
+      if(logic)logic.rispondi(m.seat,m.e)};
+    else net.h.emo=m=>{if(EMO.includes(m.e)&&seats[m.seat])sh.emo(m.seat,m.e)}}
+  if(logic)logic.ciao()
 }
 
 // ------------------------------------------------------------------ shell di gioco (barra, giocatori, pannello agenti)
@@ -282,10 +405,20 @@ function gameShell(pg,info,ctx){
   const pls=E("div","pls");g.append(pls);
   const ng=ngPanel();ng.el.forEach(x=>g.append(x));
   const status=E("div","status msg");g.append(status);
-  const sh={g,ng,status,pls,
+  const bub={};                                                       // reazioni in corso: posto -> {e, fino a quando}
+  const mostra=seat=>{const b=bub[seat];if(!b)return;const resto=b.until-Date.now();if(resto<=0){delete bub[seat];return}
+    const c=pls.querySelector('[data-seat="'+seat+'"]');if(!c)return;c.querySelectorAll(".emob").forEach(x=>x.remove());
+    const x=E("span","emob",b.e);x.style.animationDelay="-"+((EMOMS-resto)/1000).toFixed(2)+"s";c.append(x)};
+  const bar=E("div","emobar");bar.id="emoBar";bar.append(E("small","","Reazioni:"));
+  EMO.forEach(e=>{const b=E("button","",e);b.dataset.e=e;b.setAttribute("aria-label","Manda "+e);b.onclick=()=>{if(sh.manda)sh.manda(e)};bar.append(b)});
+  g.append(bar);
+  const sh={g,ng,status,pls,bar,
+    emo(seat,e){bub[seat]={e,until:Date.now()+EMOMS};mostra(seat);
+      setTimeout(()=>{const b=bub[seat];if(b&&b.until<=Date.now()){delete bub[seat];const c=pls.querySelector('[data-seat="'+seat+'"]');c&&c.querySelectorAll(".emob").forEach(x=>x.remove())}},EMOMS+80)},
     players(seats,turn,me){pls.innerHTML="";seats.forEach((s,i)=>{
       let c;if(s.tipo==="bot")c=botCard(s.bot);else{c=E("div","pl");c.append(E("b","",(i===me?"🙂 ":"👤 ")+s.nome),E("small","",i===me?"Tu":"Giocatore online"))}
-      c.classList.toggle("turn",i===turn);c.dataset.seat=String(i);pls.append(c)})}};
+      c.classList.toggle("turn",i===turn);c.dataset.seat=String(i);pls.append(c)});
+      Object.keys(bub).forEach(k=>mostra(k))}};
   return sh
 }
 function fineBanner(sh,esitoMe,testo,sotto){
@@ -305,8 +438,9 @@ function avvia(pg,info,cfg,net,me){
     again:net?null:()=>{live.stop=true;avvia(pg,info,Object.assign({},cfg,{seed:(Math.random()*2**31)|0}),null,0)}};
   const sh=gameShell(pg,info,ctx);ctx.sh=sh;window.__ctxLast=ctx;
   const storia=seats.map(()=>[]);ctx.storia=storia;
+  if(net)net.reset();
+  installaEmo(sh,ctx,seats,net,me,info);
   if(net){
-    net.reset();
     if(net.host){net.h.partito=ent=>{if(live.stop)return;const seat=ent.seat;if(seat>=0&&seats[seat]&&seats[seat].tipo==="remoto"){const b=scegliBot(1,seats.filter(s=>s.bot).map(s=>s.bot.id))[0];
         const vecchio=seats[seat].nome;seats[seat]={tipo:"bot",nome:b.nome+" (al posto di "+vecchio+")",bot:b};cfg.seats[seat]={tipo:"bot",nome:b.nome,botId:b.id};
         net.bcast({t:"swap",seat,botId:b.id,nome:seats[seat].nome});net.push({t:"wake"});ctx.onSwap&&ctx.onSwap(seat)}}}
@@ -331,6 +465,7 @@ function avvia(pg,info,cfg,net,me){
     await sleep(20);const cands=info.bot(S,seat,ctx.lv);
     const r=consiglio(info.id,cands,st.bot,ctx.lv);
     sh.ng.think(`${st.bot.nome} ha deciso · ${r.voti}/35 agenti d'accordo, guidati da «${r.decide}»`,r.favor,st.bot.nome);storia[seat].push(r.favor);
+    try{sh.logic&&sh.logic.bot(seat,r)}catch(e){}
     return r.mossa.a}
   const attendiHost=pred=>net.next(pred);
   async function ciclo(){
@@ -358,6 +493,7 @@ function avvia(pg,info,cfg,net,me){
           else{const m=await attendiHost(m=>m.t==="do"||m.t==="bye"||m.t==="wakeG");if(live.stop)return;if(m.t==="bye"){stopOnline(sh);return}if(m.t==="wakeG")continue;a=risolvi(S,seat,m.k)}
         }
         if(!a)continue;
+        if(st.tipo!=="bot"&&sh.logic){try{sh.logic.umana(S,seat,a)}catch(e){}}
         S=info.apply(S,seat,a);seq++;draw();
         await sleep(SLOW()*(info.pausa?info.pausa(S,a,seat):450));
       }
@@ -436,6 +572,7 @@ function conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me){
       r.onclick=()=>{const nc=Object.assign({},cfg,{seed:(Math.random()*2**31)|0});net.conns.forEach(x=>{if(!x.fine)try{x.conn.send({t:"start",cfg:nc,seat:x.seat})}catch(e){}});avvia(pg,info,nc,net,0)};e.append(r)}
     else e.append(E("small","","Aspetta che chi ha creato la stanza lanci un'altra partita."))}
   sh.players(seats,-1,me);
+  try{sh.logic&&sh.logic.fine(win,pari)}catch(er){}
 }
 
 // ------------------------------------------------------------------ lobby: livello, numero di giocatori, online
@@ -481,7 +618,7 @@ function lobby(pg,info){
         b5.append(E("small","","Scrivi il tuo nome (solo il nome, niente dati personali), poi crea la stanza e dai il codice ai tuoi amici."),ni,cr)}
       else{
         const c=E("div","code",net.code);c.id="codiceStanza";
-        b5.append(E("small","","Codice della stanza: i tuoi amici aprono Giochi → «Entra in una stanza con un codice» e lo scrivono."),c,E("small","",`${umani().length} di ${cfg.n} giocatori presenti. I posti liberi li prendono i bot.`))}
+        b5.append(E("small","","Codice della stanza: i tuoi amici aprono Giochi → «Entra in una stanza con un codice» e lo scrivono. Tieni aperta questa pagina e il telefono acceso finché non sono entrati."),c,E("small","",`${umani().length} di ${cfg.n} giocatori presenti. I posti liberi li prendono i bot.`))}
       if(errore)b5.append(E("small","",errore));
       body.append(b5)}
     const go=E("button","btn","▶ Inizia la partita");go.id="startGame";
@@ -546,7 +683,7 @@ function menu(pg){
   const lst=BOTS.map(b=>botInfo(b.id)).sort((a,b)=>b.xp-a.xp);const w=E("div","pls");w.style.marginTop="10px";
   lst.forEach(i=>w.append(botCard(BOTS.find(b=>b.id===i.id))));dt.append(w);g.append(dt);
 }
-window.GIOCHI={open(pg){style();intro();menu(pg)},_games:GAMES,_consiglio:consiglio,AGENTI,BOTS,LIV,botInfo,_avvia:avvia};
+window.GIOCHI={open(pg){style();intro();menu(pg)},_games:GAMES,_net:{stanzaNuova,unisciti},_consiglio:consiglio,AGENTI,BOTS,LIV,botInfo,_avvia:avvia};
 window.__G={E,LSG,sleep,rnd,shuffle,mulberry,SLOW,h32,GAMES,consiglio,fineBanner,scegliBot,botCard,F,LIV,NAG,
   register(info){GAMES[info.id]=info;return info}};
 })();
