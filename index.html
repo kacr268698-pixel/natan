@@ -179,7 +179,7 @@ dialog::backdrop{background:rgba(5,7,20,.7)}
         <h3>Giochi e trofei</h3><p>Nove giochi contro i bot o online con gli amici, e quasi cinquanta trofei da sbloccare.</p>
       </div>
       <div>
-        <div class="mock"><div class="big" id="nAppunti">migliaia</div><div class="small">appunti nella biblioteca</div></div>
+        <div class="mock"><div class="big" id="nAppunti">migliaia</div><div class="small">appunti nella biblioteca · <span id="nAgg">si aggiorna ogni 30 minuti</span></div></div>
         <h3>Biblioteca</h3><p>Natan studia da solo e controlla i suoi appunti, così risponde anche senza Internet.</p>
       </div>
     </div>
@@ -258,7 +258,9 @@ fetch("app.json",{cache:"no-store"}).then(r=>r.json()).then(async c=>{
   for(const [k,u] of Object.entries(c.link||{})){const f=u.split("/").pop();if(nomi.has(f))LINK[k]=u}
   bottoni();
 }).catch(()=>{});
-fetch("biblioteca/indice.json",{cache:"no-store"}).then(r=>r.json()).then(d=>{if(d.totale)$("nAppunti").textContent=d.totale.toLocaleString("it-IT")}).catch(()=>{});
+function contaAppunti(){fetch("biblioteca/indice.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.json()).then(d=>{const n=d.totale_mac||d.totale;if(n)$("nAppunti").textContent=n.toLocaleString("it-IT");
+  if(d.aggiornato){const t=new Date(d.aggiornato*1000);$("nAgg").textContent="aggiornato alle "+t.toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}}).catch(()=>{})}
+contaAppunti();setInterval(contaAppunti,30*60*1000);
 
 $("iosBtn").onclick=()=>$("dlg").showModal();$("close").onclick=()=>$("dlg").close();
 $("spoilBtn").onclick=()=>{$("spoiler").classList.add("aperto");$("spoilBtn").remove()};
