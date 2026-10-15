@@ -1,16 +1,22 @@
 // =====================================================================================================
-// GIOCHI DI NATAN: Scacchi, Dama, Carte colorate (stile Uno), Scopa e Briscola contro «Natan Gaming».
-// Natan Gaming è un consiglio di 20 agenti: per ogni mossa possibile il gioco calcola alcune caratteristiche
-// (valore, punti, attacco, difesa, rischio...), ogni agente le pesa a modo suo e vota; vince la mossa con più voti.
-// L'«Allenatore» corregge i pesi dopo ogni partita (si ricorda tra una partita e l'altra, su questo dispositivo).
+// GIOCHI DI NATAN (nucleo): menu, tutorial, lobby (livelli, numero di giocatori, online), bot con nome ed esperienza,
+// consiglio dei 35 agenti dietro ogni bot e motore delle partite a turni.
+// I giochi veri stanno in giochi-a.js (scacchi, dama), giochi-b.js (tris, 4 di fila, Uno, scopa, briscola)
+// e giochi-c.js (hockey da tavolo, sling puck).
+//
+// Come funziona un bot: per ogni mossa possibile il gioco calcola alcune caratteristiche (valore, punti, attacco, difesa,
+// rischio...). Ognuno dei 35 agenti le pesa a modo suo e vota; vince la mossa con più voti. Ogni bot ha i suoi pesi
+// (che si correggono dopo ogni partita) e la sua esperienza (partite, vittorie, punti esperienza), salvati su questo dispositivo.
 (function(){
 "use strict";
 const E=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined&&txt!==null)n.textContent=txt;return n};
 const LSG={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const rnd=n=>Math.floor(Math.random()*n);
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(a,R){R=R||Math.random;for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const SLOW=()=>(window.NATAN_GIOCHI_VELOCE?0:1);
+function h32(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 
 // ------------------------------------------------------------------ stile
 const CSS=`
@@ -26,7 +32,7 @@ const CSS=`
 .gm .ng .lg{width:38px;height:38px;border-radius:11px;background:conic-gradient(from 0deg,#7c83ff,#c06bff,#7c83ff);display:grid;place-items:center;font-weight:800}
 .gm .ng .tx{flex:1;min-width:0}.gm .ng .tx b{display:block}.gm .ng .tx span{font-size:13px;opacity:.85}
 .gm .think{font-size:13px;color:var(--muted);min-height:18px}
-.gm .agents{display:flex;flex-wrap:wrap;gap:4px}.gm .agents i{font-style:normal;font-size:11px;padding:3px 7px;border-radius:999px;background:var(--raise);color:var(--muted);border:1px solid var(--line)}
+.gm .agents{display:flex;flex-wrap:wrap;gap:3px}.gm .agents i{font-style:normal;font-size:10.5px;padding:2px 6px;border-radius:999px;background:var(--raise);color:var(--muted);border:1px solid var(--line)}
 .gm .agents i.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .gm .status{font-weight:600}
 .gm .board{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,520px);aspect-ratio:1;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.35);align-self:center;user-select:none;-webkit-user-select:none}
@@ -40,6 +46,7 @@ const CSS=`
 .gm .man.w{background:radial-gradient(circle at 35% 30%,#fff,#d8d8d8)}.gm .man.b{background:radial-gradient(circle at 35% 30%,#555,#111);color:#ffd75a}
 .gm .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .gm .hand{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:104px}
+.gm .hand.sm{min-height:0;gap:3px}.gm .hand.sm .card{width:26px;height:38px;border-width:2px;border-radius:5px}
 .gm .table{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:104px;padding:10px;border-radius:16px;background:radial-gradient(ellipse at center,#1f6b45,#134a30)}
 .gm .card{width:64px;height:96px;border-radius:10px;background:#fff;color:#222;display:flex;flex-direction:column;justify-content:space-between;padding:5px 6px;box-shadow:0 3px 8px rgba(0,0,0,.35);cursor:pointer;font-weight:700;position:relative;transition:transform .12s;flex:0 0 auto}
 .gm .card:hover{transform:translateY(-4px)}.gm .card.no{opacity:.45;cursor:default}.gm .card.no:hover{transform:none}
@@ -55,6 +62,30 @@ const CSS=`
 .gm .score{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:14px}.gm .score b{background:var(--raise);padding:6px 10px;border-radius:10px}
 .gm .msg{text-align:center;min-height:22px}
 .gm .end{background:linear-gradient(135deg,#232552,#3a1f55);color:#fff;border-radius:18px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.gm .end .pl{color:var(--text);text-align:left}
+.gm .box{background:var(--raise);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.gm .box h3{margin:0;font-size:15px}
+.gm .seg{display:flex;gap:6px;flex-wrap:wrap}
+.gm .seg button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:12px;padding:9px 14px;cursor:pointer;font:inherit}
+.gm .seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.gm .stepper{display:flex;align-items:center;gap:12px}.gm .stepper b{font-size:22px;min-width:24px;text-align:center}
+.gm .stepper button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--text);font-size:20px;cursor:pointer}
+.gm .stepper button:disabled{opacity:.35;cursor:default}
+.gm .pls{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.gm .pl{border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:13px;position:relative;background:var(--raise)}
+.gm .pl.turn{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.gm .pl b{font-size:15px}.gm .pl small{color:var(--muted)}
+.gm .pl .xp{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:3px}.gm .pl .xp i{display:block;height:100%;background:linear-gradient(90deg,#7c83ff,#c06bff)}
+.gm .code{font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;padding:8px;border-radius:14px;border:2px dashed var(--acc)}
+.gm input.tx{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:12px;padding:10px 12px;font:inherit}
+.gm .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(100%,340px);align-self:center}
+.gm .ttt button{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:var(--raise);font-size:min(16vw,64px);font-weight:800;cursor:pointer;color:var(--text)}
+.gm .ttt button.x{color:#e2463c}.gm .ttt button.o{color:#2f6fd6}.gm .ttt button.win{background:#ffe9a8;color:#222}
+.gm .f4{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;width:min(100%,460px);align-self:center;background:#2f4fb3;padding:8px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.gm .f4 .cl{aspect-ratio:1;border-radius:50%;background:#101a40;display:block;position:relative;cursor:pointer;border:0;padding:0}
+.gm .f4 .cl.p0{background:radial-gradient(circle at 35% 30%,#ff9a8f,#e2463c)}.gm .f4 .cl.p1{background:radial-gradient(circle at 35% 30%,#ffe98a,#e5b710)}
+.gm .f4 .cl.win{box-shadow:0 0 0 4px #fff,0 0 14px #fff}.gm .f4 .cl.last{outline:3px solid rgba(255,255,255,.7)}
+.gm canvas.rt{width:min(100%,420px);align-self:center;border-radius:16px;touch-action:none;background:#0d1b3a;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .ngintro{position:fixed;inset:0;z-index:999;display:grid;place-items:center;background:radial-gradient(circle at center,#24205a,#0b0b16 70%);animation:ngout .45s ease-in 1.35s forwards;pointer-events:none}
 .ngintro .c{display:flex;flex-direction:column;align-items:center;gap:14px;color:#fff;animation:ngin .9s cubic-bezier(.2,1.4,.4,1) both}
 .ngintro .lg{width:110px;height:110px;border-radius:30px;display:grid;place-items:center;font-size:56px;background:conic-gradient(from 0deg,#7c83ff,#c06bff,#ff7cc8,#7c83ff);animation:ngspin 1.6s linear infinite;box-shadow:0 0 60px rgba(160,123,255,.7)}
@@ -70,13 +101,16 @@ function style(){if(document.getElementById("gmcss"))return;const s=E("style");s
 
 function intro(){
   if(window.NATAN_GIOCHI_VELOCE)return;
-  const o=E("div","ngintro");const c=E("div","c");const lg=E("div","lg");lg.append(E("span","","🎮"));c.append(lg,E("b","","Natan Gaming"),E("small","","20 agenti pronti a sfidarti"));o.append(c);
+  const o=E("div","ngintro");const c=E("div","c");const lg=E("div","lg");lg.append(E("span","","🎮"));c.append(lg,E("b","","Natan Gaming"),E("small","","30 bot con 35 agenti ciascuno pronti a sfidarti"));o.append(c);
   for(let i=0;i<26;i++){const p=E("i");const a=Math.random()*Math.PI*2,d=120+Math.random()*220;p.style.cssText=`left:50%;top:50%;--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px;animation-delay:${.2+Math.random()*.5}s;background:${["#7c83ff","#c06bff","#ff7cc8","#ffd75a"][i%4]}`;o.append(p)}
   document.body.append(o);setTimeout(()=>o.remove(),2000)
 }
 
-// ------------------------------------------------------------------ il consiglio dei 20 agenti
-// caratteristiche di ogni mossa (tutte circa tra -1 e +1): valore, punti, attacco, difesa, rischio, conserva, posizione, futuro, finale
+// ------------------------------------------------------------------ livelli
+const LIV=[{id:"normale",nome:"Normale",ic:"🟢",err:.35},{id:"medio",nome:"Medio",ic:"🟡",err:.15},{id:"difficile",nome:"Difficile",ic:"🟠",err:.04},{id:"estremo",nome:"Estremo",ic:"🔴",err:0}];
+
+// ------------------------------------------------------------------ i 35 agenti
+// caratteristiche di ogni mossa (tutte circa tra -1 e +1)
 const F=["valore","punti","attacco","difesa","rischio","conserva","posizione","futuro","finale"];
 const AGENTI=[
   ["Calcolatore",{valore:3}],["Contabile",{punti:2,valore:1}],["Attaccante",{attacco:2,punti:.5}],["Difensore",{difesa:2,rischio:-1.5}],
@@ -84,43 +118,69 @@ const AGENTI=[
   ["Finalista",{finale:2.5,punti:.5}],["Cacciatore",{attacco:1.5,finale:1}],["Equilibrato",{valore:1,punti:1,difesa:1,posizione:1}],
   ["Tattico",{valore:1.5,attacco:1}],["Paziente",{conserva:1,difesa:1,rischio:-.5}],["Coraggioso",{attacco:1.5,rischio:.3}],
   ["Centrista",{posizione:2.5}],["Osservatore",{difesa:1,futuro:1}],["Memoria",{conserva:1,punti:1}],["Probabilista",{valore:1,rischio:-1}],
+  ["Analista",{valore:2,punti:1}],["Matematico",{valore:2.5,futuro:.5}],["Azzardo",{rischio:1.2,attacco:1}],["Veterano",{valore:1,conserva:1,finale:1}],
+  ["Cecchino",{attacco:2.5}],["Muro",{difesa:2.5}],["Architetto",{posizione:1.5,futuro:1.5}],["Fiutatore",{punti:1.5,attacco:1}],
+  ["Maratoneta",{finale:1.5,conserva:1}],["Bluff",{rischio:.8,futuro:1}],["Scudiero",{difesa:1.5,conserva:1}],["Esploratore",{futuro:1.5,posizione:1}],
+  ["Giudice",{valore:1.5,difesa:1,rischio:-1}],["Velocista",{punti:2,attacco:1}],["Saggio",{valore:1,futuro:1,difesa:1,finale:1}],
   ["Sorpresa",{}],["Allenatore",{}]];
-function pesi(game){const p=LSG.get("natan_gaming_pesi_"+game,null);return Array.isArray(p)&&p.length===AGENTI.length?p:AGENTI.map(()=>1)}
-// sceglie tra le mosse candidate: ognuna con .f = caratteristiche. Ritorna {mossa, decide, voti}
-function consiglio(game,cands){
-  if(cands.length===1)return {mossa:cands[0],decide:"Calcolatore",unica:true};
-  const w=pesi(game);const tot=cands.map(()=>0);const migliore=AGENTI.map(()=>0);
+const NAG=AGENTI.length;   // 35
+
+// ------------------------------------------------------------------ i bot: nome, esperienza, 35 agenti
+const NOMI=["Pino","Luna","Bruno","Stella","Nico","Gaia","Rocco","Mia","Teo","Sara","Leo","Viola","Dado","Ada","Otto","Zoe","Franz","Iris","Gigi","Nora","Max","Lia","Ugo","Elsa","Kiro","Bea","Toto","Vera","Ciro","Pia"];
+const BOTS=NOMI.map(n=>({id:n.toLowerCase(),nome:n}));
+const TITOLI=["Novizio","Allievo","Esperto","Maestro","Campione","Leggenda"];
+const baseXp=id=>30+(h32("xp"+id)%25)*35;                      // ogni bot parte già con un po' di esperienza (da 30 a 870)
+const livello=xp=>1+Math.floor(Math.sqrt(xp/20));
+const titolo=l=>TITOLI[Math.min(TITOLI.length-1,Math.floor((l-1)/2))];
+function allRec(){return LSG.get("natan_bots",{})}
+function botInfo(id){const r=allRec()[id]||{};const xp=r.xp==null?baseXp(id):r.xp;const l=livello(xp);
+  const sotto=20*(l-1)*(l-1),sopra=20*l*l;
+  return {id,p:r.p||0,v:r.v||0,s:r.s||0,n:r.n||0,xp,liv:l,titolo:titolo(l),perc:Math.max(0,Math.min(100,Math.round((xp-sotto)*100/(sopra-sotto))))}}
+function pesiBot(id,game){const all=allRec();const r=all[id]||{};const w=r.w&&r.w[game];
+  if(Array.isArray(w)&&w.length===NAG)return w.slice();
+  return AGENTI.map((a,i)=>.65+.7*((h32(id+"|"+game+"|"+a[0])%1000)/1000))}      // ogni bot ha un «carattere» suo
+function salvaBot(id,game,w,esito,lv){
+  const all=allRec();const r=all[id]||{p:0,v:0,s:0,n:0,xp:baseXp(id),w:{}};r.w=r.w||{};if(w)r.w[game]=w.map(x=>Math.round(x*1000)/1000);
+  if(esito!==undefined){r.p=(r.p||0)+1;esito===true?r.v=(r.v||0)+1:esito===false?r.s=(r.s||0)+1:r.n=(r.n||0)+1;
+    r.xp=(r.xp==null?baseXp(id):r.xp)+8+(esito===true?18:esito===null?8:3)+lv*3}
+  all[id]=r;LSG.set("natan_bots",all);
+  try{if(window.natanGiochiSync)window.natanGiochiSync(all)}catch(e){}
+}
+// sceglie tra le mosse candidate: ognuna con .f = caratteristiche. Ritorna {mossa, decide, favor, voti}
+function consiglio(game,cands,bot,lv){
+  if(cands.length===1)return {mossa:cands[0],decide:"Calcolatore",favor:["Calcolatore"],voti:NAG,unica:true};
+  const id=(bot&&bot.id)||"natan";const w=pesiBot(id,game);const tot=cands.map(()=>0);const migliore=AGENTI.map(()=>0);
   AGENTI.forEach(([nome,pp],ai)=>{
     let best=-1e9,bi=0;
     cands.forEach((c,i)=>{let s=0;
       if(nome==="Sorpresa")s=Math.random();
-      else if(nome==="Allenatore")s=F.reduce((a,k)=>a+(c.f[k]||0)*(LSG.get("natan_gaming_stile_"+game,{})[k]||0),0)+(c.f.valore||0);
+      else if(nome==="Allenatore")s=F.reduce((a,k)=>a+Math.max(0,c.f[k]||0),0)+(c.f.valore||0);
       else for(const k in pp)s+=pp[k]*(c.f[k]||0);
       if(s>best){best=s;bi=i}});
     migliore[ai]=bi;tot[bi]+=w[ai]*(nome==="Sorpresa"?.35:1)});
   let bi=0;tot.forEach((v,i)=>{if(v>tot[bi])bi=i});
+  let errore=false;if(Math.random()<(LIV[lv==null?3:lv].err)){bi=rnd(cands.length);errore=true}
   const favor=AGENTI.map((a,i)=>i).filter(i=>migliore[i]===bi);
-  const decide=favor.sort((a,b)=>w[b]-w[a])[0];
-  cands[bi]._agenti=favor.map(i=>AGENTI[i][0]);
-  return {mossa:cands[bi],decide:AGENTI[decide??0][0],favor:favor.map(i=>AGENTI[i][0]),voti:Math.round(favor.length)}
+  const decide=(favor.slice().sort((a,b)=>w[b]-w[a])[0])||0;
+  return {mossa:cands[bi],decide:AGENTI[decide][0],favor:favor.map(i=>AGENTI[i][0]),voti:favor.length,errore,pesi:w}
 }
-// fine partita: l'Allenatore rinforza gli agenti che erano d'accordo con le mosse se Natan ha vinto, li indebolisce se ha perso
-function allena(game,storia,vinto){
-  const w=pesi(game);const nomi=AGENTI.map(a=>a[0]);
-  for(const fav of storia)for(const n of fav){const i=nomi.indexOf(n);if(i>=0)w[i]=Math.max(.3,Math.min(3,w[i]*(vinto?1.03:.97)))}
-  LSG.set("natan_gaming_pesi_"+game,w);
-  const st=LSG.get("natan_gaming_stats",{});st[game]=st[game]||{v:0,p:0,n:0};vinto===true?st[game].v++:vinto===false?st[game].p++:st[game].n++;LSG.set("natan_gaming_stats",st)
+// fine partita: l'allenatore rinforza gli agenti che erano d'accordo con le mosse se il bot ha vinto, li indebolisce se ha perso
+function allena(bot,game,storia,esito,lv){
+  const w=pesiBot(bot.id,game);const nomi=AGENTI.map(a=>a[0]);
+  if(esito!==null)for(const fav of storia)for(const n of fav){const i=nomi.indexOf(n);if(i>=0)w[i]=Math.max(.3,Math.min(3,w[i]*(esito?1.03:.97)))}
+  salvaBot(bot.id,game,w,esito,lv)
 }
+function scegliBot(n,escludi){const pool=shuffle(BOTS.filter(b=>!(escludi||[]).includes(b.id)));return pool.slice(0,Math.max(0,n))}
+
+// ------------------------------------------------------------------ pezzi grafici comuni
+function botCard(b,extra){const i=botInfo(b.id);const d=E("div","pl");d.dataset.bot=b.id;
+  d.append(E("b","","🤖 "+b.nome),E("small","",`Liv. ${i.liv} · ${i.titolo} · ${i.xp} XP`),E("small","",`${i.p} partite · ${i.v} vittorie`),E("small","","🧠 35 agenti dietro di lui"));
+  const x=E("div","xp");const bar=E("i");bar.style.width=i.perc+"%";x.append(bar);d.append(x);if(extra)d.append(extra);return d}
+
 function ngPanel(){
-  const p=E("div","ng");const lg=E("div","lg","N");const tx=E("div","tx");tx.append(E("b","","Natan Gaming"),E("span","","20 agenti studiano ogni mossa"));p.append(lg,tx);
+  const p=E("div","ng");const lg=E("div","lg","N");const tx=E("div","tx");tx.append(E("b","","Natan Gaming"),E("span","","30 bot · 35 agenti dietro ogni bot"));p.append(lg,tx);
   const th=E("div","think");const ag=E("div","agents");AGENTI.forEach(a=>ag.append(E("i","",a[0])));
-  return {el:[p,th,ag],think:(t,favor)=>{th.textContent=t||"";[...ag.children].forEach(i=>i.classList.toggle("on",!!favor&&favor.includes(i.textContent)))}}
-}
-async function pensa(ng,game,cands,cosa){
-  ng.think("🤔 Natan Gaming ci pensa… i 20 agenti stanno votando",null);await sleep(SLOW()*(500+rnd(500)));
-  const r=consiglio(game,cands);
-  ng.think(r.unica?"Natan Gaming: c'era una sola mossa possibile.":`Natan Gaming ${cosa||"ha deciso"} · ${r.voti}/20 agenti d'accordo, guidati da «${r.decide}»`,r.favor||[r.decide]);
-  return r
+  return {el:[p,th,ag],think:(t,favor,chi)=>{th.textContent=t||"";[...ag.children].forEach(i=>i.classList.toggle("on",!!favor&&favor.includes(i.textContent)));if(chi!==undefined)p.querySelector(".tx b").textContent=chi||"Natan Gaming"}}
 }
 
 // ------------------------------------------------------------------ tutorial
@@ -134,426 +194,301 @@ function tutorial(pg,info,start){
     const d=E("div","dots");info.tut.forEach((_,i)=>d.append(E("i",i===k?"on":"")));box.append(d);
     const r=E("div","row");r.style.justifyContent="space-between";
     const skip=E("button","btn ghost","Salta il tutorial");skip.onclick=start;
-    const nx=E("button","btn",k<info.tut.length-1?"Avanti →":"Inizia a giocare");nx.id="tutNext";nx.onclick=()=>{if(k<info.tut.length-1){k++;draw()}else start()};
+    const nx=E("button","btn",k<info.tut.length-1?"Avanti →":"Continua");nx.id="tutNext";nx.onclick=()=>{if(k<info.tut.length-1){k++;draw()}else start()};
     r.append(skip,nx);box.append(r)};
   draw()
+}
+
+// ------------------------------------------------------------------ rete (stanze online con PeerJS)
+const CODEALF="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function genCode(){let s="";for(let i=0;i<5;i++)s+=CODEALF[rnd(CODEALF.length)];return s}
+const pulisci=s=>String(s||"").replace(/[^\p{L}\p{N} _\-]/gu,"").trim().slice(0,14);
+function nickSalvato(){return pulisci(LSG.get("natan_gaming_nick",""))||pulisci((LSG.get("natan_profilo",{})||{}).name)||"Giocatore"}
+class Net{
+  constructor(host){this.host=host;this.q=[];this.w=[];this.h={};this.conns=[];this.peer=null;this.code="";this.up=null}
+  push(m){for(let i=0;i<this.w.length;i++){if(this.w[i].p(m)){const x=this.w.splice(i,1)[0];x.r(m);return}}this.q.push(m)}
+  next(p){const i=this.q.findIndex(p);if(i>=0)return Promise.resolve(this.q.splice(i,1)[0]);return new Promise(r=>this.w.push({p,r}))}
+  reset(){this.q=[];this.w=[]}
+  dispatch(m,ent){if(m&&this.h[m.t]){try{this.h[m.t](m,ent)}catch(e){console.error(e)}}else this.push(m)}
+  bcast(m){for(const c of this.conns){if(c.conn&&c.conn.open){try{c.conn.send(m)}catch(e){}}}}
+  send(m){if(this.up&&this.up.open){try{this.up.send(m)}catch(e){}}}
+  close(){try{if(this.host)this.bcast({t:"bye"});else this.send({t:"addio"})}catch(e){}
+    const p=this.peer;this.peer=null;setTimeout(()=>{try{p&&p.destroy()}catch(e){}},200)}
+}
+async function stanzaNuova(nick,onChange){
+  if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");
+  const P=await window.natanPeerLib();const net=new Net(true);net.nick=nick;net.max=2;
+  for(let tent=0;tent<6&&!net.peer;tent++){
+    const code=genCode();
+    await new Promise(res=>{let p;try{p=new P("natan-gioco-"+code)}catch(e){return res()}
+      const t=setTimeout(()=>{try{p.destroy()}catch(e){}res()},9000);
+      p.on("open",()=>{clearTimeout(t);net.peer=p;net.code=code;res()});
+      p.on("error",e=>{if(!net.peer){clearTimeout(t);try{p.destroy()}catch(x){}res()}})})}
+  if(!net.peer)throw new Error("Non riesco a collegarmi alla rete: riprova tra poco.");
+  net.peer.on("connection",c=>{
+    const ent={conn:c,nome:null,seat:-1,fine:false};
+    const gone=()=>{if(ent.fine)return;ent.fine=true;const i=net.conns.indexOf(ent);
+      if(i>=0){if(!net.started){net.conns.splice(i,1);onChange&&onChange();net.stato()}else if(net.h.partito)net.h.partito(ent)}};
+    c.on("data",m=>{
+      if(!m||typeof m!=="object")return;
+      if(m.t==="hello"){
+        if(ent.nome)return;
+        if(net.started||net.conns.length+1>=net.max){try{c.send({t:"pieno"})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},300);return}
+        let nome=pulisci(m.nome)||"Amico";const usati=[net.nick,...net.conns.map(x=>x.nome)];const base=nome;let k=2;while(usati.includes(nome))nome=base+k++;
+        ent.nome=nome;net.conns.push(ent);onChange&&onChange();net.stato()}
+      else if(!ent.nome)return;
+      else if(m.t==="act")net.push({t:"act",seat:ent.seat,k:m.k});
+      else if(m.t==="addio")gone();
+      else net.dispatch(Object.assign({},m,{seat:ent.seat}),ent)});
+    c.on("close",gone);
+  });
+  net.stato=()=>{if(net.started)return;net.bcast({t:"lobby",game:net.game,umani:[net.nick,...net.conns.map(x=>x.nome)],n:net.n,lv:net.lv})};
+  return net
+}
+async function unisciti(code,nick,onLobby){
+  if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");
+  const P=await window.natanPeerLib();const net=new Net(false);net.nick=nick;
+  const p=new P();net.peer=p;
+  await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(new Error("Non riesco a collegarmi alla rete: riprova tra poco.")),9000);p.on("open",()=>{clearTimeout(t);ok()});p.on("error",e=>{if(!p.open){clearTimeout(t);bad(new Error("Non riesco a collegarmi alla rete."))}})});
+  await new Promise((ok,bad)=>{
+    const c=p.connect("natan-gioco-"+code.toUpperCase().trim(),{reliable:true});net.up=c;let done=false;
+    const nope=msg=>{if(!done){done=true;clearTimeout(t);bad(new Error(msg))}};
+    const t=setTimeout(()=>nope("Non trovo la stanza «"+code.toUpperCase()+"». Controlla il codice."),9000);
+    c.on("open",()=>{c.send({t:"hello",nome:nick})});
+    c.on("error",()=>nope("Non trovo la stanza «"+code.toUpperCase()+"». Controlla il codice."));
+    c.on("data",m=>{
+      if(!m||typeof m!=="object")return;
+      if(m.t==="pieno"){nope("La stanza è già piena.");return}
+      if(m.t==="lobby"){if(!done){done=true;clearTimeout(t);ok()}onLobby&&onLobby(m)}
+      else net.dispatch(m)});
+    c.on("close",()=>{net.dispatch({t:"bye"})});
+  });
+  return net
+}
+
+// ------------------------------------------------------------------ shell di gioco (barra, giocatori, pannello agenti)
+function gameShell(pg,info,ctx){
+  pg.innerHTML="";const g=E("div","gm");pg.append(g);
+  const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.id="gmBack2";back.onclick=()=>{ctx&&ctx.leave&&ctx.leave();menu(pg)};
+  const help=E("button","btn ghost","❔ Regole");help.onclick=()=>{ctx&&ctx.leave&&ctx.leave();tutorial(pg,info,()=>lobby(pg,info))};
+  top.append(back);
+  if(ctx&&ctx.again){const again=E("button","btn ghost","↻ Nuova partita");again.id="gmAgain";again.onclick=ctx.again;top.append(again)}
+  top.append(help);g.append(top,E("h1","",info.ic+" "+info.nome));
+  const pls=E("div","pls");g.append(pls);
+  const ng=ngPanel();ng.el.forEach(x=>g.append(x));
+  const status=E("div","status msg");g.append(status);
+  const sh={g,ng,status,pls,
+    players(seats,turn,me){pls.innerHTML="";seats.forEach((s,i)=>{
+      let c;if(s.tipo==="bot")c=botCard(s.bot);else{c=E("div","pl");c.append(E("b","",(i===me?"🙂 ":"👤 ")+s.nome),E("small","",i===me?"Tu":"Giocatore online"))}
+      c.classList.toggle("turn",i===turn);c.dataset.seat=String(i);pls.append(c)})}};
+  return sh
+}
+function fineBanner(sh,esitoMe,testo,sotto){
+  const e=E("div","end");e.append(E("div","",esitoMe===true?"🏆":esitoMe===false?"🤖":"🤝"),E("h2","",testo),E("small","",sotto||""));
+  sh.g.append(e);try{e.scrollIntoView({behavior:"smooth",block:"center"})}catch(x){}return e
+}
+
+// ------------------------------------------------------------------ motore delle partite
+// info: {id, init(n,seed), turn(S), legal(S,seat), apply(S,seat,a), over(S), bot(S,seat,lv), view(sh,ctx), min, max}
+// oppure (giochi in tempo reale) {rt:true, playRT(sh,ctx,cfg)}
+function avvia(pg,info,cfg,net,me){
+  const live={stop:false};
+  const n=cfg.seats.length;
+  const seats=cfg.seats.map((s,i)=>s.tipo==="bot"?{tipo:"bot",nome:s.nome,bot:BOTS.find(b=>b.id===s.botId)||{id:s.botId,nome:s.nome}}:{tipo:i===me?"io":"remoto",nome:s.nome});
+  const ctx={seats,me,n,lv:cfg.lv,net,
+    stop(){live.stop=true},leave(){live.stop=true;if(net)net.close()},
+    again:net?null:()=>{live.stop=true;avvia(pg,info,Object.assign({},cfg,{seed:(Math.random()*2**31)|0}),null,0)}};
+  const sh=gameShell(pg,info,ctx);ctx.sh=sh;window.__ctxLast=ctx;
+  const storia=seats.map(()=>[]);ctx.storia=storia;
+  if(net){
+    net.reset();
+    if(net.host){net.h.partito=ent=>{if(live.stop)return;const seat=ent.seat;if(seat>=0&&seats[seat]&&seats[seat].tipo==="remoto"){const b=scegliBot(1,seats.filter(s=>s.bot).map(s=>s.bot.id))[0];
+        const vecchio=seats[seat].nome;seats[seat]={tipo:"bot",nome:b.nome+" (al posto di "+vecchio+")",bot:b};cfg.seats[seat]={tipo:"bot",nome:b.nome,botId:b.id};
+        net.bcast({t:"swap",seat,botId:b.id,nome:seats[seat].nome});net.push({t:"wake"});ctx.onSwap&&ctx.onSwap(seat)}}}
+    else{net.h.swap=m=>{const b=BOTS.find(x=>x.id===m.botId);if(b&&seats[m.seat])seats[m.seat]={tipo:"bot",nome:m.nome,bot:b};net.push({t:"wakeG"});ctx.onSwap&&ctx.onSwap(m.seat)};
+      net.h.bye=()=>{net.push({t:"bye"});ctx.onBye&&ctx.onBye()};
+      net.h.do=m=>net.push(m);
+      net.h.start=m=>{live.stop=true;avviaOnlineGuest(pg,m)}}
+  }
+  if(info.rt){
+    ctx.finish=res=>{if(live.finito||live.stop)return;live.finito=true;live.stop=true;conclusione(sh,info,seats,ctx,res,storia,pg,cfg,net,me)};
+    sh.players(seats,-1,me);info.playRT(sh,ctx,cfg);return ctx}
+  let S=info.init(n,cfg.seed);let seq=0;
+  let attesa=null;ctx.legal=[];ctx.S=S;
+  const risolvi=(S,seat,k)=>info.legal(S,seat).find(x=>x.k===k)||(info.parse?info.parse(S,seat,k):null);
+  ctx.act=k=>{if(!attesa)return false;const a=attesa.legal.find(x=>x.k===k)||(info.parse?info.parse(S,attesa.seat,k):null);if(!a)return false;const r=attesa.res;attesa=null;ctx.legal=[];ctx.myTurn=false;r(a);return true};
+  const view=info.view(sh,ctx);
+  const draw=()=>{ctx.S=S;view.draw(S,ctx)};
+  async function pensaBot(seat){
+    const st=seats[seat];const lg=info.legal(S,seat);
+    if(lg.length===1){sh.ng.think(`${st.bot.nome}: c'era una sola mossa possibile.`,["Calcolatore"],st.bot.nome);await sleep(SLOW()*350);storia[seat].push(["Calcolatore"]);return lg[0]}
+    sh.ng.think(`🤔 ${st.bot.nome} ci pensa… i 35 agenti stanno votando`,null,st.bot.nome);await sleep(SLOW()*(300+rnd(400)));
+    await sleep(20);const cands=info.bot(S,seat,ctx.lv);
+    const r=consiglio(info.id,cands,st.bot,ctx.lv);
+    sh.ng.think(`${st.bot.nome} ha deciso · ${r.voti}/35 agenti d'accordo, guidati da «${r.decide}»`,r.favor,st.bot.nome);storia[seat].push(r.favor);
+    return r.mossa.a}
+  const attendiHost=pred=>net.next(pred);
+  async function ciclo(){
+    try{
+      for(;;){
+        if(live.stop)return;
+        const o=info.over(S);
+        if(o){live.stop=true;draw();conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me);return}
+        const seat=info.turn(S);const st=seats[seat];
+        sh.players(seats,seat,me);
+        let a=null;
+        if(st.tipo==="io"){
+          const lg=info.legal(S,seat);ctx.legal=lg;ctx.myTurn=true;draw();sh.status.textContent=info.msgTurno?info.msgTurno(S,ctx,seat):"Tocca a te";
+          a=await new Promise(res=>{attesa={res,legal:lg,seat}});if(live.stop)return;
+          if(net){if(net.host)net.bcast({t:"do",seq,seat,k:a.k});
+            else{net.send({t:"act",k:a.k});const m=await attendiHost(m=>m.t==="do"||m.t==="bye");if(live.stop)return;if(m.t==="bye"){stopOnline(sh);return}a=risolvi(S,seat,m.k)||a}}
+        }else if(st.tipo==="bot"){
+          ctx.legal=[];ctx.myTurn=false;draw();sh.status.textContent=`Tocca a ${st.nome}`;
+          if(net&&!net.host){const m=await attendiHost(m=>m.t==="do"||m.t==="bye"||m.t==="wakeG");if(live.stop)return;if(m.t==="bye"){stopOnline(sh);return}if(m.t==="wakeG")continue;a=risolvi(S,seat,m.k)}
+          else{a=await pensaBot(seat);if(live.stop)return;if(net)net.bcast({t:"do",seq,seat,k:a.k})}
+        }else{
+          ctx.legal=[];ctx.myTurn=false;draw();sh.status.textContent=`Tocca a ${st.nome}…`;
+          if(net.host){const m=await attendiHost(m=>(m.t==="act"&&m.seat===seat)||m.t==="wake");if(live.stop)return;if(m.t==="wake")continue;
+            a=risolvi(S,seat,m.k);if(!a)continue;net.bcast({t:"do",seq,seat,k:a.k})}
+          else{const m=await attendiHost(m=>m.t==="do"||m.t==="bye"||m.t==="wakeG");if(live.stop)return;if(m.t==="bye"){stopOnline(sh);return}if(m.t==="wakeG")continue;a=risolvi(S,seat,m.k)}
+        }
+        if(!a)continue;
+        S=info.apply(S,seat,a);seq++;draw();
+        await sleep(SLOW()*(info.pausa?info.pausa(S,a,seat):450));
+      }
+    }catch(e){console.error(e);sh.status.textContent="Qualcosa è andato storto: premi «Nuova partita».";}
+  }
+  sh.players(seats,-1,me);setTimeout(ciclo,0);
+  return ctx
+}
+function stopOnline(sh){sh.status.textContent="La partita online è finita: chi ha creato la stanza si è scollegato.";fineBanner(sh,null,"Connessione chiusa","Puoi tornare ai giochi e iniziare una nuova partita.")}
+
+function conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me){
+  const win=o.win||[];const io=win.includes(me);const pari=!win.length;
+  const esito=pari?null:io?true:false;
+  seats.forEach((s,i)=>{if(s.tipo==="bot"){const e=pari?null:win.includes(i);allena(s.bot,info.id,storia[i],e,ctx.lv)}});
+  const st=LSG.get("natan_gaming_stats",{});const k=st[info.id]=st[info.id]||{v:0,p:0,n:0};
+  esito===true?k.p++:esito===false?k.v++:k.n++;LSG.set("natan_gaming_stats",st);   // p = vittorie tue, v = vittorie dei bot (o degli altri)
+  const testo=(typeof o.text==="function"?o.text(seats):o.text)||(pari?"Pareggio!":io?"Hai vinto!":"Hai perso");
+  sh.status.textContent=testo;
+  const sotto=pari?"Pareggio!":io?"Hai vinto! Gli allenatori correggono gli agenti dei bot che hanno sbagliato.":"Ha vinto un altro giocatore. Gli allenatori rinforzano gli agenti che avevano ragione.";
+  const e=fineBanner(sh,esito,testo,sotto);e.id="gmEnd";
+  const bs=seats.filter(s=>s.bot);if(bs.length){const w=E("div","pls");bs.forEach(s=>w.append(botCard(s.bot)));e.append(w)}
+  if(net){
+    if(net.host){const r=E("button","btn","↻ Rigioca con gli stessi giocatori");r.id="gmRigioca";
+      r.onclick=()=>{const nc=Object.assign({},cfg,{seed:(Math.random()*2**31)|0});net.conns.forEach(x=>{if(!x.fine)try{x.conn.send({t:"start",cfg:nc,seat:x.seat})}catch(e){}});avvia(pg,info,nc,net,0)};e.append(r)}
+    else e.append(E("small","","Aspetta che chi ha creato la stanza lanci un'altra partita."))}
+  sh.players(seats,-1,me);
+}
+
+// ------------------------------------------------------------------ lobby: livello, numero di giocatori, online
+function lobby(pg,info){
+  style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
+  const mn=info.min||2,mx=info.max||2;
+  const cfg={mode:"bot",lv:Math.min(3,Math.max(0,+LSG.get("natan_gaming_lv",1)||0)),n:Math.min(mx,Math.max(mn,+LSG.get("natan_gaming_n_"+info.id,mn)||mn)),nick:nickSalvato(),bots:[]};
+  cfg.bots=scegliBot(cfg.n-1);
+  let net=null,errore="";
+  const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.onclick=()=>{if(net)net.close();menu(pg)};top.append(back);
+  const help=E("button","btn ghost","❔ Regole");help.onclick=()=>{if(net)net.close();tutorial(pg,info,()=>lobby(pg,info))};top.append(help);
+  g.append(top,E("h1","",info.ic+" "+info.nome));
+  const body=E("div","");body.style.cssText="display:flex;flex-direction:column;gap:14px";g.append(body);
+  const umani=()=>net?[net.nick,...net.conns.map(c=>c.nome)]:[cfg.nick];
+  function render(){
+    body.innerHTML="";
+    const b1=E("div","box");b1.append(E("h3","","Dove vuoi giocare?"));const sg=E("div","seg");
+    [["bot","🤖 Contro Natan Gaming"],["online","🌐 Online con amici"]].forEach(([m,t])=>{const b=E("button",cfg.mode===m?"on":"",t);b.dataset.mode=m;b.onclick=()=>{if(net){net.close();net=null}cfg.mode=m;errore="";render()};sg.append(b)});b1.append(sg);body.append(b1);
+    const b2=E("div","box");b2.append(E("h3","","Livello dei bot"));const sl=E("div","seg");
+    LIV.forEach((l,i)=>{const b=E("button",cfg.lv===i?"on":"",l.ic+" "+l.nome);b.dataset.lv=String(i);b.onclick=()=>{cfg.lv=i;LSG.set("natan_gaming_lv",i);if(net)net.lv=i;render();if(net)net.stato()};sl.append(b)});b2.append(sl);body.append(b2);
+    if(mx>mn){
+      const b3=E("div","box");b3.append(E("h3","",`Quanti giocatori? (da ${mn} a ${mx})`));const st=E("div","stepper");
+      const minus=E("button","","−"),plus=E("button","","+"),val=E("b","",String(cfg.n));val.id="nGioc";
+      const lo=Math.max(mn,umani().length);
+      minus.disabled=cfg.n<=lo;plus.disabled=cfg.n>=mx;minus.id="nMeno";plus.id="nPiu";
+      const set=v=>{cfg.n=v;LSG.set("natan_gaming_n_"+info.id,v);if(net){net.max=v;net.n=v}cfg.bots=scegliBot(cfg.n-umani().length);render();if(net)net.stato()};
+      minus.onclick=()=>set(cfg.n-1);plus.onclick=()=>set(cfg.n+1);st.append(minus,val,plus);
+      b3.append(st,E("small","",cfg.mode==="bot"?"Tu e gli altri sono bot.":"Gli amici entrano con il codice; i posti liberi li prendono i bot."));body.append(b3)}
+    const b4=E("div","box");b4.append(E("h3","",cfg.mode==="bot"?"I tuoi avversari":"Giocatori"));const pl=E("div","pls");
+    const mie=umani();mie.forEach((nm,i)=>{const c=E("div","pl");c.append(E("b","",(i===0?"🙂 ":"👤 ")+nm),E("small","",i===0?"Tu":"Amico online"));pl.append(c)});
+    const nb=Math.max(0,cfg.n-mie.length);while(cfg.bots.length<nb)cfg.bots.push(...scegliBot(1,cfg.bots.map(b=>b.id)));cfg.bots=cfg.bots.slice(0,nb);
+    cfg.bots.forEach(b=>pl.append(botCard(b)));b4.append(pl);
+    const rb=E("button","btn ghost","🔀 Cambia avversari");rb.id="cambiaBot";rb.onclick=()=>{cfg.bots=scegliBot(Math.max(0,cfg.n-umani().length));render()};
+    if(cfg.bots.length)b4.append(rb);body.append(b4);
+    if(cfg.mode==="online"){
+      const b5=E("div","box");b5.append(E("h3","","Stanza online"));
+      if(!net){
+        const ni=E("input","tx");ni.value=cfg.nick;ni.placeholder="Il tuo nome";ni.maxLength=14;ni.id="nickIn";ni.oninput=()=>{cfg.nick=pulisci(ni.value)||"Giocatore";LSG.set("natan_gaming_nick",cfg.nick)};
+        const cr=E("button","btn","➕ Crea una stanza");cr.id="creaStanza";
+        cr.onclick=async()=>{cr.disabled=true;cr.textContent="Creo la stanza…";errore="";
+          try{const nn=await stanzaNuova(cfg.nick,()=>{cfg.bots=scegliBot(Math.max(0,cfg.n-umani().length));render()});nn.max=cfg.n;nn.n=cfg.n;nn.lv=cfg.lv;nn.game=info.id;net=nn;render()}
+          catch(e){errore=e.message||"errore";render()}};
+        b5.append(E("small","","Scrivi il tuo nome (solo il nome, niente dati personali), poi crea la stanza e dai il codice ai tuoi amici."),ni,cr)}
+      else{
+        const c=E("div","code",net.code);c.id="codiceStanza";
+        b5.append(E("small","","Codice della stanza: i tuoi amici aprono Giochi → «Entra in una stanza con un codice» e lo scrivono."),c,E("small","",`${umani().length} di ${cfg.n} giocatori presenti. I posti liberi li prendono i bot.`))}
+      if(errore)b5.append(E("small","",errore));
+      body.append(b5)}
+    const go=E("button","btn","▶ Inizia la partita");go.id="startGame";
+    go.onclick=()=>{
+      const hum=umani();const nn=Math.max(cfg.n,hum.length);
+      const seats=hum.map(nm=>({tipo:"umano",nome:nm}));
+      const pool=cfg.bots.slice();while(pool.length<nn-hum.length)pool.push(...scegliBot(1,pool.map(b=>b.id)));
+      pool.slice(0,nn-hum.length).forEach(b=>seats.push({tipo:"bot",nome:b.nome,botId:b.id}));
+      const c={game:info.id,seats,lv:cfg.lv,seed:(Math.random()*2**31)|0};
+      if(net){net.started=true;net.conns.forEach((x,i)=>{x.seat=i+1});
+        net.conns.forEach((x,i)=>{try{x.conn.send({t:"start",cfg:c,seat:i+1})}catch(e){}});avvia(pg,info,c,net,0)}
+      else avvia(pg,info,c,null,0)};
+    body.append(go);
+  }
+  render()
+}
+
+// ospite: è arrivato il messaggio «start» dalla stanza
+function avviaOnlineGuest(pg,m){
+  const info=GAMES[m.cfg.game];const net=window.__netGuest;if(!info||!net)return;
+  avvia(pg,info,m.cfg,net,m.seat)
+}
+function entraStanza(pg){
+  style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
+  const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.onclick=()=>{if(window.__netGuest){window.__netGuest.close();window.__netGuest=null}menu(pg)};top.append(back);
+  g.append(top,E("h1","","🔑 Entra in una stanza"));
+  const b=E("div","box");const ni=E("input","tx");ni.value=nickSalvato();ni.maxLength=14;ni.placeholder="Il tuo nome";ni.id="nickJoin";
+  const ci=E("input","tx");ci.placeholder="Codice (5 caratteri)";ci.maxLength=5;ci.id="codeJoin";ci.style.textTransform="uppercase";
+  const bt=E("button","btn","Entra");bt.id="entraBtn";const msg=E("div","msg","");msg.id="joinMsg";
+  const lobbyBox=E("div","box");lobbyBox.style.display="none";lobbyBox.id="joinLobby";
+  b.append(E("small","","Il codice te lo dà l'amico che ha creato la stanza."),ni,ci,bt,msg);g.append(b,lobbyBox);
+  bt.onclick=async()=>{
+    const code=ci.value.trim();if(code.length<4){msg.textContent="Scrivi il codice della stanza.";return}
+    LSG.set("natan_gaming_nick",pulisci(ni.value)||"Giocatore");bt.disabled=true;msg.textContent="Mi collego…";
+    try{
+      if(window.__netGuest){window.__netGuest.close();window.__netGuest=null}
+      const net=await unisciti(code,pulisci(ni.value)||"Giocatore",m=>{
+        lobbyBox.style.display="";lobbyBox.innerHTML="";const inf=GAMES[m.game];
+        lobbyBox.append(E("h3","",inf?inf.ic+" "+inf.nome:"Partita"),E("small","",`Livello: ${LIV[m.lv||0].nome} · Giocatori presenti: ${(m.umani||[]).join(", ")}`),E("small","","Aspetto che chi ha creato la stanza inizi la partita…"));
+        msg.textContent="Sei dentro la stanza ✔"});
+      window.__netGuest=net;
+      net.h.start=m=>avviaOnlineGuest(pg,m);
+      net.h.bye=()=>{msg.textContent="La stanza si è chiusa."};
+    }catch(e){msg.textContent=e.message||"Non riesco a entrare.";bt.disabled=false}};
 }
 
 // ------------------------------------------------------------------ menu
 const GAMES={};
 function menu(pg){
-  pg.innerHTML="";const g=E("div","gm");pg.append(g);
+  style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna");back.id="gmBack";back.onclick=()=>{try{window.openChat()}catch(e){location.reload()}};top.append(back);g.append(top);
-  g.append(E("h1","","🎮 Giochi"),E("p","lead","Sfida Natan Gaming: prima di ogni gioco c'è un breve tutorial."));
+  g.append(E("h1","","🎮 Giochi"),E("p","lead","Sfida i bot di Natan Gaming o gioca online con gli amici. Prima di ogni gioco c'è un breve tutorial."));
   const ng=ngPanel();ng.el.forEach(x=>g.append(x));
   const st=LSG.get("natan_gaming_stats",{});
   const c=E("div","cards");g.append(c);
-  for(const [k,info] of Object.entries(GAMES)){const b=E("button","gcard");b.dataset.g=k;b.append(E("span","ic",info.ic),E("strong","",info.nome),E("small","",info.sub));
-    const s=st[k];if(s)b.append(E("small","",`Tu ${s.p} · Natan ${s.v}`+(s.n?` · pari ${s.n}`:"")));
-    b.onclick=()=>tutorial(pg,info,()=>info.play(pg));c.append(b)}
+  for(const [k,info] of Object.entries(GAMES)){const b=E("button","gcard");b.dataset.g=k;b.append(E("span","ic",info.ic),E("strong","",info.nome),E("small","",info.sub),E("small","",info.min===info.max?`${info.max} giocatori`:`${info.min}-${info.max} giocatori`));
+    const s=st[k];if(s)b.append(E("small","",`Tu ${s.p} · Bot ${s.v}`+(s.n?` · pari ${s.n}`:"")));
+    b.onclick=()=>tutorial(pg,info,()=>lobby(pg,info));c.append(b)}
+  const j=E("button","btn ghost","🔑 Entra in una stanza con un codice");j.id="entraStanza";j.onclick=()=>entraStanza(pg);g.append(j);
+  const dt=E("details","box");dt.id="botList";dt.append(E("summary","","🤖 I 30 bot di Natan Gaming (nome, esperienza, 35 agenti ciascuno)"));
+  const lst=BOTS.map(b=>botInfo(b.id)).sort((a,b)=>b.xp-a.xp);const w=E("div","pls");w.style.marginTop="10px";
+  lst.forEach(i=>w.append(botCard(BOTS.find(b=>b.id===i.id))));dt.append(w);g.append(dt);
 }
-function gameShell(pg,info){
-  pg.innerHTML="";const g=E("div","gm");pg.append(g);
-  const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.onclick=()=>menu(pg);
-  const again=E("button","btn ghost","↻ Nuova partita");again.onclick=()=>info.play(pg);
-  const help=E("button","btn ghost","❔ Regole");help.onclick=()=>tutorial(pg,info,()=>info.play(pg));
-  top.append(back,again,help);g.append(top,E("h1","",info.ic+" "+info.nome));
-  const ng=ngPanel();ng.el.forEach(x=>g.append(x));
-  const status=E("div","status msg");g.append(status);
-  return {g,ng,status}
-}
-function fine(sh,game,storia,vinto,testo){
-  allena(game,storia,vinto);
-  const e=E("div","end");e.append(E("div","",vinto===true?"🤖":vinto===false?"🏆":"🤝"),E("h2","",testo),
-    E("small","",vinto===true?"Natan Gaming ha vinto. L'Allenatore ha rinforzato gli agenti che avevano ragione.":vinto===false?"Hai battuto Natan Gaming! L'Allenatore corregge gli agenti che hanno sbagliato.":"Pareggio!"));
-  sh.g.append(e);e.scrollIntoView({behavior:"smooth",block:"center"})
-}
-window.GIOCHI={open(pg){style();intro();menu(pg)},_games:GAMES,_consiglio:consiglio,AGENTI};
-window.__G={E,LSG,sleep,rnd,shuffle,SLOW,pensa,gameShell,fine,GAMES,consiglio};
-})();
-
-// =====================================================================================================
-// SCACCHI
-(function(){
-const {E,sleep,pensa,gameShell,fine,GAMES}=window.__G;
-const VAL={p:100,n:320,b:330,r:500,q:900,k:0};
-const isW=p=>p&&p===p.toUpperCase();
-const N8=[-17,-15,-10,-6,6,10,15,17];
-const rc=i=>[i>>3,i&7];
-function start(){const r="rnbqkbnr",b=[];for(const ch of r)b.push(ch);for(let i=0;i<8;i++)b.push("p");for(let i=0;i<32;i++)b.push("");for(let i=0;i<8;i++)b.push("P");for(const ch of r)b.push(ch.toUpperCase());
-  return {b,turn:"w",cast:"KQkq",ep:-1,half:0,ply:0}}
-function attacked(b,sq,byW){
-  const [r,c]=rc(sq);
-  const pr=byW?r+1:r-1;                                      // pedoni
-  for(const dc of [-1,1]){const cc=c+dc;if(pr>=0&&pr<8&&cc>=0&&cc<8){const p=b[pr*8+cc];if(p===(byW?"P":"p"))return true}}
-  for(const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]){const rr=r+dr,cc=c+dc;if(rr>=0&&rr<8&&cc>=0&&cc<8&&b[rr*8+cc]===(byW?"N":"n"))return true}
-  for(const [dr,dc] of [[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]]){
-    let rr=r+dr,cc=c+dc,first=true;
-    while(rr>=0&&rr<8&&cc>=0&&cc<8){const p=b[rr*8+cc];
-      if(p){if(isW(p)===byW){const t=p.toLowerCase();const diag=dr&&dc;
-        if(t==="q"||(diag&&t==="b")||(!diag&&t==="r")||(first&&t==="k"))return true}break}
-      rr+=dr;cc+=dc;first=false}}
-  return false
-}
-function kingSq(b,w){return b.indexOf(w?"K":"k")}
-function inCheck(S,w){return attacked(S.b,kingSq(S.b,w),!w)}
-function pseudo(S){
-  const b=S.b,w=S.turn==="w",out=[];
-  for(let i=0;i<64;i++){const p=b[i];if(!p||isW(p)!==w)continue;const t=p.toLowerCase();const [r,c]=rc(i);
-    const add=(to,extra)=>{const q=b[to];if(q&&isW(q)===w)return false;out.push(Object.assign({f:i,t:to,p:t,cap:q||""},extra||{}));return !q};
-    if(t==="p"){const dir=w?-1:1,r1=r+dir;
-      if(r1>=0&&r1<8&&!b[r1*8+c]){if(r1===0||r1===7)out.push({f:i,t:r1*8+c,p:t,cap:"",promo:"q"});else{out.push({f:i,t:r1*8+c,p:t,cap:""});
-        const r2=r+2*dir;if((w&&r===6||!w&&r===1)&&!b[r2*8+c])out.push({f:i,t:r2*8+c,p:t,cap:"",dbl:true})}}
-      for(const dc of [-1,1]){const cc=c+dc;if(cc<0||cc>7||r1<0||r1>7)continue;const to=r1*8+cc,q=b[to];
-        if(q&&isW(q)!==w)out.push({f:i,t:to,p:t,cap:q,promo:(r1===0||r1===7)?"q":undefined});
-        else if(to===S.ep)out.push({f:i,t:to,p:t,cap:w?"p":"P",ep:true})}}
-    else if(t==="n"){for(const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]){const rr=r+dr,cc=c+dc;if(rr>=0&&rr<8&&cc>=0&&cc<8)add(rr*8+cc)}}
-    else if(t==="k"){for(const [dr,dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]){const rr=r+dr,cc=c+dc;if(rr>=0&&rr<8&&cc>=0&&cc<8)add(rr*8+cc)}
-      const row=w?7:0,K=w?"K":"k",Q=w?"Q":"q";
-      if(i===row*8+4&&!attacked(b,i,!w)){
-        if(S.cast.includes(K)&&!b[row*8+5]&&!b[row*8+6]&&b[row*8+7]===(w?"R":"r")&&!attacked(b,row*8+5,!w)&&!attacked(b,row*8+6,!w))out.push({f:i,t:row*8+6,p:"k",cap:"",castle:"k"});
-        if(S.cast.includes(Q)&&!b[row*8+3]&&!b[row*8+2]&&!b[row*8+1]&&b[row*8]===(w?"R":"r")&&!attacked(b,row*8+3,!w)&&!attacked(b,row*8+2,!w))out.push({f:i,t:row*8+2,p:"k",cap:"",castle:"q"})}}
-    else{const dirs=t==="b"?[[-1,-1],[-1,1],[1,-1],[1,1]]:t==="r"?[[-1,0],[1,0],[0,-1],[0,1]]:[[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]];
-      for(const [dr,dc] of dirs){let rr=r+dr,cc=c+dc;while(rr>=0&&rr<8&&cc>=0&&cc<8){if(!add(rr*8+cc))break;rr+=dr;cc+=dc}}}}
-  return out
-}
-function make(S,m){
-  const b=S.b.slice(),w=S.turn==="w";const p=b[m.f];b[m.t]=m.promo?(w?m.promo.toUpperCase():m.promo):p;b[m.f]="";
-  if(m.ep)b[m.t+(w?8:-8)]="";
-  if(m.castle){const row=w?7:0;if(m.castle==="k"){b[row*8+5]=b[row*8+7];b[row*8+7]=""}else{b[row*8+3]=b[row*8];b[row*8]=""}}
-  let cast=S.cast;
-  if(p==="K")cast=cast.replace("K","").replace("Q","");if(p==="k")cast=cast.replace("k","").replace("q","");
-  for(const [sq,ch] of [[63,"K"],[56,"Q"],[7,"k"],[0,"q"]])if(m.f===sq||m.t===sq)cast=cast.replace(ch,"");
-  return {b,turn:w?"b":"w",cast,ep:m.dbl?(m.f+m.t)/2:-1,half:(m.p==="p"||m.cap)?0:S.half+1,ply:S.ply+1}
-}
-function legal(S){const w=S.turn==="w";return pseudo(S).filter(m=>!inCheck(make(S,m),w))}
-// valutazione dal punto di vista del bianco
-const CEN=[0,1,2,3,3,2,1,0];
-function evalB(b){
-  let s=0,minor=0;for(const p of b)if(p&&"nbrqNBRQ".includes(p))minor++;const endg=minor<=6;
-  for(let i=0;i<64;i++){const p=b[i];if(!p)continue;const w=isW(p),t=p.toLowerCase(),[r,c]=rc(i);let v=VAL[t];
-    if(t==="p")v+=(w?6-r:r-1)*(endg?14:6)+(c>=2&&c<=5?4:0);
-    else if(t==="n"||t==="b")v+=(CEN[r]+CEN[c])*5-((w?r===7:r===0)?12:0);
-    else if(t==="q")v+=(CEN[r]+CEN[c])*2;
-    else if(t==="k")v+=endg?(CEN[r]+CEN[c])*8:((w?r===7:r===0)?(c<=2||c>=6?18:0):-25);
-    else if(t==="r")v+=((w?r===1:r===6)?20:0);
-    s+=w?v:-v}
-  return s
-}
-function search(S,d,a,bt,q=0){
-  const ms=d>0?legal(S):legal(S).filter(m=>m.cap);
-  const sign=S.turn==="w"?1:-1;
-  if(d<=0){const stand=sign*evalB(S.b);if(q>=3||!ms.length)return stand;if(stand>=bt)return stand;if(stand>a)a=stand}
-  else if(!ms.length)return inCheck(S,S.turn==="w")?-100000+S.ply:0;
-  ms.sort((x,y)=>(VAL[(y.cap||"").toLowerCase()]||0)-(VAL[(x.cap||"").toLowerCase()]||0));
-  let best=d>0?-1e9:a;
-  for(const m of ms){const v=-search(make(S,m),d-1,-bt,-a,d<=0?q+1:0);if(v>best)best=v;if(v>a)a=v;if(a>=bt)break}
-  return best
-}
-function features(S,m,v,best){
-  const w=S.turn==="w",N=make(S,m),f={};
-  f.valore=Math.max(-1,(v-best)/120);
-  f.punti=(VAL[(m.cap||"").toLowerCase()]||0)/900+(m.promo?.9:0);
-  f.attacco=(inCheck(N,!w)?.8:0);
-  f.difesa=attacked(S.b,m.f,!w)&&m.p!=="k"?.6:0;
-  const hang=attacked(N.b,m.t,!w)&&!attacked(N.b,m.t,w);f.rischio=hang?(VAL[m.promo||m.p]||50)/900:0;
-  f.conserva=(m.p==="q"&&S.ply<16)?-.5:(m.p==="k"&&!m.castle&&S.ply<40)?-.4:0;
-  const [r,c]=rc(m.t),[r0,c0]=rc(m.f);f.posizione=((CEN[r]+CEN[c])-(CEN[r0]+CEN[c0]))/6;
-  f.futuro=(m.castle?1:0)+(("nb".includes(m.p)&&(w?r0===7:r0===0))?.6:0)+(m.p==="p"?.15:0);
-  const pieces=S.b.filter(x=>x&&"nbrqNBRQ".includes(x)).length;f.finale=pieces<=6?(m.p==="p"?.6:m.p==="k"?.3:0):0;
-  return f
-}
-function bestMoves(S,depth){
-  const ms=legal(S);let best=-1e9;const sc=ms.map(m=>{const v=-search(make(S,m),depth-1,-1e9,1e9);if(v>best)best=v;return v});
-  const cands=ms.map((m,i)=>({m,v:sc[i]})).filter(x=>x.v>=best-60).sort((a,b)=>b.v-a.v).slice(0,7);
-  return cands.map(x=>({m:x.m,v:x.v,f:features(S,x.m,x.v,best)}))
-}
-window.__CHESS={start,legal,make,inCheck,bestMoves,search};
-const GL={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};
-const FILES="abcdefgh";
-const sqName=i=>FILES[i&7]+(8-(i>>3));
-GAMES.scacchi={nome:"Scacchi",ic:"♟️",sub:"Il classico: dai scacco matto al re",
-  tut:[["♔","Lo scopo","Devi dare scacco matto: attaccare il re avversario in modo che non possa più scappare. Tu hai i pezzi bianchi e muovi per primo."],
-       ["♙♘","I pezzi","Pedone: avanti di 1 (di 2 alla prima mossa), mangia in diagonale. Cavallo: a «L», salta gli altri pezzi. Alfiere: in diagonale. Torre: dritto. Regina: dritto e in diagonale. Re: di 1 in ogni direzione."],
-       ["👆","Come si muove","Tocca un tuo pezzo: i puntini mostrano dove può andare, i cerchi dove può mangiare. Poi tocca la casella. Il pedone che arriva in fondo diventa regina."],
-       ["🏰","Mosse speciali","Arrocco: tocca il re e poi la casella a due passi verso la torre. Ci sono anche la presa «en passant» e lo stallo (se chi deve muovere non ha mosse ma non è sotto scacco, è pareggio)."]],
-  play(pg){
-    const sh=gameShell(pg,this);let S=start(),sel=-1,last=[],busy=false;const storia=[];const depth=matchMedia("(min-width:900px)").matches?3:2;
-    const board=E("div","board");sh.g.append(board);
-    const draw=()=>{board.innerHTML="";const ms=sel>=0?legal(S).filter(m=>m.f===sel):[];
-      for(let i=0;i<64;i++){const [r,c]=rc(i);const d=E("div","sq "+((r+c)%2?"d":"l"));d.dataset.sq=sqName(i);
-        if(i===sel)d.classList.add("sel");if(last.includes(i))d.classList.add("last");
-        const m=ms.find(x=>x.t===i);if(m)d.classList.add(m.cap?"cap":"mv");
-        const p=S.b[i];if(p){const s=E("span",isW(p)?"pw":"pb",GL[p.toLowerCase()]+"\uFE0E");d.append(s)}
-        d.onclick=()=>tap(i);board.append(d)}};
-    const over=()=>{const ms=legal(S);
-      if(!ms.length){const chk=inCheck(S,S.turn==="w");if(chk){const nat=S.turn==="w";sh.status.textContent=nat?"Scacco matto! Ha vinto Natan Gaming.":"Scacco matto! Hai vinto!";fine(sh,"scacchi",storia,nat,nat?"Scacco matto: vince Natan Gaming":"Scacco matto: hai vinto!")}
-        else{sh.status.textContent="Stallo: pareggio.";fine(sh,"scacchi",storia,null,"Stallo: pareggio")}return true}
-      const pcs=S.b.filter(Boolean);if(pcs.length===2||S.half>=100){sh.status.textContent="Pareggio.";fine(sh,"scacchi",storia,null,"Pareggio");return true}
-      return false};
-    const tap=async i=>{
-      if(busy||S.turn!=="w")return;const p=S.b[i];
-      if(sel>=0){const m=legal(S).find(x=>x.f===sel&&x.t===i);
-        if(m){S=make(S,m);last=[m.f,m.t];sel=-1;draw();if(over())return;await natan();return}}
-      sel=(p&&isW(p))?i:-1;draw()};
-    const natan=async()=>{busy=true;sh.status.textContent=inCheck(S,false)?"Natan Gaming è sotto scacco!":"Tocca a Natan Gaming";
-      await sleep(30);const c=bestMoves(S,depth);const r=await pensa(sh.ng,"scacchi",c,"ha mosso");storia.push(r.favor||[]);
-      const m=r.mossa.m;S=make(S,m);last=[m.f,m.t];draw();busy=false;
-      if(!over())sh.status.textContent=(inCheck(S,true)?"Scacco! ":"")+"Tocca a te ("+sqName(m.f)+"→"+sqName(m.t)+")"};
-    sh.status.textContent="Tocca a te: muovi un pezzo bianco";draw()}};
-})();
-
-// =====================================================================================================
-// DAMA ITALIANA
-(function(){
-const {E,sleep,pensa,gameShell,fine,GAMES}=window.__G;
-const rc=i=>[i>>3,i&7],ok=(r,c)=>r>=0&&r<8&&c>=0&&c<8;
-function start(){const b=Array(64).fill("");for(let i=0;i<64;i++){const [r,c]=rc(i);if((r+c)%2===1){if(r<3)b[i]="b";else if(r>4)b[i]="w"}}return {b,turn:"w",ply:0,quiet:0}}
-const mine=(p,w)=>p&&(w?p.toLowerCase()==="w":p.toLowerCase()==="b");
-const king=p=>p==="W"||p==="B";
-function caps(b,from,p,w,taken,path,out){
-  const [r,c]=rc(from);const dirs=king(p)?[[-1,-1],[-1,1],[1,-1],[1,1]]:(w?[[-1,-1],[-1,1]]:[[1,-1],[1,1]]);let any=false;
-  for(const [dr,dc] of dirs){const mr=r+dr,mc=c+dc,lr=r+2*dr,lc=c+2*dc;if(!ok(lr,lc))continue;const mid=mr*8+mc,land=lr*8+lc;
-    const q=b[mid];if(!q||mine(q,w)||taken.includes(mid)||b[land])continue;
-    if(!king(p)&&king(q))continue;                                        // nella dama italiana la pedina non mangia la dama
-    any=true;const np=[...path,land],nt=[...taken,mid];
-    const promo=!king(p)&&(w?lr===0:lr===7);
-    const b2=b.slice();b2[from]="";b2[land]=p;
-    if(promo)out.push({path:np,caps:nt,promo:true,king:king(p),kcaps:nt.map(x=>king(b[x])?1:0)});
-    else caps(b2,land,p,w,nt,np,out)}
-  if(!any&&taken.length)out.push({path,caps:taken,promo:false,king:king(p),kcaps:taken.map(x=>king(b[x])?1:0)})
-}
-function moves(S){
-  const w=S.turn==="w",b=S.b;let cs=[];
-  for(let i=0;i<64;i++)if(mine(b[i],w)){const o=[];caps(b,i,b[i],w,[],[i],o);cs=cs.concat(o)}
-  if(cs.length){                                                          // presa obbligatoria: la più ricca (regole italiane)
-    const mx=Math.max(...cs.map(m=>m.caps.length));cs=cs.filter(m=>m.caps.length===mx);
-    if(cs.some(m=>m.king))cs=cs.filter(m=>m.king);
-    const kk=Math.max(...cs.map(m=>m.kcaps.reduce((a,x)=>a+x,0)));cs=cs.filter(m=>m.kcaps.reduce((a,x)=>a+x,0)===kk);
-    if(kk>0){const first=Math.min(...cs.map(m=>m.kcaps.indexOf(1)));cs=cs.filter(m=>m.kcaps.indexOf(1)===first)}
-    return cs}
-  const out=[];
-  for(let i=0;i<64;i++){const p=b[i];if(!mine(p,w))continue;const [r,c]=rc(i);
-    const dirs=king(p)?[[-1,-1],[-1,1],[1,-1],[1,1]]:(w?[[-1,-1],[-1,1]]:[[1,-1],[1,1]]);
-    for(const [dr,dc] of dirs){const rr=r+dr,cc=c+dc;if(ok(rr,cc)&&!b[rr*8+cc])out.push({path:[i,rr*8+cc],caps:[],promo:!king(p)&&(w?rr===0:rr===7)})}}
-  return out
-}
-function make(S,m){const b=S.b.slice();const from=m.path[0],to=m.path[m.path.length-1];let p=b[from];b[from]="";for(const x of m.caps)b[x]="";
-  if(m.promo)p=p.toUpperCase();b[to]=p;return {b,turn:S.turn==="w"?"b":"w",ply:S.ply+1,quiet:m.caps.length?0:S.quiet+1}}
-function evalW(b){let s=0;for(let i=0;i<64;i++){const p=b[i];if(!p)continue;const [r,c]=rc(i);const w=p.toLowerCase()==="w";
-  let v=king(p)?170:100+(w?7-r:r)*4+(c>1&&c<6?3:0)+((w?r===7:r===0)?6:0);s+=w?v:-v}return s}
-function search(S,d,a,bt){const ms=moves(S);if(!ms.length)return -100000+S.ply;if(d<=0)return (S.turn==="w"?1:-1)*evalW(S.b);
-  let best=-1e9;for(const m of ms){const v=-search(make(S,m),m.caps.length&&d===1?1:d-1,-bt,-a);if(v>best)best=v;if(v>a)a=v;if(a>=bt)break}return best}
-function threatened(S2,sq){const o=moves(S2);return o.some(m=>m.caps.includes(sq))}
-function bestMoves(S,depth){
-  const ms=moves(S);let best=-1e9;const sc=ms.map(m=>{const v=-search(make(S,m),depth-1,-1e9,1e9);if(v>best)best=v;return v});
-  return ms.map((m,i)=>({m,v:sc[i]})).filter(x=>x.v>=best-40).sort((a,b)=>b.v-a.v).slice(0,7).map(x=>{
-    const N=make(S,x.m),to=x.m.path[x.m.path.length-1],[r,c]=rc(to),[r0]=rc(x.m.path[0]);
-    const f={valore:Math.max(-1,(x.v-best)/100),punti:x.m.caps.length/3,attacco:0,difesa:threatened({b:S.b,turn:S.turn==="w"?"b":"w"},x.m.path[0])?.6:0,
-      rischio:threatened(N,to)?.8:0,conserva:(S.turn==="b"&&r0===0)||(S.turn==="w"&&r0===7)?-.4:0,posizione:(c>1&&c<6?.4:0),
-      futuro:x.m.promo?1:(Math.abs(r-r0)*.1),finale:king(S.b[x.m.path[0]])?.4:0};
-    const after={b:N.b,turn:S.turn};f.attacco=moves(after).some(m=>m.caps.length)?.5:0;return {m:x.m,v:x.v,f}})}
-window.__DAMA={start,moves,make,bestMoves};
-GAMES.dama={nome:"Dama",ic:"⚪",sub:"Dama italiana: la presa è obbligatoria",
-  tut:[["⚪⚫","Lo scopo","Mangia tutte le pedine di Natan Gaming o bloccalo così che non possa più muovere. Tu hai le bianche e inizi tu."],
-       ["↗️","Come si muove","Le pedine vanno avanti in diagonale di una casella, solo sulle caselle scure. Tocca una tua pedina e poi la casella dove vuoi andare."],
-       ["💥","Mangiare","Se una pedina avversaria è vicina e dietro c'è una casella libera, la salti e la mangi. Se puoi mangiare DEVI farlo, e devi scegliere la presa che mangia di più. Puoi fare più salti di fila."],
-       ["👑","La dama","Quando una pedina arriva in fondo diventa dama (👑): si muove e mangia anche all'indietro. Attenzione: nella dama italiana una pedina semplice non può mangiare una dama."]],
-  play(pg){
-    const sh=gameShell(pg,this);let S=start(),sel=-1,last=[],busy=false;const storia=[];const depth=matchMedia("(min-width:900px)").matches?6:5;
-    const board=E("div","board");sh.g.append(board);
-    const draw=()=>{board.innerHTML="";const all=moves(S);const ms=sel>=0?all.filter(m=>m.path[0]===sel):[];const mustFrom=new Set(all.filter(m=>m.caps.length).map(m=>m.path[0]));
-      for(let i=0;i<64;i++){const [r,c]=rc(i);const d=E("div","sq "+((r+c)%2?"d":"l"));d.dataset.sq=String(i);
-        if(i===sel)d.classList.add("sel");if(last.includes(i))d.classList.add("last");
-        const m=ms.find(x=>x.path[x.path.length-1]===i);if(m)d.classList.add(m.caps.length?"cap":"mv");
-        const p=S.b[i];if(p){const man=E("div","man "+(p.toLowerCase()==="w"?"w":"b"),king(p)?"👑":"");if(S.turn==="w"&&mustFrom.has(i)&&p.toLowerCase()==="w")man.style.outline="3px solid #ffd75a";d.append(man)}
-        d.onclick=()=>tap(i);board.append(d)}};
-    const over=()=>{if(!moves(S).length){const nat=S.turn==="w";sh.status.textContent=nat?"Non hai più mosse: vince Natan Gaming.":"Natan Gaming non ha più mosse: hai vinto!";
-      fine(sh,"dama",storia,nat,nat?"Vince Natan Gaming":"Hai vinto!");return true}
-      if(S.quiet>=80){sh.status.textContent="Troppe mosse senza prese: pareggio.";fine(sh,"dama",storia,null,"Pareggio");return true}return false};
-    const tap=async i=>{if(busy||S.turn!=="w")return;
-      if(sel>=0){const m=moves(S).find(x=>x.path[0]===sel&&x.path[x.path.length-1]===i);if(m){S=make(S,m);last=m.path;sel=-1;draw();if(over())return;await natan();return}}
-      const all=moves(S);sel=all.some(m=>m.path[0]===i)?i:-1;
-      if(sel<0&&mine(S.b[i],true)&&all.some(m=>m.caps.length))sh.status.textContent="Devi mangiare: muovi una delle pedine evidenziate in giallo";draw()};
-    const natan=async()=>{busy=true;sh.status.textContent="Tocca a Natan Gaming";await sleep(30);
-      const r=await pensa(sh.ng,"dama",bestMoves(S,depth),"ha mosso");storia.push(r.favor||[]);const m=r.mossa.m;S=make(S,m);last=m.path;draw();busy=false;
-      if(!over())sh.status.textContent=(m.caps.length?`Natan Gaming ha mangiato ${m.caps.length} ${m.caps.length>1?"pedine":"pedina"}. `:"")+"Tocca a te"};
-    sh.status.textContent="Tocca a te: muovi una pedina bianca";draw()}};
-})();
-
-// =====================================================================================================
-// CARTE COLORATE (stile Uno)
-(function(){
-const {E,sleep,shuffle,pensa,gameShell,fine,GAMES}=window.__G;
-const COL=["r","g","v","b"],CN={r:"rosso",g:"giallo",v:"verde",b:"blu",n:"jolly"};
-function deck(){const d=[];for(const c of COL){d.push({c,v:"0"});for(let k=0;k<2;k++){for(let n=1;n<=9;n++)d.push({c,v:String(n)});for(const a of ["salta","inverti","+2"])d.push({c,v:a})}}
-  for(let k=0;k<4;k++){d.push({c:"n",v:"jolly"});d.push({c:"n",v:"+4"})}return shuffle(d)}
-const can=(card,top,color)=>card.c==="n"||card.c===color||card.v===top.v;
-const label=v=>({salta:"⊘",inverti:"⇄",jolly:"★","+2":"+2","+4":"+4"}[v]||v);
-function cardEl(k,onclick,ok=true){const d=E("div","card u "+k.c);d.append(E("div","big",label(k.v)));d.title=CN[k.c]+" "+k.v;if(!ok)d.classList.add("no");if(onclick&&ok)d.onclick=onclick;return d}
-function bestColor(h){const n={r:0,g:0,v:0,b:0};for(const k of h)if(k.c!=="n")n[k.c]++;return COL.sort((a,b)=>n[b]-n[a])[0]}
-window.__UNO={deck,can};
-GAMES.uno={nome:"Carte colorate",ic:"🃏",sub:"Stile Uno: resta senza carte per primo",
-  tut:[["🃏","Lo scopo","Vince chi resta per primo senza carte. Tu e Natan Gaming partite con 7 carte."],
-       ["🟥🟦","Come si gioca","Al tuo turno metti sul mazzo una carta dello stesso colore oppure con lo stesso numero o simbolo. Se non puoi, peschi una carta (e se va bene puoi giocarla subito)."],
-       ["⊘⇄+2","Le carte speciali","⊘ Salta e ⇄ Inverti: l'avversario salta il turno. +2: l'avversario pesca 2 carte e salta il turno. ★ Jolly: scegli tu il colore. +4: scegli il colore e l'avversario pesca 4 carte (in questa versione il +4 si può giocare sempre)."],
-       ["📣","UNO!","Quando stai per restare con una sola carta, premi «UNO!» prima di giocarla. Se te ne dimentichi, Natan Gaming se ne accorge e peschi 2 carte."]],
-  play(pg){
-    const sh=gameShell(pg,this);let D=deck();const hand=[D.pop(),D.pop(),D.pop(),D.pop(),D.pop(),D.pop(),D.pop()],nat=[D.pop(),D.pop(),D.pop(),D.pop(),D.pop(),D.pop(),D.pop()];
-    let top=D.pop();while(top.c==="n"){D.unshift(top);top=D.pop()}let color=top.c,busy=false,uno=false,drew=null,finished=false;const pile=[top];const storia=[];
-    const draw1=()=>{if(!D.length){const keep=pile.pop();D=shuffle(pile.splice(0));pile.push(keep)}return D.pop()};
-    const opp=E("div","hand");const mid=E("div","table");const mine=E("div","hand");const ctl=E("div","row");ctl.style.justifyContent="center";
-    sh.g.append(E("small","","Le carte di Natan Gaming"),opp,mid,E("small","","Le tue carte"),mine,ctl);
-    const render=()=>{opp.innerHTML="";nat.forEach(()=>opp.append(E("div","card back")));
-      mid.innerHTML="";mid.append(cardEl(top));const cc=E("div","");cc.style.cssText="align-self:center;color:#fff;font-weight:700";cc.textContent="Colore: "+CN[color];mid.append(cc);
-      const dk=E("div","card back");dk.style.cursor="pointer";dk.title="Pesca";mid.append(dk);dk.onclick=pesca;
-      mine.innerHTML="";hand.forEach((k,i)=>{const ok=!busy&&!finished&&(drew?k===drew:true)&&can(k,top,color);mine.append(cardEl(k,()=>play(i),ok))});
-      ctl.innerHTML="";if(finished)return;
-      const pb=E("button","btn ghost","🂠 Pesca");pb.id="unoPesca";pb.onclick=pesca;pb.disabled=busy||!!drew;ctl.append(pb);
-      if(drew){const ps=E("button","btn ghost","Passa");ps.id="unoPassa";ps.onclick=()=>{drew=null;natan()};ctl.append(ps)}
-      const ub=E("button","btn"+(uno?"":" ghost"),uno?"UNO! ✓":"📣 UNO!");ub.id="unoBtn";ub.onclick=()=>{uno=true;render()};ub.disabled=busy||hand.length>2;ctl.append(ub)};
-    const effect=async(k,victim,who)=>{
-      if(k.v==="+2"){victim.push(draw1(),draw1());return true}
-      if(k.v==="+4"){victim.push(draw1(),draw1(),draw1(),draw1());return true}
-      return k.v==="salta"||k.v==="inverti"};
-    const chooseColor=()=>new Promise(res=>{ctl.innerHTML="";ctl.append(E("span","","Scegli il colore:"));
-      for(const c of COL){const b=E("button","btn","");b.style.background={r:"#e2463c",g:"#f2c230",v:"#33a65a",b:"#2f6fd6"}[c];b.textContent=CN[c];b.dataset.col=c;b.onclick=()=>res(c);ctl.append(b)}});
-    const check=()=>{if(!hand.length){finished=true;render();sh.status.textContent="Hai finito le carte: hai vinto!";fine(sh,"uno",storia,false,"Hai vinto!");return true}
-      if(!nat.length){finished=true;render();sh.status.textContent="Natan Gaming ha finito le carte.";fine(sh,"uno",storia,true,"Vince Natan Gaming");return true}return false};
-    async function play(i){if(busy||finished)return;const k=hand[i];if(!can(k,top,color))return;
-      busy=true;hand.splice(i,1);pile.push(k);top=k;color=k.c;drew=null;
-      if(k.c==="n"){render();color=await chooseColor()}
-      let msg="";if(hand.length===1&&!uno){hand.push(draw1(),draw1());msg="Natan Gaming: «Non hai detto UNO!» Peschi 2 carte. "}
-      uno=false;const skip=await effect(k,nat);render();if(check())return;
-      if(skip){sh.status.textContent=msg+"Natan Gaming salta il turno: tocca a te di nuovo";busy=false;render();return}
-      sh.status.textContent=msg;busy=false;await natan()}
-    async function pesca(){if(busy||finished||drew)return;const k=draw1();hand.push(k);
-      if(can(k,top,color)){drew=k;sh.status.textContent="Hai pescato una carta che va bene: giocala oppure premi «Passa»";render()}
-      else{sh.status.textContent="Hai pescato";render();await natan()}}
-    async function natan(){if(finished)return;busy=true;render();sh.status.textContent="Tocca a Natan Gaming";
-      for(;;){
-        const playable=nat.map((k,i)=>({k,i})).filter(x=>can(x.k,top,color));
-        if(!playable.length){const k=draw1();nat.push(k);await sleep(400);render();
-          if(!can(k,top,color)){sh.status.textContent="Natan Gaming ha pescato. Tocca a te";busy=false;render();return}continue}
-        const few=1/Math.max(1,hand.length),maj=bestColor(nat);
-        const cands=playable.map(x=>{const k=x.k;const rest=nat.filter((_,j)=>j!==x.i);const act=["+2","+4","salta","inverti"].includes(k.v);
-          return {x,f:{valore:(+k.v||0)/9*.5,punti:act?.4:0,attacco:(k.v==="+4"?1:k.v==="+2"?.7:act?.4:0)*few*2,
-            conserva:k.c==="n"?-.7:0,posizione:(k.c===maj?.5:0),futuro:rest.filter(r=>r.c===(k.c==="n"?maj:k.c)||r.c==="n").length/8,
-            finale:hand.length<=2?(act?1:.2):0,rischio:0,difesa:hand.length<=2&&k.v==="+4"?.8:0}}});
-        const r=await pensa(sh.ng,"uno",cands,"ha giocato");storia.push(r.favor||[]);const {k,i}=r.mossa.x;
-        nat.splice(i,1);pile.push(k);top=k;color=k.c==="n"?bestColor(nat):k.c;
-        const skip=await effect(k,hand);render();
-        if(check())return;
-        if(skip){sh.status.textContent=(k.v==="+2"?"Peschi 2 carte e ":k.v==="+4"?"Peschi 4 carte e ":"")+"salti il turno: Natan Gaming gioca ancora";await sleep(700);continue}
-        break}
-      sh.status.textContent=(nat.length===1?"Natan Gaming: «UNO!» · ":"")+"Tocca a te"+(top.c==="n"?" · colore scelto: "+CN[color]:"");busy=false;render()}
-    sh.status.textContent="Tocca a te: gioca una carta dello stesso colore o numero";render()}};
-})();
-
-// =====================================================================================================
-// CARTE ITALIANE: Scopa e Briscola
-(function(){
-const {E,sleep,shuffle,pensa,gameShell,fine,GAMES}=window.__G;
-const SEMI=["denari","coppe","spade","bastoni"],ICO={denari:"🪙",coppe:"🏆",spade:"🗡️",bastoni:"🪵"},TINT={denari:"#b8860b",coppe:"#c0392b",spade:"#2c5aa0",bastoni:"#2e7d32"};
-const NOME=v=>({1:"A",8:"F",9:"C",10:"R"}[v]||String(v));
-const NOMEL=v=>({1:"Asso",8:"Fante",9:"Cavallo",10:"Re"}[v]||String(v));
-function mazzo(){const d=[];for(const s of SEMI)for(let v=1;v<=10;v++)d.push({s,v});return shuffle(d)}
-function cardEl(k,onclick,ok=true){const d=E("div","card");d.style.borderLeft="5px solid "+TINT[k.s];d.style.color=TINT[k.s];
-  d.append(E("div","v",NOME(k.v)),E("div","s",ICO[k.s]),E("div","v2",NOMEL(k.v)+" di "+k.s));d.title=NOMEL(k.v)+" di "+k.s;if(!ok)d.classList.add("no");if(onclick&&ok)d.onclick=onclick;return d}
-const PRIM={7:21,6:18,1:16,5:15,4:14,3:13,2:12,8:10,9:10,10:10};
-function prese(tavolo,v){const s=tavolo.map((k,i)=>({k,i})).filter(x=>x.k.v===v);if(s.length)return s.map(x=>[x.i]);
-  const out=[],n=tavolo.length;for(let m=1;m<(1<<n);m++){let sum=0,ids=[];for(let i=0;i<n;i++)if(m&(1<<i)){sum+=tavolo[i].v;ids.push(i)}if(sum===v&&ids.length>1)out.push(ids)}return out}
-function primiera(cs){let t=0;for(const s of SEMI){const m=Math.max(0,...cs.filter(k=>k.s===s).map(k=>PRIM[k.v]));if(!m)return 0;t+=m}return t}
-function punteggio(a,b,sa,sb){const r={a:sa,b:sb,det:[]};
-  const add=(cond,who,txt)=>{if(cond===1){r.a++;r.det.push("tu: "+txt)}else if(cond===-1){r.b++;r.det.push("Natan: "+txt)}};
-  add(Math.sign(a.length-b.length),0,"carte");const da=a.filter(k=>k.s==="denari").length,db=b.filter(k=>k.s==="denari").length;add(Math.sign(da-db),0,"denari");
-  add(a.some(k=>k.s==="denari"&&k.v===7)?1:-1,0,"settebello");const pa=primiera(a),pb=primiera(b);add(Math.sign(pa-pb),0,"primiera");
-  if(sa)r.det.push("tu: "+sa+" scop"+(sa>1?"e":"a"));if(sb)r.det.push("Natan: "+sb+" scop"+(sb>1?"e":"a"));return r}
-window.__SCOPA={prese,primiera,punteggio,mazzo};
-GAMES.scopa={nome:"Scopa",ic:"🧹",sub:"Carte italiane: prendi, fai scopa, arriva a 11",
-  tut:[["🧹","Lo scopo","Si gioca con 40 carte italiane (denari 🪙, coppe 🏆, spade 🗡️, bastoni 🪵). Vince chi arriva per primo a 11 punti, in più smazzate."],
-       ["🃏","Prendere","Giochi una carta: se sul tavolo c'è una carta con lo stesso valore la prendi (Fante=8, Cavallo=9, Re=10). Altrimenti puoi prendere più carte che sommate fanno il suo valore. Se non prendi niente, la carta resta sul tavolo."],
-       ["✨","Scopa!","Se prendi tutte le carte del tavolo fai «scopa»: un punto in più. Attenta a non lasciare sul tavolo carte che l'avversario può prendere tutte insieme."],
-       ["🏅","I punti","A fine smazzata: 1 punto a chi ha più carte, 1 a chi ha più denari, 1 per il settebello (7 di denari), 1 per la primiera (i migliori 7, 6 e assi di ogni seme), più le scope."]],
-  play(pg){
-    const sh=gameShell(pg,this);let tot={a:0,b:0};const storia=[];let primo=0;
-    const opp=E("div","hand"),tav=E("div","table"),mine=E("div","hand"),ctl=E("div","row"),sc=E("div","score");ctl.style.justifyContent="center";
-    sh.g.append(sc,E("small","","Natan Gaming"),opp,tav,E("small","","Le tue carte"),mine,ctl);
-    const smazzata=()=>{const D=mazzo();const st={D,tav:[D.pop(),D.pop(),D.pop(),D.pop()],ha:[],hb:[],pa:[],pb:[],sa:0,sb:0,last:null,turn:primo,busy:false};
-      const dai=()=>{for(let i=0;i<3;i++){st.ha.push(st.D.pop());st.hb.push(st.D.pop())}};dai();
-      const render=()=>{sc.innerHTML="";sc.append(E("b","",`Tu ${tot.a}`),E("b","",`Natan ${tot.b}`),E("b","",`Mazzo ${st.D.length}`),E("b","",`Scope: tu ${st.sa} · Natan ${st.sb}`));
-        opp.innerHTML="";st.hb.forEach(()=>opp.append(E("div","card back")));tav.innerHTML="";st.tav.forEach(k=>tav.append(cardEl(k)));if(!st.tav.length)tav.append(E("span","","(tavolo vuoto)"));
-        mine.innerHTML="";st.ha.forEach((k,i)=>mine.append(cardEl(k,()=>gioca(i),!st.busy&&st.turn===0)))};
-      const scegli=opts=>new Promise(res=>{ctl.innerHTML="";ctl.append(E("span","","Cosa prendi?"));
-        opts.forEach((o,j)=>{const b=E("button","btn ghost",o.map(i=>NOMEL(st.tav[i].v)+" "+ICO[st.tav[i].s]).join(" + "));b.dataset.opt=String(j);b.onclick=()=>{ctl.innerHTML="";res(o)};ctl.append(b)})});
-      const applica=(who,k,opt)=>{const h=who===0?st.pa:st.pb;let txt;
-        if(opt){const taken=opt.map(i=>st.tav[i]);st.tav=st.tav.filter((_,i)=>!opt.includes(i));h.push(k,...taken);st.last=who;
-          const ultima=!st.D.length&&!st.ha.length&&!st.hb.length;
-          if(!st.tav.length&&!ultima){who===0?st.sa++:st.sb++;txt="SCOPA! ✨"}else txt="prende "+taken.map(t=>NOMEL(t.v)).join(" + ")}
-        else{st.tav.push(k);txt="posa "+NOMEL(k.v)+" di "+k.s}return txt};
-      const dopo=async()=>{
-        if(!st.ha.length&&!st.hb.length){
-          if(st.D.length){dai();render()}
-          else{if(st.tav.length&&st.last!==null){(st.last===0?st.pa:st.pb).push(...st.tav);st.tav=[]}
-            const r=punteggio(st.pa,st.pb,st.sa,st.sb);tot.a+=r.a;tot.b+=r.b;render();
-            sh.status.textContent=`Fine smazzata: tu +${r.a}, Natan +${r.b} (${r.det.join(", ")})`;
-            if((tot.a>=11||tot.b>=11)&&tot.a!==tot.b){fine(sh,"scopa",storia,tot.b>tot.a,tot.a>tot.b?`Hai vinto ${tot.a} a ${tot.b}!`:`Vince Natan Gaming ${tot.b} a ${tot.a}`);return true}
-            const nx=E("button","btn","Prossima smazzata →");nx.id="scopaNext";nx.onclick=()=>{primo=1-primo;ctl.innerHTML="";smazzata()};ctl.innerHTML="";ctl.append(nx);return true}}
-        return false};
-      async function gioca(i){if(st.busy||st.turn!==0)return;st.busy=true;const k=st.ha.splice(i,1)[0];render();
-        const opts=prese(st.tav,k.v);let opt=null;if(opts.length===1)opt=opts[0];else if(opts.length>1)opt=await scegli(opts);
-        sh.status.textContent="Tu: "+applica(0,k,opt);st.turn=1;render();if(await dopo())return;await sleep(500);await natan()}
-      async function natan(){st.busy=true;render();
-        const cands=[];st.hb.forEach((k,i)=>{const opts=prese(st.tav,k.v);
-          const valuta=opt=>{const taken=opt?opt.map(j=>st.tav[j]):[];const resto=opt?st.tav.filter((_,j)=>!opt.includes(j)):[...st.tav,k];const somma=resto.reduce((a,x)=>a+x.v,0);
-            const tutti=[k,...taken];const settebello=tutti.some(x=>x.s==="denari"&&x.v===7)&&opt;
-            return {i,opt,f:{punti:opt?(taken.length+1)/5+tutti.filter(x=>x.s==="denari").length*.15:0,attacco:(opt&&!resto.length)?1.4:0,
-              rischio:(resto.length&&somma<=10)?.8:(resto.length===1?.3:0),conserva:(!opt&&(k.v===7||k.s==="denari"))?-.6:0,
-              valore:(settebello?1.2:0)+(opt?tutti.reduce((a,x)=>a+(x.v===7?.3:x.v===6?.15:0),0):0),posizione:0,futuro:!opt?(1-k.v/10)*.3:0,
-              finale:!st.D.length&&opt?.4:0,difesa:0}}};
-          if(opts.length)opts.forEach(o=>cands.push(valuta(o)));else cands.push(valuta(null))});
-        const r=await pensa(sh.ng,"scopa",cands,"ha giocato");storia.push(r.favor||[]);const k=st.hb.splice(r.mossa.i,1)[0];
-        const tx=applica(1,k,r.mossa.opt);sh.status.textContent="Natan Gaming "+tx+(r.mossa.opt?" (con "+NOMEL(k.v)+" di "+k.s+")":"")+" · tocca a te";st.turn=0;st.busy=false;render();
-        if(await dopo())return;if(st.turn===1)await natan()}
-      render();sh.status.textContent=st.turn===0?"Tocca a te: gioca una carta":"Inizia Natan Gaming";if(st.turn===1)setTimeout(natan,600)};
-    smazzata()}};
-
-// --- Briscola
-const FORZA={1:10,3:9,10:8,9:7,8:6,7:5,6:4,5:3,4:2,2:1},PUNTI={1:11,3:10,10:4,9:3,8:2};
-const pt=k=>PUNTI[k.v]||0;
-function vince(a,b,br){if(a.s===b.s)return FORZA[b.v]>FORZA[a.v]?1:0;return b.s===br?1:0}       // 0 = vince chi ha giocato per primo
-window.__BRISCOLA={vince,pt};
-GAMES.briscola={nome:"Briscola",ic:"🎴",sub:"Carte italiane: fai più di 60 punti",
-  tut:[["🎴","Lo scopo","Si gioca con 40 carte italiane. Ognuno ha 3 carte. La carta girata sotto il mazzo è la «briscola»: il suo seme batte tutti gli altri."],
-       ["⚔️","La mano","Uno gioca una carta, l'altro risponde. Vince la carta più forte dello stesso seme, oppure una briscola. Se il seme è diverso e nessuno gioca briscola, vince chi ha giocato per primo."],
-       ["🔢","Forza e punti","Ordine di forza: Asso, 3, Re, Cavallo, Fante, 7, 6, 5, 4, 2. Punti: Asso 11, 3 vale 10, Re 4, Cavallo 3, Fante 2, le altre 0. In tutto ci sono 120 punti."],
-       ["🏆","Chi vince","Chi vince la mano prende le carte, pesca per primo e gioca la mano dopo. Alla fine vince chi ha più di 60 punti (60 a 60 è pareggio)."]],
-  play(pg){
-    const sh=gameShell(pg,this);const D=mazzo();const br=D[0];const ha=[D.pop(),D.pop(),D.pop()],hb=[D.pop(),D.pop(),D.pop()];let pa=0,pb=0,lead=0,inTav=null,busy=false;const storia=[];
-    const sc=E("div","score"),opp=E("div","hand"),tav=E("div","table"),mine=E("div","hand");sh.g.append(sc,E("small","","Natan Gaming"),opp,tav,E("small","","Le tue carte"),mine);
-    const render=()=>{sc.innerHTML="";sc.append(E("b","",`Tu ${pa}`),E("b","",`Natan ${pb}`),E("b","",`Mazzo ${D.length}`),E("b","",`Briscola: ${ICO[br.s]} ${br.s}`));
-      opp.innerHTML="";hb.forEach(()=>opp.append(E("div","card back")));tav.innerHTML="";
-      if(D.length){const b=cardEl(br);b.style.transform="rotate(90deg) scale(.85)";b.style.opacity=".9";tav.append(b)}
-      if(inTav)tav.append(cardEl(inTav.k));if(!inTav&&!D.length)tav.append(E("span","",""));
-      mine.innerHTML="";ha.forEach((k,i)=>mine.append(cardEl(k,()=>gioca(i),!busy&&(lead===0?!inTav:inTav&&inTav.who===1))))};
-    const pesca=w=>{if(!D.length)return;const first=w===0?ha:hb,sec=w===0?hb:ha;first.push(D.pop());sec.push(D.pop())};
-    const chiudi=async(a,b,primo)=>{const w=vince(a,b,br.s)===0?primo:1-primo;const p=pt(a)+pt(b);w===0?pa+=p:pb+=p;
-      sh.status.textContent=(w===0?"Prendi tu":"Prende Natan Gaming")+(p?` (${p} punti)`:"")+(w===0&&ha.length>1?" · tocca a te":"");inTav=null;pesca(w);lead=w;render();
-      if(!ha.length&&!hb.length){const vin=pa>60?false:pb>60?true:null;fine(sh,"briscola",storia,vin,vin===false?`Hai vinto ${pa} a ${pb}!`:vin?`Vince Natan Gaming ${pb} a ${pa}`:"60 a 60: pareggio");return}
-      await sleep(700);if(lead===1)await natan()};
-    async function gioca(i){if(busy)return;if(lead===0&&inTav)return;if(lead===1&&!(inTav&&inTav.who===1))return;
-      const k=ha.splice(i,1)[0];
-      if(lead===0){inTav={k,who:0};render();busy=true;await sleep(400);await natan()}
-      else{const a=inTav.k;inTav={k,who:0};render();busy=true;await sleep(600);busy=false;await chiudi(a,k,1)}}
-    async function natan(){busy=true;render();
-      const resp=inTav&&inTav.who===0;const a=resp?inTav.k:null;
-      const cands=hb.map((k,i)=>{const isB=k.s===br.s;
-        if(resp){const win=vince(a,k,br.s)===1;const p=pt(a)+pt(k);
-          return {i,f:{valore:win?p/21:-p/21,punti:win?p/11:0,attacco:win&&pt(a)>=10?1:0,conserva:(isB?-.5:0)-(pt(k)>=10&&!win?.8:0),rischio:!win?pt(k)/11:0,
-            difesa:win&&isB&&pt(a)>=3?.6:0,posizione:0,futuro:-(FORZA[k.v]/10)*.3,finale:!D.length&&win?.5:0}}}
-        return {i,f:{valore:-pt(k)/11,punti:0,attacco:0,conserva:(isB?-.6:0)-(pt(k)>=10?.7:0),rischio:pt(k)/11*.8,difesa:0,posizione:0,futuro:-(FORZA[k.v]/10)*.2,finale:0}}});
-      const r=await pensa(sh.ng,"briscola",cands,"ha giocato");storia.push(r.favor||[]);const k=hb.splice(r.mossa.i,1)[0];
-      if(resp){const a2=inTav.k;inTav={k,who:1};render();await sleep(700);busy=false;await chiudi(a2,k,0)}
-      else{inTav={k,who:1};busy=false;render();sh.status.textContent="Natan Gaming ha giocato "+NOMEL(k.v)+" di "+k.s+": rispondi"}}
-    render();sh.status.textContent="Tocca a te: gioca una carta (la briscola è "+br.s+" "+ICO[br.s]+")"}};
+window.GIOCHI={open(pg){style();intro();menu(pg)},_games:GAMES,_consiglio:consiglio,AGENTI,BOTS,LIV,botInfo,_avvia:avvia};
+window.__G={E,LSG,sleep,rnd,shuffle,mulberry,SLOW,h32,GAMES,consiglio,fineBanner,scegliBot,botCard,F,LIV,NAG,
+  register(info){GAMES[info.id]=info;return info}};
 })();
