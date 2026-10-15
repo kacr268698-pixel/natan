@@ -228,25 +228,83 @@ class Net{
   send(m){if(this.up&&this.up.open){try{this.up.send(m)}catch(e){}}}
   close(){try{if(this.host)this.bcast({t:"bye"});else this.send({t:"addio"})}catch(e){}
     try{clearInterval(this.hb);if(this.vis)document.removeEventListener("visibilitychange",this.vis)}catch(e){}
+    if(this.rel){const R=this.rel,code=this.code;setTimeout(()=>{R.stop=true;relayPost(R.base,{op:"chiudi",c:code,tok:R.tok},4000).catch(()=>{})},500)}
     const p=this.peer;this.peer=null;setTimeout(()=>{try{p&&p.destroy()}catch(e){}},200)}
 }
+// --- via di riserva: se i due telefoni non riescono a collegarsi direttamente (reti diverse, 4G, scuola), le mosse passano dal Mac di Kevin
+const RID=()=>{const a=new Uint8Array(12);(window.crypto||{getRandomValues:x=>x.forEach((_,i)=>x[i]=rnd(256))}).getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,"0")).join("")};
+async function relayPost(base,body,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||30000);
+  try{const r=await fetch(base+"/stanza",{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(body),signal:c.signal,cache:"no-store"});return await r.json()}finally{clearTimeout(t)}}
+class RConn{                                   // sembra una connessione di PeerJS (on, send, close, open) ma passa dal Mac
+  constructor(){this.l={};this.open=false;this.relay=true;this.coda=Promise.resolve()}
+  on(e,f){(this.l[e]=this.l[e]||[]).push(f)}
+  emit(e,...a){(this.l[e]||[]).forEach(f=>{try{f(...a)}catch(x){console.error(x)}})}
+  invia(base,body){this.coda=this.coda.then(async()=>{        // in fila (le mosse arrivano nell'ordine giusto) e con qualche nuovo tentativo se la rete balbetta
+    for(let k=0;k<4;k++){try{const r=await relayPost(base,body,15000);if(r)return}catch(e){}await sleep(800*(k+1))}}).catch(()=>{})}
+}
+async function relayBase(){try{return window.natanRelayBase?(await window.natanRelayBase())||"":""}catch(e){return ""}}
+function relayOspite(base,code){
+  const c=new RConn();const g=RID();let vivo=true,da=0;
+  c.send=m=>{if(vivo)c.invia(base,{op:"invia",c:code,de:g,a:"h",m})};
+  c.close=()=>{if(!vivo)return;c.invia(base,{op:"invia",c:code,de:g,a:"h",m:{t:"addio"}});vivo=false;c.open=false};
+  c.iniz=async()=>{                              // ritorna "" se è entrato, altrimenti il motivo
+    let r;try{r=await relayPost(base,{op:"entra",c:code,g},9000)}catch(e){return "blocco"}
+    if(r.err==="nostanza")return "nostanza";if(r.err==="pieno")return "pieno";if(r.err)return "blocco";
+    c.open=true;c.emit("open");
+    (async()=>{let errs=0;
+      while(vivo){try{const r=await relayPost(base,{op:"poll",c:code,chi:g,da,att:15},25000);errs=0;
+          if(r.err){break}
+          for(const [n,de,m] of r.m||[]){da=Math.max(da,n);if(vivo)c.emit("data",m)}}
+        catch(e){if(++errs>6)break;await sleep(1500)}}
+      if(vivo){vivo=false;c.open=false;c.emit("close")}})();
+    return ""};
+  return c}
+function relayOspiteLato(net,de){                // dal lato di chi ha creato la stanza: la «connessione» con un ospite che arriva dal Mac
+  const R=net.rel;const c=new RConn();c.open=true;
+  c.send=m=>{if(c.open)c.invia(R.base,{op:"invia",c:net.code,de:"h",tok:R.tok,a:de,m})};
+  c.close=()=>{c.open=false};return c}
+async function relayCreatore(net,accogli){
+  const R=net.rel;const conns={};let da=0,errs=0;
+  while(!R.stop){
+    try{const r=await relayPost(R.base,{op:"poll",c:net.code,chi:"h",tok:R.tok,da,att:15},25000);errs=0;
+      if(r.err==="nostanza"){const x=await relayPost(R.base,{op:"crea",c:net.code,tok:R.tok},9000);if(!x.ok)break;continue}
+      if(r.err)break;
+      for(const [n,de,m] of r.m||[]){da=Math.max(da,n);let c=conns[de];
+        if(!c){if(!m||m.t!=="hello")continue;c=conns[de]=relayOspiteLato(net,de);accogli(c)}
+        if(m&&m.t==="addio"){c.emit("data",m);c.open=false;c.emit("close");delete conns[de];continue}
+        c.emit("data",m)}}
+    catch(e){if(++errs>8)break;await sleep(1500)}}
+}
 async function stanzaNuova(nick,onChange){
-  if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");
-  const P=await window.natanPeerLib();const net=new Net(true);net.nick=nick;net.max=2;
-  for(let tent=0;tent<6&&!net.peer;tent++){
-    const code=genCode();
-    await new Promise(res=>{let p;try{p=new P("natan-gioco-"+code,PEERCFG)}catch(e){return res()}
-      const t=setTimeout(()=>{try{p.destroy()}catch(e){}res()},9000);
-      p.on("open",()=>{clearTimeout(t);net.peer=p;net.code=code;res()});
-      p.on("error",e=>{if(!net.peer){clearTimeout(t);try{p.destroy()}catch(x){}res()}})})}
-  if(!net.peer)throw new Error("Non riesco a collegarmi alla rete: riprova tra poco.");
+  let P=null,perr=null;
+  try{if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");P=await window.natanPeerLib()}catch(e){perr=e}
+  const net=new Net(true);net.nick=nick;net.max=2;
+  if(P){
+    for(let tent=0;tent<6&&!net.peer;tent++){
+      const code=genCode();
+      await new Promise(res=>{let p;try{p=new P("natan-gioco-"+code,PEERCFG)}catch(e){return res()}
+        const t=setTimeout(()=>{try{p.destroy()}catch(e){}res()},9000);
+        p.on("open",()=>{clearTimeout(t);net.peer=p;net.code=code;res()});
+        p.on("error",e=>{if(!net.peer){clearTimeout(t);try{p.destroy()}catch(x){}res()}})})}}
+  // la via di riserva dal Mac: si prepara in parallelo (se il Mac non risponde, resta solo la connessione diretta)
+  const base=await relayBase();
+  if(base){
+    const R={base,tok:RID(),stop:false};net.rel=R;
+    const prova=async()=>{try{
+      for(let k=0;k<(net.code?1:6);k++){
+        const code=net.code||genCode();const r=await relayPost(base,{op:"crea",c:code,tok:R.tok},7000);
+        if(r.ok){net.code=code;return true}
+        if(net.code)return false}}catch(e){}return false};
+    net.relOk=await prova();if(!net.relOk){net.rel=null}}
+  if(!net.code)throw (perr&&!net.rel?perr:new Error("Non riesco a collegarmi alla rete: riprova tra poco."));
   // La stanza esiste solo finché il telefono resta collegato al servizio di PeerJS: se la connessione cade (pagina in secondo piano,
-  // rete che cambia) il codice sparisce e gli amici vedono «non trovo la stanza». Quindi la riattacchiamo subito, in automatico.
+  // rete che cambia) il codice sparisce. Quindi la riattacchiamo subito, in automatico.
   const keep=()=>{const q=net.peer;if(q&&q.disconnected&&!q.destroyed){try{q.reconnect()}catch(e){}}};
-  net.peer.on("disconnected",()=>setTimeout(keep,500));
-  net.peer.on("error",e=>{if(e&&["network","server-error","socket-error","socket-closed"].includes(e.type))setTimeout(keep,2000)});
+  if(net.peer){
+    net.peer.on("disconnected",()=>setTimeout(keep,500));
+    net.peer.on("error",e=>{if(e&&["network","server-error","socket-error","socket-closed"].includes(e.type))setTimeout(keep,2000)})}
   net.hb=setInterval(keep,8000);net.vis=()=>{if(!document.hidden)keep()};document.addEventListener("visibilitychange",net.vis);
-  net.peer.on("connection",c=>{
+  const accogli=c=>{
     const ent={conn:c,nome:null,seat:-1,fine:false};
     const gone=()=>{if(ent.fine)return;ent.fine=true;const i=net.conns.indexOf(ent);
       if(i>=0){if(!net.started){net.conns.splice(i,1);onChange&&onChange();net.stato()}else if(net.h.partito)net.h.partito(ent)}};
@@ -254,6 +312,7 @@ async function stanzaNuova(nick,onChange){
       if(!m||typeof m!=="object")return;
       if(m.t==="hello"){
         if(ent.nome)return;
+        if(c.relay&&GAMES[net.game]&&GAMES[net.game].rt){try{c.send({t:"nort"})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},300);return}
         if(net.started||net.conns.length+1>=net.max){try{c.send({t:"pieno"})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},300);return}
         let nome=pulisci(m.nome)||"Amico";const usati=[net.nick,...net.conns.map(x=>x.nome)];const base=nome;let k=2;while(usati.includes(nome))nome=base+k++;
         ent.nome=nome;net.conns.push(ent);onChange&&onChange();net.stato()}
@@ -262,42 +321,61 @@ async function stanzaNuova(nick,onChange){
       else if(m.t==="addio")gone();
       else net.dispatch(Object.assign({},m,{seat:ent.seat}),ent)});
     c.on("close",gone);
-  });
+  };
+  if(net.peer)net.peer.on("connection",accogli);
+  if(net.rel)relayCreatore(net,accogli);
   net.stato=()=>{if(net.started)return;net.bcast({t:"lobby",game:net.game,umani:[net.nick,...net.conns.map(x=>x.nome)],n:net.n,lv:net.lv})};
   return net
 }
 async function unisciti(code,nick,onLobby){
-  if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");
   code=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
-  const P=await window.natanPeerLib();const net=new Net(false);net.nick=nick;
-  const p=new P(undefined,PEERCFG);net.peer=p;let cur=null;
-  await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(new Error("Non riesco a collegarmi alla rete: riprova tra poco.")),12000);p.on("open",()=>{clearTimeout(t);ok()});
-    p.on("error",e=>{if(!p.open){clearTimeout(t);bad(new Error("Non riesco a collegarmi alla rete: riprova tra poco."))}else if(cur)cur(e)})});
-  // un tentativo: ritorna "ok", "pieno", "nostanza" (il servizio non conosce quel codice) o "blocco" (la stanza c'è ma la connessione non parte)
-  const tenta=()=>new Promise(res=>{
+  const net=new Net(false);net.nick=nick;
+  // un tentativo con una «connessione» (diretta o dal Mac): "ok", "pieno", "nort", "nostanza" (il codice non esiste) o "blocco" (c'è ma non si collega)
+  const tenta=(apri,tempo)=>new Promise(res=>{
     let done=false;const fine=r=>{if(!done){done=true;clearTimeout(t);cur=null;res(r)}};
-    const c=p.connect("natan-gioco-"+code,{reliable:true});net.up=c;
-    const t=setTimeout(()=>{try{c.close()}catch(e){}fine("blocco")},16000);
+    const c=apri();net.up=c;
+    const t=setTimeout(()=>{try{c.close()}catch(e){}fine("blocco")},tempo);
     cur=e=>{if(e&&e.type==="peer-unavailable")fine("nostanza")};
     c.on("open",()=>{c.send({t:"hello",nome:nick})});
     c.on("error",()=>fine("blocco"));
     c.on("data",m=>{
       if(!m||typeof m!=="object")return;
       if(m.t==="pieno"){fine("pieno");return}
+      if(m.t==="nort"){fine("nort");return}
       if(m.t==="lobby"){fine("ok");onLobby&&onLobby(m)}
       else net.dispatch(m)});
     c.on("close",()=>{if(!done)fine("blocco");else net.dispatch({t:"bye"})});
+    if(c.iniz)c.iniz().then(e=>{if(e)fine(e)});
   });
-  let r="";
-  for(let k=0;k<3;k++){
-    r=await tenta();if(r==="ok"||r==="pieno")break;
-    try{net.up&&net.up.close()}catch(e){}
-    if(k<2)await new Promise(z=>setTimeout(z,2500))}
+  let cur=null,r="blocco";
+  // 1) connessione diretta tra i telefoni (veloce, non dipende dal Mac)
+  try{
+    if(!window.natanPeerLib)throw 0;
+    const P=await window.natanPeerLib();const p=new P(undefined,PEERCFG);net.peer=p;
+    await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(0),10000);p.on("open",()=>{clearTimeout(t);ok()});
+      p.on("error",e=>{if(!p.open){clearTimeout(t);bad(0)}else if(cur)cur(e)})});
+    for(let k=0;k<2;k++){
+      r=await tenta(()=>p.connect("natan-gioco-"+code,{reliable:true}),10000);
+      if(r==="ok"||r==="pieno")break;
+      try{net.up&&net.up.close()}catch(e){}
+      if(r==="blocco")break;
+      if(k<1)await sleep(1800)}
+  }catch(e){r="blocco"}
+  // 2) via di riserva dal Mac: funziona con qualsiasi rete
+  let provato=false;
+  if(r!=="ok"&&r!=="pieno"){
+    const base=await relayBase();
+    if(base){provato=true;
+      const r2=await tenta(()=>relayOspite(base,code),14000);
+      if(r2==="ok"||r2==="pieno"||r2==="nort")r=r2;
+      else if(r2==="nostanza"&&r==="nostanza")r="nostanza";
+      else r="blocco"}}
   if(r==="ok")return net;
   net.close();
   if(r==="pieno")throw new Error("La stanza è già piena.");
+  if(r==="nort")throw new Error("Questo gioco in tempo reale ha bisogno della connessione diretta tra i telefoni, che qui è bloccata. Scegliete un gioco a turni (scacchi, dama, tris, forza 4, carte…) oppure collegatevi alla stessa rete Wi-Fi.");
   if(r==="nostanza")throw new Error("Non trovo la stanza «"+code+"». Controlla il codice e chiedi all'amico di tenere aperta la pagina della stanza (se esce o blocca il telefono, il codice smette di funzionare).");
-  throw new Error("La stanza «"+code+"» c'è, ma la connessione tra i due telefoni non parte (di solito è la rete che la blocca). Riprova, oppure collegatevi alla stessa rete Wi-Fi.")
+  throw new Error("La stanza «"+code+"» c'è, ma la connessione non parte"+(provato?" nemmeno passando dal Mac di Kevin":" (la rete la blocca)")+". Riprova tra un attimo.")
 }
 
 // ------------------------------------------------------------------ reazioni con le emoji (giocatori e bot)
@@ -618,7 +696,8 @@ function lobby(pg,info){
         b5.append(E("small","","Scrivi il tuo nome (solo il nome, niente dati personali), poi crea la stanza e dai il codice ai tuoi amici."),ni,cr)}
       else{
         const c=E("div","code",net.code);c.id="codiceStanza";
-        b5.append(E("small","","Codice della stanza: i tuoi amici aprono Giochi → «Entra in una stanza con un codice» e lo scrivono. Tieni aperta questa pagina e il telefono acceso finché non sono entrati."),c,E("small","",`${umani().length} di ${cfg.n} giocatori presenti. I posti liberi li prendono i bot.`))}
+        b5.append(E("small","","Codice della stanza: i tuoi amici aprono Giochi → «Entra in una stanza con un codice» e lo scrivono. Tieni aperta questa pagina e il telefono acceso finché non sono entrati."),c,E("small","",`${umani().length} di ${cfg.n} giocatori presenti. I posti liberi li prendono i bot.`),
+          E("small","",net.relOk?"✅ Funziona anche con amici su un'altra rete Wi-Fi o con il 4G/5G.":"ℹ️ Per ora solo connessione diretta: tra reti diverse a volte non passa (il Mac di Kevin non risponde, quindi manca la via di riserva)."))}
       if(errore)b5.append(E("small","",errore));
       body.append(b5)}
     const go=E("button","btn","▶ Inizia la partita");go.id="startGame";
