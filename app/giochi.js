@@ -1,8 +1,8 @@
 // =====================================================================================================
 // GIOCHI DI NATAN (nucleo): menu, tutorial, lobby (livelli, numero di giocatori, online), bot con nome ed esperienza,
 // consiglio dei 35 agenti dietro ogni bot e motore delle partite a turni.
-// I giochi veri stanno in giochi-a.js (scacchi, dama), giochi-b.js (tris, 4 di fila, Uno, scopa, briscola)
-// e giochi-c.js (hockey da tavolo, sling puck).
+// I giochi veri (il «Giardino Zen» di Natan) stanno in giochi-z.js (suoni, musica, Sudoku e Mahjong), giochi-carte.js (Scopa d'Assi e Uno),
+// giochi-dama.js (Dama) e giochi-biliardo.js (Biliardo). Sudoku e Mahjong girano nella pagina a parte zen.html.
 //
 // Come funziona un bot: per ogni mossa possibile il gioco calcola alcune caratteristiche (valore, punti, attacco, difesa,
 // rischio...). Ognuno dei 35 agenti le pesa a modo suo e vota; vince la mossa con più voti. Ogni bot ha i suoi pesi
@@ -32,6 +32,7 @@ const CSS=`
 .gm .ng .lg{width:38px;height:38px;border-radius:11px;background:conic-gradient(from 0deg,#7c83ff,#c06bff,#7c83ff);display:grid;place-items:center;font-weight:800}
 .gm .ng .tx{flex:1;min-width:0}.gm .ng .tx b{display:block}.gm .ng .tx span{font-size:13px;opacity:.85}
 .gm .think{font-size:13px;color:var(--muted);min-height:18px}
+.gm details.agdet summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:6px}
 .gm .agents{display:flex;flex-wrap:wrap;gap:3px}.gm .agents i{font-style:normal;font-size:10.5px;padding:2px 6px;border-radius:999px;background:var(--raise);color:var(--muted);border:1px solid var(--line)}
 .gm .agents i.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .gm .status{font-weight:600}
@@ -112,7 +113,7 @@ function style(){if(document.getElementById("gmcss"))return;const s=E("style");s
 
 function intro(){
   if(window.NATAN_GIOCHI_VELOCE)return;
-  const o=E("div","ngintro");const c=E("div","c");const lg=E("div","lg");lg.append(E("span","","🎮"));c.append(lg,E("b","","Natan Gaming"),E("small","","30 bot con 35 agenti ciascuno pronti a sfidarti"));o.append(c);
+  const o=E("div","ngintro");const c=E("div","c");const lg=E("div","lg");lg.append(E("span","","🎮"));c.append(lg,E("b","","Natan Gaming"),E("small","","30 bot con 35 agenti ciascuno · Giardino Zen"));o.append(c);
   for(let i=0;i<26;i++){const p=E("i");const a=Math.random()*Math.PI*2,d=120+Math.random()*220;p.style.cssText=`left:50%;top:50%;--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px;animation-delay:${.2+Math.random()*.5}s;background:${["#7c83ff","#c06bff","#ff7cc8","#ffd75a"][i%4]}`;o.append(p)}
   document.body.append(o);setTimeout(()=>o.remove(),2000)
 }
@@ -191,7 +192,8 @@ function botCard(b,extra){const i=botInfo(b.id);const d=E("div","pl");d.dataset.
 function ngPanel(){
   const p=E("div","ng");const lg=E("div","lg","N");const tx=E("div","tx");tx.append(E("b","","Natan Gaming"),E("span","","30 bot · 35 agenti dietro ogni bot"));p.append(lg,tx);
   const th=E("div","think");const ag=E("div","agents");AGENTI.forEach(a=>ag.append(E("i","",a[0])));
-  return {el:[p,th,ag],think:(t,favor,chi)=>{th.textContent=t||"";[...ag.children].forEach(i=>i.classList.toggle("on",!!favor&&favor.includes(i.textContent)));if(chi!==undefined)p.querySelector(".tx b").textContent=chi||"Natan Gaming"}}
+  const det=E("details","agdet");det.append(E("summary","","🧠 Vedi i 35 agenti che votano"),ag);
+  return {el:[p,th,det],think:(t,favor,chi)=>{th.textContent=t||"";[...ag.children].forEach(i=>i.classList.toggle("on",!!favor&&favor.includes(i.textContent)));if(chi!==undefined)p.querySelector(".tx b").textContent=chi||"Natan Gaming"}}
 }
 
 // ------------------------------------------------------------------ tutorial
@@ -373,7 +375,7 @@ async function unisciti(code,nick,onLobby){
   if(r==="ok")return net;
   net.close();
   if(r==="pieno")throw new Error("La stanza è già piena.");
-  if(r==="nort")throw new Error("Questo gioco in tempo reale ha bisogno della connessione diretta tra i telefoni, che qui è bloccata. Scegliete un gioco a turni (scacchi, dama, tris, forza 4, carte…) oppure collegatevi alla stessa rete Wi-Fi.");
+  if(r==="nort")throw new Error("Questo gioco in tempo reale ha bisogno della connessione diretta tra i telefoni, che qui è bloccata. Scegliete un gioco a turni (dama, biliardo, carte…) oppure collegatevi alla stessa rete Wi-Fi.");
   if(r==="nostanza")throw new Error("Non trovo la stanza «"+code+"». Controlla il codice e chiedi all'amico di tenere aperta la pagina della stanza (se esce o blocca il telefono, il codice smette di funzionare).");
   throw new Error("La stanza «"+code+"» c'è, ma la connessione non parte"+(provato?" nemmeno passando dal Mac di Kevin":" (la rete la blocca)")+". Riprova tra un attimo.")
 }
@@ -428,7 +430,7 @@ function creaEmoBot(sh,ctx,seats,net,info){
     ciao(){const b=pick();if(b>=0)dire(b,"ciao",{ritardo:1000+rnd(900),forza:1.4})},
     // una persona sta per muovere: il bot guarda se la mossa è tra le migliori o tra le peggiori e reagisce
     umana(S,seat,a){
-      if(L.off||botSeats().length===0||!a)return;
+      if(L.off||info.noEval||botSeats().length===0||!a)return;
       const t0=Date.now();let cands;try{cands=info.bot(S,seat,0)}catch(e){return}
       if(Date.now()-t0>400)L.off=true;                                // se il calcolo costa troppo, il gioco non ne risente mai più
       if(!cands||cands.length<3)return;
@@ -450,6 +452,11 @@ function creaEmoBot(sh,ctx,seats,net,info){
       const b=pick();if(b<0||!seats[b])return;
       const lista=emoRisposta(e,L.mom>.5,emoCarattere(seats[b].bot.id).tono);
       if(lista.length)dire(b,lista,{forza:.95,min:1500,ritardo:1000+rnd(1200)})},
+    // l'esito di un tiro (biliardo): il bot reagisce al colpo di una persona
+    esito(seat,tipo){
+      if(L.off||botSeats().length===0)return;const b=pick();if(b<0)return;
+      if(tipo==="buona"){L.mom=cl(L.mom-1);dire(b,"buona",{forza:.7,ritardo:900+rnd(600)})}
+      else{L.mom=cl(L.mom+1);dire(b,"errore",{forza:.8,ritardo:900+rnd(600)})}},
     // fine partita: ognuno dei bot saluta a modo suo
     fine(win,pari){
       L.fin=true;botSeats().forEach((i,k)=>dire(i,pari?"pari":(win||[]).includes(i)?"vinto":"perso",{fine:true,ritardo:700+k*500+rnd(500)}))}}
@@ -530,7 +537,7 @@ function avvia(pg,info,cfg,net,me){
   if(info.rt){
     ctx.finish=res=>{if(live.finito||live.stop)return;live.finito=true;live.stop=true;conclusione(sh,info,seats,ctx,res,storia,pg,cfg,net,me)};
     sh.players(seats,-1,me);info.playRT(sh,ctx,cfg);return ctx}
-  let S=info.init(n,cfg.seed);let seq=0;
+  let S=info.init(n,cfg.seed,cfg.opz||{});let seq=0;
   let attesa=null;ctx.legal=[];ctx.S=S;
   const risolvi=(S,seat,k)=>info.legal(S,seat).find(x=>x.k===k)||(info.parse?info.parse(S,seat,k):null);
   ctx.act=k=>{if(!attesa)return false;const a=attesa.legal.find(x=>x.k===k)||(info.parse?info.parse(S,attesa.seat,k):null);if(!a)return false;const r=attesa.res;attesa=null;ctx.legal=[];ctx.myTurn=false;r(a);return true};
@@ -658,6 +665,7 @@ function lobby(pg,info){
   style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
   const mn=info.min||2,mx=info.max||2;
   const cfg={mode:"bot",lv:Math.min(3,Math.max(0,+LSG.get("natan_gaming_lv",1)||0)),n:Math.min(mx,Math.max(mn,+LSG.get("natan_gaming_n_"+info.id,mn)||mn)),nick:nickSalvato(),bots:[]};
+  cfg.opz=Object.assign({},...(info.opzioni||[]).map(o=>({[o.id]:!!o.def})),LSG.get("natan_gaming_opz_"+info.id,{}));
   cfg.bots=scegliBot(cfg.n-1);
   let net=null,errore="";
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.onclick=()=>{if(net)net.close();menu(pg)};top.append(back);
@@ -679,6 +687,12 @@ function lobby(pg,info){
       const set=v=>{cfg.n=v;LSG.set("natan_gaming_n_"+info.id,v);if(net){net.max=v;net.n=v}cfg.bots=scegliBot(cfg.n-umani().length);render();if(net)net.stato()};
       minus.onclick=()=>set(cfg.n-1);plus.onclick=()=>set(cfg.n+1);st.append(minus,val,plus);
       b3.append(st,E("small","",cfg.mode==="bot"?"Tu e gli altri sono bot.":"Gli amici entrano con il codice; i posti liberi li prendono i bot."));body.append(b3)}
+    if(info.opzioni&&info.opzioni.length){
+      const b6=E("div","box");b6.append(E("h3","","Regole"));
+      info.opzioni.forEach(o=>{const lab=E("label");lab.style.cssText="display:flex;gap:10px;align-items:flex-start;cursor:pointer";
+        const cb=E("input");cb.type="checkbox";cb.id="opz_"+o.id;cb.checked=!!cfg.opz[o.id];cb.onchange=()=>{cfg.opz[o.id]=cb.checked;LSG.set("natan_gaming_opz_"+info.id,cfg.opz)};
+        const tx=E("span");tx.append(E("b","",o.nome),E("br"),E("small","",o.desc));lab.append(cb,tx);b6.append(lab)});
+      body.append(b6)}
     const b4=E("div","box");b4.append(E("h3","",cfg.mode==="bot"?"I tuoi avversari":"Giocatori"));const pl=E("div","pls");
     const mie=umani();mie.forEach((nm,i)=>{const c=E("div","pl");c.append(E("b","",(i===0?"🙂 ":"👤 ")+nm),E("small","",i===0?"Tu":"Amico online"));pl.append(c)});
     const nb=Math.max(0,cfg.n-mie.length);while(cfg.bots.length<nb)cfg.bots.push(...scegliBot(1,cfg.bots.map(b=>b.id)));cfg.bots=cfg.bots.slice(0,nb);
@@ -706,7 +720,7 @@ function lobby(pg,info){
       const seats=hum.map(nm=>({tipo:"umano",nome:nm}));
       const pool=cfg.bots.slice();while(pool.length<nn-hum.length)pool.push(...scegliBot(1,pool.map(b=>b.id)));
       pool.slice(0,nn-hum.length).forEach(b=>seats.push({tipo:"bot",nome:b.nome,botId:b.id}));
-      const c={game:info.id,seats,lv:cfg.lv,seed:(Math.random()*2**31)|0};
+      const c={game:info.id,seats,lv:cfg.lv,seed:(Math.random()*2**31)|0,opz:cfg.opz};
       if(net){net.started=true;net.conns.forEach((x,i)=>{x.seat=i+1});
         net.conns.forEach((x,i)=>{try{x.conn.send({t:"start",cfg:c,seat:i+1})}catch(e){}});avvia(pg,info,c,net,0)}
       else avvia(pg,info,c,null,0)};
@@ -746,16 +760,33 @@ function entraStanza(pg){
 
 // ------------------------------------------------------------------ menu
 const GAMES={};
+// una vittoria nei giochi da soli (Sudoku, Mahjong): conta per le statistiche e i trofei
+function soloVinto(id){
+  const info=GAMES[id];if(!info)return;
+  const st=LSG.get("natan_gaming_stats",{});const k=st[id]=st[id]||{v:0,p:0,n:0};k.p++;LSG.set("natan_gaming_stats",st);
+  const X=Object.assign(nuovoX(),LSG.get("natan_gaming_x",{}));X.tot++;try{X.giorni[new Date().toISOString().slice(0,10)]=1}catch(e){}LSG.set("natan_gaming_x",X);
+  try{controllaTrofei()}catch(e){}}
 function menu(pg){
-  style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
+  style();pg.innerHTML="";const g=E("div","gm zmenu");pg.append(g);
+  const Z=window.__G.zen||null;
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna");back.id="gmBack";back.onclick=()=>{try{window.openChat()}catch(e){location.reload()}};top.append(back);g.append(top);
-  g.append(E("h1","","🎮 Giochi"),E("p","lead","Sfida i bot di Natan Gaming o gioca online con gli amici. Prima di ogni gioco c'è un breve tutorial."));
+  const hero=E("div","zhero");const hl=E("div");const h1=E("h1","","Giardino Zen");h1.append(E("span","","庭"));
+  hl.append(h1,E("p","","Giochi calmi da soli, contro i bot di Natan Gaming o con gli amici online."));hero.append(hl);
+  if(Z){const ctl=E("div","zctl");const mb=E("button","","Musica: "+Z.STYLES[Z.Music.idx].name);mb.id="musicBtn";mb.onclick=()=>{Z.A.init();Z.Music.cycle();mb.textContent="Musica: "+Z.STYLES[Z.Music.idx].name};
+    const sb=E("button","",Z.A.sfx?"Suoni accesi":"Suoni spenti");sb.id="sfxBtn";sb.onclick=()=>{Z.A.sfx=!Z.A.sfx;LSG.set("natan_zen_sfx",Z.A.sfx);sb.textContent=Z.A.sfx?"Suoni accesi":"Suoni spenti";if(Z.A.sfx)Z.sfx("hint")};
+    ctl.append(mb,sb);hero.append(ctl);
+    g.addEventListener("pointerdown",()=>{try{Z.A.init();Z.Music.start()}catch(e){}},{once:true});setTimeout(()=>{try{Z.Music.start()}catch(e){}},50)}
+  g.append(hero);
   const ng=ngPanel();ng.el.forEach(x=>g.append(x));
   const st=LSG.get("natan_gaming_stats",{});
-  const c=E("div","cards");g.append(c);
-  for(const [k,info] of Object.entries(GAMES)){const b=E("button","gcard");b.dataset.g=k;b.append(E("span","ic",info.ic),E("strong","",info.nome),E("small","",info.sub),E("small","",info.min===info.max?`${info.max} giocatori`:`${info.min}-${info.max} giocatori`));
-    const s=st[k];if(s)b.append(E("small","",`Tu ${s.p} · Bot ${s.v}`+(s.n?` · pari ${s.n}`:"")));
-    b.onclick=()=>tutorial(pg,info,()=>lobby(pg,info));c.append(b)}
+  const c=E("div","cards zcards");g.append(c);
+  const lista=Object.entries(GAMES).sort((a,b)=>(a[1].ord||99)-(b[1].ord||99));
+  for(const [k,info] of lista){const b=E("button","gcard zstone");b.dataset.g=k;
+    if(Z&&Z.PIC&&Z.PIC[k]){const w=E("div");w.innerHTML=Z.PIC[k];b.append(w.firstChild)}else b.append(E("span","ic",info.ic));
+    const t=E("span","txt");t.append(E("strong","",info.nome),E("small","",info.sub),E("small","",info.solo?"Da solo":info.min===info.max?`${info.max} giocatori`:`${info.min}-${info.max} giocatori`));
+    const s=st[k];if(s)t.append(E("small","",info.solo?`Vinte: ${s.p}`:`Tu ${s.p} · Bot ${s.v}`+(s.n?` · pari ${s.n}`:"")));
+    b.append(t);
+    b.onclick=()=>info.apri?info.apri(pg,()=>menu(pg)):tutorial(pg,info,()=>lobby(pg,info));c.append(b)}
   const tb=E("button","btn ghost");tb.id="trofeiBtn";{const T=trofei();tb.textContent=`🏆 Trofei (${T.filter(t=>t.ok).length}/${T.length})`}tb.onclick=()=>schermataTrofei(pg);tb.style.marginRight="8px";g.append(tb);
   const j=E("button","btn ghost","🔑 Entra in una stanza con un codice");j.id="entraStanza";j.onclick=()=>entraStanza(pg);g.append(j);
   const dt=E("details","box");dt.id="botList";dt.append(E("summary","","🤖 I 30 bot di Natan Gaming (nome, esperienza, 35 agenti ciascuno)"));
@@ -763,6 +794,6 @@ function menu(pg){
   lst.forEach(i=>w.append(botCard(BOTS.find(b=>b.id===i.id))));dt.append(w);g.append(dt);
 }
 window.GIOCHI={open(pg){style();intro();menu(pg)},_games:GAMES,_net:{stanzaNuova,unisciti},_consiglio:consiglio,AGENTI,BOTS,LIV,botInfo,_avvia:avvia};
-window.__G={E,LSG,sleep,rnd,shuffle,mulberry,SLOW,h32,GAMES,consiglio,fineBanner,scegliBot,botCard,F,LIV,NAG,
+window.__G={E,LSG,sleep,rnd,shuffle,mulberry,SLOW,h32,GAMES,consiglio,fineBanner,scegliBot,botCard,F,LIV,NAG,soloVinto,menu,
   register(info){GAMES[info.id]=info;return info}};
 })();
