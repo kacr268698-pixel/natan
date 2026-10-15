@@ -1,7 +1,7 @@
 // Natan: tiene l'app sul dispositivo così si apre anche senza rete (anche il motore che fa girare Natan sul dispositivo).
 // La biblioteca non passa di qui: l'app la salva da sola nel dispositivo. I modelli li salva il motore stesso.
-const CACHE = "natan-2.3.0-1792045768";
-const FILES = ["./", "./index.html", "./app/", "./app/index.html", "./app/giochi.js", "./app/giochi-a.js", "./app/giochi-b.js", "./app/giochi-c.js", "./manifest.webmanifest", "./icone/icon-192.png", "./icone/icon-512.png", "./icone/apple-touch-icon.png"];
+const CACHE = "natan-2.4.0-1792052104";
+const FILES = ["./", "./index.html", "./app/", "./app/index.html", "./app/giochi.js", "./app/giochi-a.js", "./app/giochi-b.js", "./app/giochi-c.js", "./app/test.js", "./manifest.webmanifest", "./icone/icon-192.png", "./icone/icon-512.png", "./icone/apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("natan-") && k !== CACHE && k !== "natan-motore").map(k => caches.delete(k)))).then(() => self.clients.claim()));

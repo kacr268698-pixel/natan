@@ -71,6 +71,11 @@ const CSS=`
 .gm .stepper{display:flex;align-items:center;gap:12px}.gm .stepper b{font-size:22px;min-width:24px;text-align:center}
 .gm .stepper button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--text);font-size:20px;cursor:pointer}
 .gm .stepper button:disabled{opacity:.35;cursor:default}
+.gm .prog{height:6px;border-radius:4px;background:rgba(127,127,160,.25);overflow:hidden;margin:6px 0}.gm .prog i{display:block;height:100%;background:linear-gradient(90deg,#7c83ff,#3ecf8e)}
+.gm .trg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:12px}
+.gm .tro{border:1px solid rgba(127,127,160,.35);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:3px;opacity:.72}
+.gm .tro.ok{opacity:1;border-color:#f5b84a;background:rgba(245,184,74,.10)}.gm .tro .ic{font-size:30px}
+.gm .newtro{margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(245,184,74,.18);border:1px solid #f5b84a;font-weight:700;font-size:13px}
 .gm .pls{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
 .gm .pl{border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:13px;position:relative;background:var(--raise)}
 .gm .pl.turn{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
@@ -363,16 +368,68 @@ function avvia(pg,info,cfg,net,me){
 }
 function stopOnline(sh){sh.status.textContent="La partita online è finita: chi ha creato la stanza si è scollegato.";fineBanner(sh,null,"Connessione chiusa","Puoi tornare ai giochi e iniziare una nuova partita.")}
 
+
+// ------------------------------------------------------------------ trofei: tanti obiettivi da raggiungere
+function nuovoX(){return {streak:0,best:0,lv:{},lvg:{},online:0,onlineW:0,big:0,bigW:0,tot:0,beaten:{},giorni:{}}}
+function aggiornaX(info,esito,seats,ctx,net){
+  const X=Object.assign(nuovoX(),LSG.get("natan_gaming_x",{}));X.tot++;
+  if(esito===true){X.streak++;X.best=Math.max(X.best,X.streak);X.lv[ctx.lv]=(X.lv[ctx.lv]||0)+1;(X.lvg[ctx.lv]=X.lvg[ctx.lv]||{})[info.id]=1;
+    seats.forEach(s=>{if(s.tipo==="bot"&&s.bot)X.beaten[s.bot.id]=1})}
+  else if(esito===false)X.streak=0;
+  if(net){X.online++;if(esito===true)X.onlineW++}
+  if(seats.length>=4){X.big++;if(esito===true)X.bigW++}
+  try{X.giorni[new Date().toISOString().slice(0,10)]=1}catch(e){}
+  LSG.set("natan_gaming_x",X);return X}
+function trofei(){
+  const st=LSG.get("natan_gaming_stats",{});const X=Object.assign(nuovoX(),LSG.get("natan_gaming_x",{}));
+  const hist=LSG.get("natan_test_hist",[]);const T=[];
+  const vitt=k=>(st[k]&&st[k].p)||0,tot=Object.values(st).reduce((a,r)=>a+r.p,0),giocati=Object.values(st).reduce((a,r)=>a+r.p+r.v+(r.n||0),0);
+  const T_=(id,ic,nome,desc,cur,max,punti)=>T.push({id,ic,nome,desc,cur:Math.min(cur,max),max,ok:cur>=max,punti:punti||10});
+  T_("v1","🥇","Primo passo","Vinci la tua prima partita",tot,1,10);T_("v5","🥈","Si comincia a ragionare","Vinci 5 partite",tot,5,10);
+  T_("v25","🏅","Giocatore vero","Vinci 25 partite",tot,25,20);T_("v100","🏆","Campione","Vinci 100 partite",tot,100,50);
+  T_("g10","🎲","Appassionato","Gioca 10 partite",giocati,10,10);T_("g50","🎯","Instancabile","Gioca 50 partite",giocati,50,20);T_("g200","🔥","Leggenda dei giochi","Gioca 200 partite",giocati,200,50);
+  for(const [k,g] of Object.entries(GAMES)){T_("w5"+k,g.ic,"Re di "+g.nome,"Vinci 5 volte a "+g.nome,vitt(k),5,15);T_("w20"+k,"👑","Maestro di "+g.nome,"Vinci 20 volte a "+g.nome,vitt(k),20,30)}
+  const nGiochi=Object.keys(GAMES).length;
+  T_("tutti","🌈","Giocatore completo","Vinci almeno una volta a ogni gioco",Object.keys(GAMES).filter(k=>vitt(k)>0).length,nGiochi,40);
+  LIV.forEach((l,i)=>T_("lv"+i,["🟢","🟡","🟠","🔴"][i]||"⭐","Livello "+(l.nome||l),"Vinci contro bot di livello "+(l.nome||l),X.lv[i]||0,1,15));
+  T_("estremi","💀","Domatore dell'Estremo","Vinci a livello Estremo in 3 giochi diversi",Object.keys(X.lvg[3]||{}).length,3,60);
+  T_("s3","🔗","Tre di fila","Vinci 3 partite di seguito",X.best,3,15);T_("s5","⛓️","Cinque di fila","Vinci 5 partite di seguito",X.best,5,30);T_("s10","💎","Inarrestabile","Vinci 10 partite di seguito",X.best,10,60);
+  T_("on1","🌐","Online!","Gioca una partita online con un amico",X.online,1,15);T_("onw","🤝","Vittoria tra amici","Vinci una partita online",X.onlineW,1,25);T_("onw5","🎉","Re della stanza","Vinci 5 partite online",X.onlineW,5,50);
+  T_("big","👥","Tavolo pieno","Gioca una partita con 4 o 5 giocatori",X.big,1,15);T_("bigw","🥳","Vincitore al tavolo","Vinci una partita con 4 o 5 giocatori",X.bigW,1,30);
+  T_("bot10","🤖","Cacciatore di bot","Batti 10 bot diversi",Object.keys(X.beaten).length,10,30);T_("bot30","🦾","Spezza-bot","Batti tutti e 30 i bot",Object.keys(X.beaten).length,30,80);
+  let maxLiv=1;try{maxLiv=Math.max(...BOTS.map(b=>botInfo(b.id).liv))}catch(e){}
+  T_("botlv","📈","Allenatore","Fai arrivare un bot al livello 10",maxLiv,10,40);
+  T_("pari","🕊️","Diplomatico","Chiudi una partita in pareggio",Object.values(st).reduce((a,r)=>a+(r.n||0),0),1,10);
+  T_("giorni","📅","Giocatore fedele","Gioca in 5 giorni diversi",Object.keys(X.giorni).length,5,30);
+  T_("t1","📝","Studente","Fai la tua prima verifica con Natan Test",hist.length,1,15);T_("t5","📚","Secchione","Fai 5 verifiche",hist.length,5,30);
+  T_("t10v","🔟","Dieci e lode","Prendi 10 in una verifica",hist.some(h=>h.voto>=10)?1:0,1,50);
+  T_("tx","🧠","Cervellone","Prendi almeno 8 in una verifica di livello Estremo",hist.some(h=>h.diff==="Estremo"&&h.voto>=8)?1:0,1,60);
+  T_("tuni","🎓","Universitario","Prendi almeno 7 in una verifica di Università",hist.some(h=>/Univ/.test(h.scuola||"")&&h.voto>=7)?1:0,1,40);
+  return T}
+function schermataTrofei(pg){
+  style();pg.innerHTML="";const g=E("div","gm");pg.append(g);const top=E("div","top");const back=E("button","btn ghost","← Giochi");back.id="trBack";back.onclick=()=>menu(pg);top.append(back);g.append(top);
+  const T=trofei();const ok=T.filter(t=>t.ok),pt=ok.reduce((a,t)=>a+t.punti,0),tot=T.reduce((a,t)=>a+t.punti,0);
+  g.append(E("h1","","🏆 Trofei"),E("p","lead",`${ok.length} su ${T.length} trofei · ${pt} punti su ${tot}`));
+  const bar=E("div","prog");const f=E("i");f.style.width=Math.round(pt*100/tot)+"%";bar.append(f);g.append(bar);
+  const c=E("div","trg");g.append(c);c.id="trGrid";
+  T.slice().sort((a,b)=>(b.ok-a.ok)||((b.cur/b.max)-(a.cur/a.max))).forEach(t=>{const d=E("div","tro"+(t.ok?" ok":""));d.dataset.t=t.id;
+    d.append(E("span","ic",t.ok?t.ic:"🔒"),E("strong","",t.nome),E("small","",t.desc));
+    const b=E("div","prog");const i=E("i");i.style.width=Math.round(t.cur*100/t.max)+"%";b.append(i);d.append(b,E("small","",t.ok?`✓ Ottenuto · +${t.punti} punti`:`${t.cur} / ${t.max}`));c.append(d)});
+}
+function controllaTrofei(){   // quali trofei sono nuovi dall'ultima volta?
+  const T=trofei();const vecchi=new Set(LSG.get("natan_trofei",[]));const nuovi=T.filter(t=>t.ok&&!vecchi.has(t.id));
+  if(nuovi.length)LSG.set("natan_trofei",T.filter(t=>t.ok).map(t=>t.id));return nuovi}
 function conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me){
   const win=o.win||[];const io=win.includes(me);const pari=!win.length;
   const esito=pari?null:io?true:false;
   seats.forEach((s,i)=>{if(s.tipo==="bot"){const e=pari?null:win.includes(i);allena(s.bot,info.id,storia[i],e,ctx.lv)}});
   const st=LSG.get("natan_gaming_stats",{});const k=st[info.id]=st[info.id]||{v:0,p:0,n:0};
-  esito===true?k.p++:esito===false?k.v++:k.n++;LSG.set("natan_gaming_stats",st);   // p = vittorie tue, v = vittorie dei bot (o degli altri)
+  esito===true?k.p++:esito===false?k.v++:k.n++;LSG.set("natan_gaming_stats",st);aggiornaX(info,esito,seats,ctx,net);   // p = vittorie tue, v = vittorie dei bot (o degli altri)
   const testo=(typeof o.text==="function"?o.text(seats):o.text)||(pari?"Pareggio!":io?"Hai vinto!":"Hai perso");
   sh.status.textContent=testo;
   const sotto=pari?"Pareggio!":io?"Hai vinto! Gli allenatori correggono gli agenti dei bot che hanno sbagliato.":"Ha vinto un altro giocatore. Gli allenatori rinforzano gli agenti che avevano ragione.";
   const e=fineBanner(sh,esito,testo,sotto);e.id="gmEnd";
+  try{controllaTrofei().forEach(t=>{const x=E("div","newtro","🏆 Nuovo trofeo: "+t.ic+" "+t.nome+" — "+t.desc);e.append(x)})}catch(er){}
   const bs=seats.filter(s=>s.bot);if(bs.length){const w=E("div","pls");bs.forEach(s=>w.append(botCard(s.bot)));e.append(w)}
   if(net){
     if(net.host){const r=E("button","btn","↻ Rigioca con gli stessi giocatori");r.id="gmRigioca";
@@ -483,6 +540,7 @@ function menu(pg){
   for(const [k,info] of Object.entries(GAMES)){const b=E("button","gcard");b.dataset.g=k;b.append(E("span","ic",info.ic),E("strong","",info.nome),E("small","",info.sub),E("small","",info.min===info.max?`${info.max} giocatori`:`${info.min}-${info.max} giocatori`));
     const s=st[k];if(s)b.append(E("small","",`Tu ${s.p} · Bot ${s.v}`+(s.n?` · pari ${s.n}`:"")));
     b.onclick=()=>tutorial(pg,info,()=>lobby(pg,info));c.append(b)}
+  const tb=E("button","btn ghost");tb.id="trofeiBtn";{const T=trofei();tb.textContent=`🏆 Trofei (${T.filter(t=>t.ok).length}/${T.length})`}tb.onclick=()=>schermataTrofei(pg);tb.style.marginRight="8px";g.append(tb);
   const j=E("button","btn ghost","🔑 Entra in una stanza con un codice");j.id="entraStanza";j.onclick=()=>entraStanza(pg);g.append(j);
   const dt=E("details","box");dt.id="botList";dt.append(E("summary","","🤖 I 30 bot di Natan Gaming (nome, esperienza, 35 agenti ciascuno)"));
   const lst=BOTS.map(b=>botInfo(b.id)).sort((a,b)=>b.xp-a.xp);const w=E("div","pls");w.style.marginTop="10px";
