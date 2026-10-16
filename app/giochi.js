@@ -90,8 +90,15 @@ const CSS=`
 @keyframes xpup{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}@keyframes xpglow{50%{text-shadow:0 0 14px #ffd166}}
 .gm.full{position:fixed;inset:0;z-index:9000;background:var(--bg);overflow:auto;padding:14px 68px 14px 14px;box-sizing:border-box;max-width:none;margin:0;gap:8px;-webkit-overflow-scrolling:touch;align-items:center;justify-content:safe center}
 .gm.full .lvhelp{display:none}
-.gm.full>h1,.gm.full>.pls,.gm.full>.ng,.gm.full>.think,.gm.full>.agdet,.gm.full>.status{display:none}
-.gm.full>.top{position:fixed;left:8px;top:8px;z-index:9002;gap:0}.gm.full>.top>*:not(#gmFull){display:none}
+.gm.full>h1,.gm.full>.ng,.gm.full>.think,.gm.full>.agdet,.gm.full>.status{display:none}
+.gm.full{padding-top:calc(96px + env(safe-area-inset-top))}
+.gm.full>.top{position:fixed;left:calc(8px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));z-index:9002;gap:6px;flex-wrap:nowrap}.gm.full>.top>*:not(#gmFull):not(#gmBack2){display:none}
+.gm.full #gmBack2{padding:4px 11px;font-size:13px;min-height:0;border-radius:20px;background:rgba(20,22,30,.7);backdrop-filter:blur(6px)}
+.gm.full>.pls{display:flex;position:fixed;top:calc(52px + env(safe-area-inset-top));left:0;right:0;z-index:9002;justify-content:center;gap:6px;padding:0 70px 0 8px;pointer-events:none}
+.gm.full .pls .pl{padding:4px 12px;border-radius:20px;flex-direction:row;align-items:center;gap:6px;background:rgba(20,22,30,.7);backdrop-filter:blur(6px);min-width:0}
+.gm.full .pls .pl small,.gm.full .pls .pl .xp{display:none}.gm.full .pls .pl b{font-size:13px;white-space:nowrap}
+.gm.full .pls .emob{top:100%;right:auto;left:50%;margin:4px 0 0 -18px;font-size:26px}
+@media (min-width:760px){.gm.full{padding-top:calc(60px + env(safe-area-inset-top))}.gm.full>.pls{top:calc(8px + env(safe-area-inset-top))}}
 .gm.full #gmFull{padding:4px 11px;font-size:13px;opacity:.8;border-radius:20px;background:rgba(20,22,30,.6);backdrop-filter:blur(6px)}
 .gm.full>*:not(.top):not(.emobar){max-width:100%}
 .gm.full .emobar{position:fixed;right:8px;top:50%;transform:translateY(-50%);flex-direction:column;overflow:visible;z-index:9001;background:rgba(20,22,30,.6);padding:8px 5px;border-radius:30px;gap:5px;backdrop-filter:blur(6px)}

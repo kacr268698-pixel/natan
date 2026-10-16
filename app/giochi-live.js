@@ -31,7 +31,7 @@ function rrect(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.lineTo(a+w-r,b);x.ar
 function arbitro(o,ant,W,H,dt,d0,vel){const vic=o.x<45||o.x>W-45||o.y<45||o.y>H-45;if(!vic||Math.hypot(o.x-ant.x,o.y-ant.y)>d0){ant.x=o.x;ant.y=o.y;ant.t=0;return false}
   ant.t+=dt;if(ant.t>2.8){ant.t=0;const dx=W/2-o.x,dy=H/2-o.y,d=Math.hypot(dx,dy)||1;o.vx=dx/d*vel;o.vy=dy/d*vel;return true}return false}
 function fitc(root,cv,lw,lh){const full=!!root.closest(".gm.full"),dpr=Math.min(2,window.devicePixelRatio||1);
-  const w=Math.max(240,(root.clientWidth||360)-20),hmax=Math.max(260,innerHeight-(full?96:300));const s=Math.min(w/lw,hmax/lh);
+  const w=Math.max(240,(root.clientWidth||360)-20),hmax=Math.max(260,innerHeight-(full?170:300));const s=Math.min(w/lw,hmax/lh);
   cv.width=Math.round(lw*s*dpr);cv.height=Math.round(lh*s*dpr);cv.style.width=lw*s+"px";cv.style.height=lh*s+"px";return cv.width/lw}
 function loop(cv,step,draw){let on=true,last=performance.now(),acc=0;const f=ts=>{if(!on)return;if(!document.body.contains(cv)){on=false;return}
     acc+=Math.min(.1,(ts-last)/1000);last=ts;let n=0;while(acc>=1/60&&n<6){step(1/60);acc-=1/60;n++}draw();requestAnimationFrame(f)};requestAnimationFrame(f);return ()=>{on=false}}
