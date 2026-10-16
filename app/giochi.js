@@ -86,6 +86,12 @@ const CSS=`
 .gm .emobar small{color:var(--muted);white-space:nowrap;margin-right:2px}
 .gm .emobar button{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--raise);font-size:22px;line-height:1;cursor:pointer;transition:transform .1s}
 .gm .emobar button:active{transform:scale(1.25)}.gm .emobar button:disabled{opacity:.45}
+.gm .xpgain{color:#6ee7a0;font-weight:700;font-size:13px;animation:xpup .9s ease both}.gm .xpgain.up{color:#ffd166;animation:xpup .9s ease both,xpglow 1.4s ease .9s 2}
+@keyframes xpup{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}@keyframes xpglow{50%{text-shadow:0 0 14px #ffd166}}
+.gm.full{position:fixed;inset:0;z-index:9000;background:var(--bg);overflow:auto;padding:8px 66px 8px 8px;box-sizing:border-box;max-width:none;margin:0;-webkit-overflow-scrolling:touch}
+.gm.full>h1{display:none}.gm.full .emobar{position:fixed;right:6px;top:50%;transform:translateY(-50%);flex-direction:column;overflow:visible;z-index:9001;background:rgba(20,22,30,.6);padding:8px 5px;border-radius:30px;gap:5px;backdrop-filter:blur(6px)}
+.gm.full .emobar small{display:none}.gm.full .emobar button{width:40px;height:40px;font-size:21px}
+.gm.full .emobar button:hover{transform:scale(1.15)}
 .gm .emob{position:absolute;right:8px;top:-16px;font-size:30px;line-height:1;background:var(--raise);border:1px solid var(--line);border-radius:18px;padding:3px 9px;box-shadow:0 4px 14px rgba(0,0,0,.35);animation:emopop 2.6s ease forwards;pointer-events:none;z-index:5}
 @keyframes emopop{0%{transform:translateY(10px) scale(.3);opacity:0}10%{transform:translateY(0) scale(1.18);opacity:1}18%{transform:scale(1)}82%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
 .gm .code{font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;padding:8px;border-radius:14px;border:2px dashed var(--acc)}
@@ -113,7 +119,7 @@ function style(){if(document.getElementById("gmcss"))return;const s=E("style");s
 
 function intro(){
   if(window.NATAN_GIOCHI_VELOCE)return;
-  const o=E("div","ngintro");const c=E("div","c");const lg=E("div","lg");lg.append(E("span","","🎮"));c.append(lg,E("b","","Natan Gaming"),E("small","","30 bot con 35 agenti ciascuno · Giardino Zen"));o.append(c);
+  const o=E("div","ngintro");const c=E("div","c");const lg=E("div","lg");lg.append(E("span","","🎮"));c.append(lg,E("b","","Natan Gaming"),E("small","","30 bot con 35 agenti ciascuno · Giochi"));o.append(c);
   for(let i=0;i<26;i++){const p=E("i");const a=Math.random()*Math.PI*2,d=120+Math.random()*220;p.style.cssText=`left:50%;top:50%;--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px;animation-delay:${.2+Math.random()*.5}s;background:${["#7c83ff","#c06bff","#ff7cc8","#ffd75a"][i%4]}`;o.append(p)}
   document.body.append(o);setTimeout(()=>o.remove(),2000)
 }
@@ -154,7 +160,7 @@ function pesiBot(id,game){const all=allRec();const r=all[id]||{};const w=r.w&&r.
 function salvaBot(id,game,w,esito,lv){
   const all=allRec();const r=all[id]||{p:0,v:0,s:0,n:0,xp:baseXp(id),w:{}};r.w=r.w||{};if(w)r.w[game]=w.map(x=>Math.round(x*1000)/1000);
   if(esito!==undefined){r.p=(r.p||0)+1;esito===true?r.v=(r.v||0)+1:esito===false?r.s=(r.s||0)+1:r.n=(r.n||0)+1;
-    r.xp=(r.xp==null?baseXp(id):r.xp)+8+(esito===true?18:esito===null?8:3)+lv*3}
+    r.xp=(r.xp==null?baseXp(id):r.xp)+12+(esito===true?30:esito===null?14:6)+lv*5}
   all[id]=r;LSG.set("natan_bots",all);
   try{if(window.natanGiochiSync)window.natanGiochiSync(all)}catch(e){}
 }
@@ -481,12 +487,20 @@ function installaEmo(sh,ctx,seats,net,me,info){
 
 // ------------------------------------------------------------------ shell di gioco (barra, giocatori, pannello agenti)
 function gameShell(pg,info,ctx){
+  try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen()}catch(e){}
   pg.innerHTML="";const g=E("div","gm");pg.append(g);
-  const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.id="gmBack2";back.onclick=()=>{ctx&&ctx.leave&&ctx.leave();menu(pg)};
-  const help=E("button","btn ghost","❔ Regole");help.onclick=()=>{ctx&&ctx.leave&&ctx.leave();tutorial(pg,info,()=>lobby(pg,info))};
+  const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.id="gmBack2";back.onclick=()=>{try{g.fullOff&&g.fullOff()}catch(e){}ctx&&ctx.leave&&ctx.leave();menu(pg)};
+  const help=E("button","btn ghost","❔ Regole");help.onclick=()=>{try{g.fullOff&&g.fullOff()}catch(e){}ctx&&ctx.leave&&ctx.leave();tutorial(pg,info,()=>lobby(pg,info))};
   top.append(back);
   if(ctx&&ctx.again){const again=E("button","btn ghost","↻ Nuova partita");again.id="gmAgain";again.onclick=ctx.again;top.append(again)}
-  top.append(help);g.append(top,E("h1","",info.ic+" "+info.nome));
+  const fs=E("button","btn ghost","⛶ Schermo intero");fs.id="gmFull";
+  const fullOff=()=>{g.classList.remove("full");fs.textContent="⛶ Schermo intero";try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen()}catch(e){}setTimeout(()=>window.dispatchEvent(new Event("resize")),60)};
+  fs.onclick=()=>{if(g.classList.contains("full")){fullOff();return}
+    g.classList.add("full");fs.textContent="✕ Esci dallo schermo intero";try{const r=document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen;if(r)Promise.resolve(r.call(document.documentElement)).catch(()=>{})}catch(e){}
+    setTimeout(()=>{window.dispatchEvent(new Event("resize"));try{g.scrollTo(0,0)}catch(e){}},80)};
+  document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&g.classList.contains("full")&&g.isConnected){fullOff()}});
+  top.append(fs,help);g.append(top,E("h1","",info.ic+" "+info.nome));
+  g.fullOff=fullOff;
   const pls=E("div","pls");g.append(pls);
   const ng=ngPanel();ng.el.forEach(x=>g.append(x));
   const status=E("div","status msg");g.append(status);
@@ -643,6 +657,7 @@ function controllaTrofei(){   // quali trofei sono nuovi dall'ultima volta?
 function conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me){
   const win=o.win||[];const io=win.includes(me);const pari=!win.length;
   const esito=pari?null:io?true:false;
+  const prima={};seats.forEach(s=>{if(s.tipo==="bot")prima[s.bot.id]=botInfo(s.bot.id)});
   seats.forEach((s,i)=>{if(s.tipo==="bot"){const e=pari?null:win.includes(i);allena(s.bot,info.id,storia[i],e,ctx.lv)}});
   const st=LSG.get("natan_gaming_stats",{});const k=st[info.id]=st[info.id]||{v:0,p:0,n:0};
   esito===true?k.p++:esito===false?k.v++:k.n++;LSG.set("natan_gaming_stats",st);aggiornaX(info,esito,seats,ctx,net);   // p = vittorie tue, v = vittorie dei bot (o degli altri)
@@ -651,7 +666,9 @@ function conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me){
   const sotto=pari?"Pareggio!":io?"Hai vinto! Gli allenatori correggono gli agenti dei bot che hanno sbagliato.":"Ha vinto un altro giocatore. Gli allenatori rinforzano gli agenti che avevano ragione.";
   const e=fineBanner(sh,esito,testo,sotto);e.id="gmEnd";
   try{controllaTrofei().forEach(t=>{const x=E("div","newtro","🏆 Nuovo trofeo: "+t.ic+" "+t.nome+" — "+t.desc);e.append(x)})}catch(er){}
-  const bs=seats.filter(s=>s.bot);if(bs.length){const w=E("div","pls");bs.forEach(s=>w.append(botCard(s.bot)));e.append(w)}
+  const bs=seats.filter(s=>s.bot);if(bs.length){const w=E("div","pls");bs.forEach(s=>{const p0=prima[s.bot.id],p1=botInfo(s.bot.id),g=p0?p1.xp-p0.xp:0;let ex=null;
+      if(g>0){ex=E("div","xpgain","+"+g+" XP"+(p0&&p1.liv>p0.liv?" · ⬆ sale al livello "+p1.liv+" ("+p1.titolo+")":""));if(p0&&p1.liv>p0.liv)ex.classList.add("up")}
+      w.append(botCard(s.bot,ex))});e.append(w)}
   if(net){
     if(net.host){const r=E("button","btn","↻ Rigioca con gli stessi giocatori");r.id="gmRigioca";
       r.onclick=()=>{const nc=Object.assign({},cfg,{seed:(Math.random()*2**31)|0});net.conns.forEach(x=>{if(!x.fine)try{x.conn.send({t:"start",cfg:nc,seat:x.seat})}catch(e){}});avvia(pg,info,nc,net,0)};e.append(r)}
@@ -676,7 +693,7 @@ function lobby(pg,info){
   function render(){
     body.innerHTML="";
     const b1=E("div","box");b1.append(E("h3","","Dove vuoi giocare?"));const sg=E("div","seg");
-    [["bot","🤖 Contro Natan Gaming"],["online","🌐 Online con amici"]].forEach(([m,t])=>{const b=E("button",cfg.mode===m?"on":"",t);b.dataset.mode=m;b.onclick=()=>{if(net){net.close();net=null}cfg.mode=m;errore="";render()};sg.append(b)});b1.append(sg);body.append(b1);
+    [["bot","🤖 Contro Natan Gaming"],["online","🌐 Online con amici"]].filter(([m])=>!(m==="online"&&info.noOnline)).forEach(([m,t])=>{const b=E("button",cfg.mode===m?"on":"",t);b.dataset.mode=m;b.onclick=()=>{if(net){net.close();net=null}cfg.mode=m;errore="";render()};sg.append(b)});b1.append(sg);body.append(b1);
     const b2=E("div","box");b2.append(E("h3","","Livello dei bot"));const sl=E("div","seg");
     LIV.forEach((l,i)=>{const b=E("button",cfg.lv===i?"on":"",l.ic+" "+l.nome);b.dataset.lv=String(i);b.onclick=()=>{cfg.lv=i;LSG.set("natan_gaming_lv",i);if(net)net.lv=i;render();if(net)net.stato()};sl.append(b)});b2.append(sl);body.append(b2);
     if(mx>mn){
@@ -770,7 +787,7 @@ function menu(pg){
   style();pg.innerHTML="";const g=E("div","gm zmenu");pg.append(g);
   const Z=window.__G.zen||null;
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna");back.id="gmBack";back.onclick=()=>{try{window.openChat()}catch(e){location.reload()}};top.append(back);g.append(top);
-  const hero=E("div","zhero");const hl=E("div");const h1=E("h1","","Giardino Zen");h1.append(E("span","","庭"));
+  const hero=E("div","zhero");const hl=E("div");const h1=E("h1","","Giochi");
   hl.append(h1,E("p","","Giochi calmi da soli, contro i bot di Natan Gaming o con gli amici online."));hero.append(hl);
   if(Z){const ctl=E("div","zctl");const mb=E("button","","Musica: "+Z.STYLES[Z.Music.idx].name);mb.id="musicBtn";mb.onclick=()=>{Z.A.init();Z.Music.cycle();mb.textContent="Musica: "+Z.STYLES[Z.Music.idx].name};
     const sb=E("button","",Z.A.sfx?"Suoni accesi":"Suoni spenti");sb.id="sfxBtn";sb.onclick=()=>{Z.A.sfx=!Z.A.sfx;LSG.set("natan_zen_sfx",Z.A.sfx);sb.textContent=Z.A.sfx?"Suoni accesi":"Suoni spenti";if(Z.A.sfx)Z.sfx("hint")};
@@ -781,7 +798,7 @@ function menu(pg){
   const st=LSG.get("natan_gaming_stats",{});
   const c=E("div","cards zcards");g.append(c);
   const lista=Object.entries(GAMES).sort((a,b)=>(a[1].ord||99)-(b[1].ord||99));
-  for(const [k,info] of lista){const b=E("button","gcard zstone");b.dataset.g=k;
+  for(const [k,info] of lista){const b=E("button","gcard zstone");b.dataset.g=k;if(info.col)b.style.setProperty("--gc",info.col);
     if(Z&&Z.PIC&&Z.PIC[k]){const w=E("div");w.innerHTML=Z.PIC[k];b.append(w.firstChild)}else b.append(E("span","ic",info.ic));
     const t=E("span","txt");t.append(E("strong","",info.nome),E("small","",info.sub),E("small","",info.solo?"Da solo":info.min===info.max?`${info.max} giocatori`:`${info.min}-${info.max} giocatori`));
     const s=st[k];if(s)t.append(E("small","",info.solo?`Vinte: ${s.p}`:`Tu ${s.p} · Bot ${s.v}`+(s.n?` · pari ${s.n}`:"")));

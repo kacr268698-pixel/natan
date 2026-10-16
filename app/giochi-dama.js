@@ -57,7 +57,7 @@ register({id:"dama",ord:4,nome:"Dama",ic:"⚪",sub:"Dama italiana: la presa è o
   tut:[["⚪⚫","Lo scopo","Si gioca in due sulla damiera. Il Bianco muove per primo. Perde chi non ha più mosse (o non ha più pedine)."],
        ["↗️","Come si muove","Le pedine avanzano in diagonale di una casella. Si muove solo sulle caselle scure."],
        ["🍽️","Mangiare","Mangiare è obbligatorio, e solo in avanti. Una pedina non può mangiare una dama. Se puoi scegliere, devi fare la presa più grossa; a parità conta prima la presa fatta con la dama, poi quella che mangia più dame."],
-       ["王","La dama","Una pedina che arriva in fondo diventa dama (王) e si muove anche all'indietro. Dopo 40 mosse a testa senza prese o promozioni è patta."]],
+       ["♛","La dama","Una pedina che arriva in fondo diventa dama (♛) e si muove anche all'indietro. Dopo 40 mosse a testa senza prese o promozioni è patta."]],
   init(n,seed){return {b:dmInit(),turn:1,quiet:0,last:null,res:null,nm:0}},
   turn(S){return S.turn===1?0:1},
   legal(S,seat){return dmMoves(S.b,lato(seat)).map(m=>({k:mk(m),m}))},
@@ -103,7 +103,7 @@ register({id:"dama",ord:4,nome:"Dama",ic:"⚪",sub:"Dama italiana: la presa è o
         if(tg.has(i))cls+=" tgt";if(partial.includes(i))cls+=" path";
         if(hint&&(hint.from===i||hint.path.includes(i)))cls+=" hint";
         btn.className=cls;btn.disabled=!dark;
-        btn.innerHTML=p?`<span class="zpc ${p>0?"w":"b"}">${Math.abs(p)===2?"王":""}</span>`:"";
+        btn.innerHTML=p?`<span class="zpc ${p>0?"w":"b"}">${Math.abs(p)===2?"♛":""}</span>`:"";
         btn.setAttribute("aria-label",`${"ABCDEFGH"[c2]}${8-r}${p?(p>0?" bianco":" nero")+(Math.abs(p)===2?" dama":""):""}`)}
       const n=v=>S.b.filter(x=>Math.sign(x)===v).length;
       cnt.textContent=`Bianchi ${n(1)} · Neri ${n(-1)}`+(c.me===0?" · tu sei il Bianco":" · tu sei il Nero")};

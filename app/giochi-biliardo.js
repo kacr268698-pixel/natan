@@ -30,7 +30,10 @@ function passo(bs,dt,ev){
     if(!cx&&!side){if(b.y<R&&b.vy<0){b.y=2*R-b.y;b.vy=-b.vy*.78;b.vx*=.96;ev.rail(-b.vy)}else if(b.y>W-R&&b.vy>0){b.y=2*(W-R)-b.y;b.vy=-b.vy*.78;b.vx*=.96;ev.rail(-b.vy)}}
     const J=R*1.6;
     if(b.x<-J){b.x=-J;b.vx=Math.abs(b.vx)*.5}if(b.x>L+J){b.x=L+J;b.vx=-Math.abs(b.vx)*.5}
-    if(b.y<-J){b.y=-J;b.vy=Math.abs(b.vy)*.5}if(b.y>W+J){b.y=W+J;b.vy=-Math.abs(b.vy)*.5}}
+    if(b.y<-J){b.y=-J;b.vy=Math.abs(b.vy)*.5}if(b.y>W+J){b.y=W+J;b.vy=-Math.abs(b.vy)*.5}
+    if(!b.vx&&!b.vy&&(b.x<R-1||b.x>L-R+1||b.y<R-1||b.y>W-R+1)){   // fermo oltre la sponda: all'imbocco di una buca cade dentro, altrimenti rientra sul tappeto
+      let vicino=false;for(const P of POCKETS){const qx=b.x-P[0],qy=b.y-P[1];if(qx*qx+qy*qy<48*48){vicino=true;break}}
+      if(vicino){b.on=false;ev.pocket(b)}else{b.x=Math.min(L-R,Math.max(R,b.x));b.y=Math.min(W-R,Math.max(R,b.y))}}}
   const D=2*R;
   for(let i=0;i<bs.length;i++){const a=bs[i];if(!a.on)continue;
     for(let j=i+1;j<bs.length;j++){const c=bs[j];if(!c.on)continue;
@@ -66,11 +69,12 @@ function giudica(T,p,prev,brkPrima,bs,rec){
   else if(onEight&&rec.firstHit!==8)foul="no8first";
   else if(g&&!onEight&&grp(rec.firstHit)!==g)foul=rec.firstHit===8?"hit8":"hitopp";
   else if(!g&&rec.firstHit===8&&!brkPrima)foul="hit8";
-  const pot=rec.pocketed.filter(n=>n!==0);
+  let pot=rec.pocketed.filter(n=>n!==0);
+  if(pot.includes(8)&&brkPrima){const e8=T.balls.find(b=>b.n===8),sp=spotLibero(T.balls,730,250);e8.on=true;e8.x=sp.x;e8.y=sp.y;pot=pot.filter(n=>n!==8)}   // la nera imbucata alla spaccata torna al suo posto
   T.brk=false;T.shotNo=(T.shotNo||0)+1;
   if(pot.includes(8)){T.phase="over";T.winner=(onEight&&!foul)?p:o;T.ev={by:p,kind:"eight",foul,presto:!onEight};return T}
-  if(!g&&!foul){const f=pot.find(n=>n!==8);if(f){T.groups[p]=grp(f);T.groups[o]=grp(f)==="solid"?"stripe":"solid"}}
-  const g2=T.groups[p],potOwn=!!g2&&pot.some(n=>grp(n)===g2);
+  if(!g&&!foul&&!brkPrima){const f=pot.find(n=>n!==8);if(f){T.groups[p]=grp(f);T.groups[o]=grp(f)==="solid"?"stripe":"solid"}}
+  const g2=T.groups[p],potOwn=g2?pot.some(n=>grp(n)===g2):(brkPrima&&pot.length>0);
   if(foul){T.turn=o;T.ballInHand=true;T.ev={by:p,kind:"foul",foul};
     if(rec.scratch){const cue=T.balls.find(b=>b.n===0);cue.on=true;const sp=spotLibero(T.balls,250,250);cue.x=sp.x;cue.y=sp.y}}
   else if(potOwn){T.ballInHand=false;T.ev={by:p,kind:"again",n:pot.length,assegna:(!g&&g2)?g2:null}}
@@ -162,8 +166,8 @@ register({id:"biliardo",ord:5,nome:"Biliardo",ic:"🎱",sub:"Palla 8: trascina, 
     let SS=null,cc=null,anim=null,aim=null,drag=null,hint=null,cuePos=null,V=null,vistoShot=0,msgTxt="";
     const nomeDi=(c,s)=>s===c.me?"Tu":(c.seats[s]?c.seats[s].nome:"?");
     function layout(){
-      const wrapW=Math.max(280,(root.clientWidth||360)-24),portrait=wrapW<640,TL=L+80,TW=W+80;
-      let s;if(portrait)s=Math.min(wrapW/TW,Math.max(300,innerHeight-250)/TL);else s=Math.min(wrapW/TL,Math.max(260,innerHeight-230)/TW);
+      const full=!!root.closest(".gm.full"),wrapW=Math.max(280,(root.clientWidth||360)-24),portrait=wrapW<640,TL=L+80,TW=W+80;
+      let s;if(portrait)s=Math.min(wrapW/TW,Math.max(300,innerHeight-(full?90:250))/TL);else s=Math.min(wrapW/TL,Math.max(260,innerHeight-(full?90:230))/TW);
       const cw=portrait?TW*s:TL*s,ch=portrait?TL*s:TW*s,dpr=Math.min(2,window.devicePixelRatio||1);
       cv.width=Math.round(cw*dpr);cv.height=Math.round(ch*dpr);cv.style.width=cw+"px";cv.style.height=ch+"px";
       const S_=s*dpr;V={portrait,S:S_,dpr,m:portrait?[0,S_,-S_,0,(W+40)*S_,40*S_]:[S_,0,0,S_,40*S_,40*S_],rot:portrait?-Math.PI/2:0}}

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Giardino Zen</title>
+<title>Natan Giochi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
@@ -658,7 +658,7 @@ function drawParchment(){
   drawDragon(x,W,H,ink,R);
   const s=Math.max(40,Math.min(W,H)*.085), sx=W-s-22, sy=H-s-22;
   x.save(); x.translate(sx+s/2,sy+s/2); x.rotate(-.05); x.fillStyle=hexA(seal,.85); x.fillRect(-s/2,-s/2,s,s);
-  x.fillStyle=p1; x.font=`800 ${s*.68}px "Shippori Mincho",serif`; x.textAlign='center'; x.textBaseline='middle'; x.fillText('龍',0,s*.04);
+  x.fillStyle=p1; x.font=`800 ${s*.68}px "Shippori Mincho",serif`; x.textAlign='center'; x.textBaseline='middle'; x.fillText('N',0,s*.04);
   x.strokeStyle=hexA(p1,.6); x.lineWidth=2; x.strokeRect(-s/2+4,-s/2+4,s-8,s-8); x.restore();
   const e=Math.min(W,H)*.14, burn='#3b2410';
   [[0,0,e,0],[W,0,W-e,0],[0,0,0,e],[0,H,0,H-e]].forEach(([x0,y0,x1,y1])=>{ const g=x.createLinearGradient(x0,y0,x1,y1); g.addColorStop(0,hexA(burn,.75)); g.addColorStop(.25,hexA(burn,.3)); g.addColorStop(1,hexA(burn,0)); x.fillStyle=g; x.fillRect(0,0,W,H); });

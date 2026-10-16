@@ -82,7 +82,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)Music.stop(
 // ------------------------------------------------------------------ grafica comune dei giochi del Giardino
 function css(){if(document.getElementById("gmcssz"))return;const s=E("style");s.id="gmcssz";s.textContent=`
 .gm .zhero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding:6px 0 14px;border-bottom:1px solid var(--line)}
-.gm .zhero h1{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;font-size:clamp(32px,8vw,50px);font-weight:800;letter-spacing:.02em;line-height:1;margin:0}
+.gm .zhero h1{font-size:clamp(32px,8vw,50px);font-weight:800;letter-spacing:.02em;line-height:1;margin:0}
 .gm .zhero h1 span{color:#d1604d;font-size:.5em;vertical-align:.55em;margin-left:.3em}
 .gm .zhero p{margin:6px 0 0;color:var(--muted)}
 .gm .zctl{display:flex;gap:8px;flex-wrap:wrap}
@@ -92,7 +92,7 @@ function css(){if(document.getElementById("gmcssz"))return;const s=E("style");s.
 .gm .gcard.zstone{padding:0;overflow:hidden;align-items:stretch;gap:0;text-align:left;border-radius:18px}
 .gm .zstone .pic{display:block;width:100%;height:118px}
 .gm .zstone .txt{padding:11px 15px 14px;display:flex;flex-direction:column;gap:3px}
-.gm .zstone .txt strong{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;font-size:21px}
+.gm .zstone .txt strong{font-size:20px}
 .gm .pic-sd{background:#e3dccd}.gm .pic-sc{background:radial-gradient(circle at 50% 40%,#2e5a44,#1f4231)}.gm .pic-mj{background:radial-gradient(circle at 50% 50%,#e6d1a6,#cfae6e)}
 .gm .pic-dm{background:#e6dfcf}.gm .pic-bl{background:#4a3324}.gm .pic-un{background:radial-gradient(circle at 50% 40%,#2b2f6e,#14153a)}
 .zfloat{position:fixed;inset:0;z-index:60;background:#0e0f13;display:flex;flex-direction:column}
