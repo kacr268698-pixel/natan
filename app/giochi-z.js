@@ -1,5 +1,5 @@
 // GIARDINO ZEN dentro i giochi di Natan: suoni e musica, grafica comune, Sudoku e Mahjong (pagina a parte zen.html).
-// Le carte, la dama e il biliardo stanno in giochi-carte.js, giochi-dama.js e giochi-biliardo.js e usano questi suoni.
+// Le carte, la dama e il biliardo stanno in giochi-carte.js e giochi-dama.js e usano questi suoni.
 (function(){
 "use strict";
 const {E,LSG,register}=window.__G;

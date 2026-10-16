@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it">
-<head>
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f1430">
@@ -175,8 +175,8 @@ dialog::backdrop{background:rgba(5,7,20,.7)}
         <h3>Natan Test</h3><p>Verifiche su qualsiasi argomento: scuola media, superiori o università, quattro livelli di difficoltà.</p>
       </div>
       <div>
-        <div class="mock"><div class="cards"><span class="uc" style="background:#e2463c;--r:-8deg">7</span><span class="uc" style="background:#2f6fd6;--r:2deg">+2</span><span class="uc" style="background:#33a65a;--r:10deg">⇄</span></div><div class="small">Uno, Scopa d'Assi, Dama, Biliardo, Sudoku, Mahjong</div></div>
-        <h3>Giochi e trofei</h3><p>I giochi di Natan: Sudoku, Scopa d’Assi, Mahjong, Dama, Biliardo e Uno da soli, contro i bot o online con gli amici, e più di quaranta trofei da sbloccare.</p>
+        <div class="mock"><div class="cards"><span class="uc" style="background:#e2463c;--r:-8deg">7</span><span class="uc" style="background:#2f6fd6;--r:2deg">+2</span><span class="uc" style="background:#33a65a;--r:10deg">⇄</span></div><div class="small">Uno, Scopa d'Assi, Dama, Basket, Sudoku, Mahjong</div></div>
+        <h3>Giochi e trofei</h3><p>I giochi di Natan: Sudoku, Scopa d’Assi, Mahjong, Dama, Uno, Basket, Bowling, Minigolf, Calcio, Forza 4, Reversi e altri da soli, contro i bot o online con gli amici, e più di quaranta trofei da sbloccare.</p>
       </div>
       <div>
         <div class="mock"><div class="big" id="nAppunti">migliaia</div><div class="small">appunti nella biblioteca · <span id="nAgg">si aggiorna ogni 30 minuti</span></div></div>
@@ -301,5 +301,8 @@ giro();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 })();
 </script>
+<style>.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.3,1),transform .7s cubic-bezier(.2,.8,.3,1)}.rv.in{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}</style>
+<script>(function(){try{if(!("IntersectionObserver" in window))return;const els=document.querySelectorAll("section .wrap > *, .inside > div");const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+els.forEach((e,i)=>{e.classList.add("rv");e.style.transitionDelay=(i%4)*70+"ms";io.observe(e)})}catch(e){}})();</script>
 </body>
 </html>

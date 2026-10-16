@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it">
-<head>
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#15161c">
@@ -208,6 +208,76 @@ textarea.field{resize:vertical}
 @media (min-width:900px){#sideClose{display:none}#app.closed #side{display:none}#app.closed #sideOpen{display:inline-flex}}
 @media (prefers-reduced-motion:reduce){.logo,.logo svg{animation:none}*{transition:none!important}}
 </style>
+<style id="plus">
+/* ===== Natan 2.9 · grafica più viva e animazioni (si può disattivare con «riduci movimento» del sistema) ===== */
+:root{--grad:linear-gradient(135deg,#7c83ff 0%,#a77bff 55%,#ff7ab6 100%);--glow:0 8px 26px rgba(124,131,255,.35);--ease:cubic-bezier(.2,.8,.3,1);--spring:cubic-bezier(.3,1.4,.5,1)}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1200px 600px at 85% -10%,rgba(124,131,255,.10),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(255,122,182,.07),transparent 60%),var(--bg);background-attachment:fixed}
+#app,#main{background:transparent}
+/* pulsanti */
+.btn{background:var(--grad);background-size:140% 100%;background-position:0 0;box-shadow:var(--glow);transition:transform .18s var(--ease),box-shadow .2s,background-position .35s,filter .2s}
+.btn:hover{background:var(--grad);background-size:140% 100%;background-position:100% 0;transform:translateY(-2px);box-shadow:0 12px 30px rgba(124,131,255,.45)}
+.btn:active{transform:scale(.96);box-shadow:var(--glow)}
+.btn.ghost{background:var(--raise);box-shadow:none}.btn.ghost:hover{background:var(--hover);box-shadow:0 6px 18px rgba(0,0,0,.25);transform:translateY(-1px)}
+.btn.red{background:var(--bad);box-shadow:0 8px 22px rgba(240,100,100,.3)}
+.ib{transition:background .15s,transform .15s var(--spring),color .15s}.ib:hover{transform:scale(1.1)}.ib:active{transform:scale(.9)}
+.chip,.sugg button{transition:transform .18s var(--spring),background .18s,border-color .18s,box-shadow .18s}
+.chip:hover,.sugg button:hover{transform:translateY(-2px);border-color:var(--acc)}.chip:active,.sugg button:active{transform:scale(.95)}
+.chip.on{background:var(--grad);border-color:transparent;box-shadow:0 6px 16px rgba(124,131,255,.35)}
+.field{transition:border-color .2s,box-shadow .2s,background .2s}.field:focus{box-shadow:0 0 0 4px rgba(124,131,255,.2);background:#222530}
+/* barra laterale */
+#side{background:linear-gradient(180deg,#12131a,#0d0e13)}
+.side-top .mark{background:var(--grad);border:0;box-shadow:0 6px 18px rgba(124,131,255,.45);animation:markFloat 5s ease-in-out infinite}
+.sbtn{position:relative;transition:background .18s,color .18s,transform .18s var(--ease),padding .18s}
+.sbtn svg{transition:transform .25s var(--spring),color .2s}.sbtn:hover{transform:translateX(3px)}.sbtn:hover svg{transform:scale(1.18) rotate(-6deg);color:var(--acc-h)}
+.sbtn.on{background:linear-gradient(90deg,rgba(124,131,255,.22),rgba(124,131,255,.05));color:#fff}
+.sbtn.on::before{content:"";position:absolute;left:-4px;top:9px;bottom:9px;width:4px;border-radius:4px;background:var(--grad);animation:barIn .35s var(--spring)}
+.av{background:var(--grad);box-shadow:0 4px 12px rgba(124,131,255,.4)}
+#chatList .sbtn{animation:slideL .35s var(--ease) both}
+/* chat */
+.hello .mark,.hello>div:first-child{animation:markFloat 5s ease-in-out infinite}
+.hello h2{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .6s var(--ease) both}
+.sugg button{animation:rise .5s var(--ease) both}.sugg button:nth-child(1){animation-delay:.1s}.sugg button:nth-child(2){animation-delay:.18s}.sugg button:nth-child(3){animation-delay:.26s}.sugg button:nth-child(4){animation-delay:.34s}
+#chatView.empty::before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;left:50%;top:18%;transform:translateX(-50%);background:radial-gradient(circle,rgba(124,131,255,.16),transparent 65%);filter:blur(10px);pointer-events:none;animation:breathe 7s ease-in-out infinite}
+.msg:nth-last-child(-n+2){animation:msgIn .45s var(--ease) both}
+.msg.u .bub{background:linear-gradient(135deg,#363a52,#2c2f44);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.msg.a .mark{background:var(--grad);border:0;box-shadow:0 4px 14px rgba(124,131,255,.4)}
+.msg.a .txt.wait{background:linear-gradient(90deg,var(--muted) 0%,#fff 50%,var(--muted) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 1.6s linear infinite}
+.composer{transition:box-shadow .25s,border-color .25s}
+.composer:focus-within{box-shadow:0 0 0 1px rgba(124,131,255,.55),0 10px 34px rgba(124,131,255,.18)}
+/* pagine e pannelli */
+#page>*{animation:rise .5s var(--ease) both}#page>*:nth-child(2){animation-delay:.06s}#page>*:nth-child(3){animation-delay:.12s}#page>*:nth-child(4){animation-delay:.18s}#page>*:nth-child(5){animation-delay:.24s}#page>*:nth-child(n+6){animation-delay:.3s}
+.page h1,#page h1{letter-spacing:-.5px;text-shadow:0 2px 24px rgba(124,131,255,.35)}
+.panel{transition:transform .25s var(--ease),border-color .25s,box-shadow .25s}.panel:hover{border-color:rgba(124,131,255,.45);box-shadow:0 12px 32px rgba(0,0,0,.28);transform:translateY(-2px)}
+.stat{transition:transform .2s var(--spring),background .2s}.stat:hover{transform:translateY(-3px) scale(1.02);background:#1b1d26}
+.stat b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.li{transition:background .15s,transform .18s var(--ease)}.li:hover{background:#1c1e27;transform:translateX(3px)}
+.pill{transition:transform .2s var(--spring)}.pill:hover{transform:scale(1.06)}.pill.wait{animation:pulse 1.6s ease-in-out infinite}
+.bar i,.prog i{background:var(--grad);position:relative;overflow:hidden}.bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 1.8s linear infinite}
+.sw{transition:background .25s}.sw::after{transition:transform .28s var(--spring);box-shadow:0 2px 6px rgba(0,0,0,.35)}.sw.on{background:linear-gradient(135deg,#3ecf8e,#2fb67c)}
+.menu{animation:pop .22s var(--spring) both;transform-origin:top left}.mi{transition:background .15s,transform .15s var(--ease)}.mi:hover{transform:translateX(3px)}
+.toast:not(.hide){animation:toastIn .35s var(--spring) both}
+.status i.on{box-shadow:0 0 0 0 rgba(62,207,142,.6);animation:ping 2.2s ease-out infinite}
+.tag,.badge{animation:pop .35s var(--spring) both}
+/* avvio e primo avvio */
+#onb .card{animation:rise .6s var(--ease) both}#onb .mark{width:54px;height:54px;border-radius:16px;font-size:28px;background:var(--grad);border:0;box-shadow:0 10px 30px rgba(124,131,255,.5);animation:markFloat 4.5s ease-in-out infinite}
+#onb h1{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.steps i{transition:background .4s;overflow:hidden;position:relative}.steps i.on{background:var(--grad)}
+.consent{transition:border-color .25s,box-shadow .25s}.consent:hover{border-color:rgba(124,131,255,.45)}
+/* movimenti */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes msgIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes barIn{from{transform:scaleY(0)}to{transform:none}}
+@keyframes markFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes breathe{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.12)}}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes shine{from{transform:translateX(-120%)}to{transform:translateX(220%)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px) scale(.95)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,207,142,.55)}70%,100%{box-shadow:0 0 0 8px rgba(62,207,142,0)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body>
 <div id="splash">
@@ -287,7 +357,7 @@ textarea.field{resize:vertical}
 
 <script>
 "use strict";
-const VERSION="2.8.0";
+const VERSION="2.9.0";
 /*AREE*/const AREE={"Scuola superiore":["Matematica","Fisica","Chimica","Biologia","Fisiologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Economia","Arte","Musica","Geografia"],"Matematica e logica":["Analisi matematica","Algebra lineare","Algebra astratta","Geometria","Geometria analitica","Geometria differenziale","Topologia","Teoria dei numeri","Combinatoria","Teoria dei grafi","Probabilità","Statistica","Logica matematica","Teoria degli insiemi","Analisi numerica","Ricerca operativa","Matematica finanziaria","Matematica discreta","Trigonometria","Teoria dei giochi","Equazioni differenziali","Analisi complessa","Analisi funzionale","Storia della matematica"],"Fisica e astronomia":["Meccanica classica","Termodinamica","Elettromagnetismo","Ottica","Acustica","Meccanica quantistica","Relatività","Fisica nucleare","Fisica delle particelle","Fisica della materia condensata","Fisica del plasma","Fluidodinamica","Fisica atomica","Fisica medica","Biofisica","Geofisica","Astronomia","Astrofisica","Cosmologia","Planetologia","Astronautica","Astrobiologia","Storia della fisica"],"Chimica e materiali":["Chimica organica","Chimica inorganica","Chimica fisica","Chimica analitica","Biochimica","Elettrochimica","Chimica dei polimeri","Chimica industriale","Chimica farmaceutica","Chimica ambientale","Chimica degli alimenti","Radiochimica","Scienza dei materiali","Cristallografia","Spettroscopia"],"Biologia, animali e piante":["Botanica","Zoologia","Biologia cellulare","Biologia molecolare","Genetica","Microbiologia","Virologia","Batteriologia","Micologia","Parassitologia","Immunologia","Ecologia e ambiente","Biologia evolutiva","Embriologia","Istologia","Anatomia comparata","Fisiologia vegetale","Biologia marina","Limnologia","Paleontologia","Paleoantropologia","Etologia","Entomologia","Mirmecologia","Aracnologia","Ornitologia","Erpetologia","Ittiologia","Mammalogia","Malacologia","Primatologia","Cetologia","Lepidotterologia","Briologia","Ficologia","Lichenologia","Dendrologia","Biologia della conservazione","Biotecnologie","Bioinformatica","Biostatistica","Etnobotanica","Palinologia"],"Medicina e salute":["Medicina","Anatomia","Patologia","Farmacologia","Cardiologia","Neurologia","Oncologia","Pediatria","Ginecologia","Ostetricia","Dermatologia","Oftalmologia","Otorinolaringoiatria","Ortopedia","Psichiatria","Chirurgia","Anestesiologia","Radiologia","Medicina d'urgenza","Geriatria","Endocrinologia","Gastroenterologia","Nefrologia","Urologia","Pneumologia","Ematologia","Reumatologia","Malattie infettive","Epidemiologia","Sanità pubblica","Medicina legale","Medicina dello sport","Medicina del lavoro","Allergologia","Genetica medica","Anatomia patologica","Neurochirurgia","Cardiochirurgia","Chirurgia plastica","Odontoiatria","Ortodonzia","Dietetica e nutrizione","Fisioterapia","Infermieristica","Logopedia","Ortottica","Podologia","Osteopatia","Terapia occupazionale","Medicina di laboratorio","Audiologia","Neuropsichiatria infantile","Primo soccorso","Farmacia","Tossicologia","Medicina riabilitativa"],"Psicologia e mente":["Psicologia","Psicologia cognitiva","Psicologia dello sviluppo","Psicologia sociale","Psicologia clinica","Psicologia del lavoro","Psicologia dello sport","Psicologia dell'educazione","Psicologia giuridica","Psicometria","Neuropsicologia","Psicoterapia","Psicologia della personalità","Neuroscienze","Psicobiologia","Scienze cognitive"],"Ingegneria e tecnologia":["Ingegneria","Ingegneria meccanica","Ingegneria civile","Ingegneria elettrica","Elettronica","Elettrotecnica","Ingegneria informatica","Ingegneria gestionale","Ingegneria aerospaziale","Ingegneria chimica","Ingegneria biomedica","Ingegneria ambientale","Ingegneria nucleare","Ingegneria navale","Ingegneria dei materiali","Ingegneria edile","Ingegneria energetica","Telecomunicazioni","Robotica","Controlli automatici","Meccatronica","Idraulica","Geotecnica","Ingegneria dei trasporti","Nanotecnologie","Energie rinnovabili","Aeronautica","Scienza delle costruzioni","Disegno tecnico","Stampa 3D","Topografia","Metrologia"],"Informatica e digitale":["Intelligenza artificiale","Reti e sicurezza informatica","Algoritmi e strutture dati","Basi di dati","Sistemi operativi","Crittografia","Apprendimento automatico","Computer grafica","Sviluppo web","App per smartphone","Teoria della calcolabilità","Linguaggi di programmazione","Cloud computing","Blockchain","Scienza dei dati","Ingegneria del software","Sviluppo di videogiochi","Interazione uomo-computer","Architettura dei calcolatori","Informatica teorica","Elaborazione digitale delle immagini"],"Economia e impresa":["Microeconomia","Macroeconomia","Econometria","Economia politica","Economia aziendale","Finanza","Contabilità","Management e marketing","Risorse umane","Logistica","Economia internazionale","Storia economica","Banca e assicurazioni","Commercio","Commercio elettronico","Imprenditorialità","Economia comportamentale","Economia dello sviluppo","Economia ambientale","Turismo","Educazione finanziaria","Revisione contabile","Scienza delle finanze","Pubblicità"],"Diritto e politica":["Diritto","Diritto civile","Diritto penale","Diritto costituzionale","Diritto amministrativo","Diritto commerciale","Diritto del lavoro","Diritto tributario","Diritto internazionale","Diritto dell'Unione europea","Diritto privato","Procedura civile","Procedura penale","Diritto romano","Diritto canonico","Filosofia del diritto","Criminologia","Educazione civica","Scienze politiche","Relazioni internazionali","Geopolitica","Pubblica amministrazione","Diplomazia","Diritti umani"],"Società e comunicazione":["Sociologia","Antropologia culturale","Antropologia fisica","Demografia","Scienze della comunicazione","Giornalismo","Pedagogia","Servizio sociale","Studi di genere","Urbanistica","Geografia umana","Etnologia","Semiotica","Mass media"],"Storia e archeologia":["Preistoria","Storia antica","Antica Grecia","Storia romana","Medioevo","Età moderna","Età contemporanea","Storia d'Italia","Storia dell'arte","Storia della scienza","Storia della medicina","Storia militare","Archeologia","Egittologia","Assiriologia","Impero bizantino","Paleografia","Archivistica","Numismatica","Araldica","Epigrafia","Papirologia","Genealogia","Etruscologia","Storia degli Stati Uniti d'America","Storia della Cina","Storia del Giappone","Storia dell'Africa"],"Filosofia e religioni":["Logica","Etica","Estetica","Metafisica","Epistemologia","Filosofia della mente","Filosofia politica","Filosofia della scienza","Filosofia del linguaggio","Bioetica","Filosofia antica","Filosofia medievale","Filosofia orientale","Teologia","Religioni","Mitologia","Mitologia greca","Mitologia norrena","Storia delle religioni"],"Lingue e letterature":["Greco antico","Spagnolo","Francese","Tedesco","Portoghese","Russo","Cinese","Giapponese","Arabo","Coreano","Ebraico","Hindi","Olandese","Svedese","Polacco","Turco","Greco moderno","Rumeno","Albanese","Ucraino","Esperanto","Lingua dei segni italiana","Letteratura","Letteratura italiana","Letteratura inglese","Letteratura statunitense","Letteratura latina","Letteratura greca","Letteratura russa","Letteratura spagnola","Letteratura tedesca","Letteratura francese","Letteratura per ragazzi","Filologia","Filologia romanza","Glottologia","Linguistica","Fonetica","Sociolinguistica","Psicolinguistica","Traduzione","Retorica","Critica letteraria","Scrittura creativa","Dialetti italiani","Metrica"],"Arte, design e spettacolo":["Pittura","Scultura","Disegno","Fotografia","Grafica","Design industriale","Moda","Architettura","Restauro","Museologia","Cinema","Teatro","Danza","Composizione musicale","Armonia","Musicologia","Etnomusicologia","Canto","Strumenti musicali","Pianoforte","Chitarra","Musica elettronica","Storia della musica","Jazz","Fumetto","Animazione","Game design","Scenografia","Televisione","Radio","Calligrafia","Ceramica","Oreficeria","Arredamento"],"Terra, ambiente e spazio":["Geologia","Mineralogia","Petrografia","Vulcanologia","Sismologia","Oceanografia","Meteorologia","Climatologia","Idrologia","Glaciologia","Geografia fisica","Cartografia","Geomorfologia","Speleologia","Pedologia","Paleoclimatologia","Scienze ambientali","Conservazione della natura","Gestione dei rifiuti"],"Agraria, cibo e animali":["Agraria","Veterinaria","Agronomia","Zootecnia","Enologia","Viticoltura","Scienze forestali","Orticoltura","Frutticoltura","Apicoltura","Acquacoltura","Tecnologie alimentari","Gastronomia","Cucina","Pasticceria","Giardinaggio","Floricoltura","Pesca","Agricoltura biologica","Cinofilia"],"Sport e movimento":["Scienze motorie","Educazione fisica","Atletica leggera","Calcio","Nuoto","Pallavolo","Pallacanestro","Tennis","Ciclismo","Arti marziali","Ginnastica","Rugby","Sci","Scacchi","Equitazione","Vela","Arrampicata","Yoga"],"Vita pratica e mestieri":["Metodo di studio","Codice della strada","Automobili e motori","Falegnameria","Sartoria","Impianti elettrici","Economia domestica","Orientamento"]};const ALIAS={"formiche":"Mirmecologia","insetti":"Entomologia","ragni":"Aracnologia","uccelli":"Ornitologia","rettili":"Erpetologia","serpenti":"Erpetologia","anfibi":"Erpetologia","rane":"Erpetologia","pesci":"Ittiologia","mammiferi":"Mammalogia","molluschi":"Malacologia","conchiglie":"Malacologia","scimmie":"Primatologia","balene":"Cetologia","delfini":"Cetologia","farfalle":"Lepidotterologia","muschi":"Briologia","alghe":"Ficologia","licheni":"Lichenologia","alberi":"Dendrologia","funghi":"Micologia","fossili":"Paleontologia","dinosauri":"Paleontologia","vulcani":"Vulcanologia","terremoti":"Sismologia","mare":"Oceanografia","oceani":"Oceanografia","meteo":"Meteorologia","clima":"Climatologia","ghiacciai":"Glaciologia","grotte":"Speleologia","monete":"Numismatica","stemmi":"Araldica","api":"Apicoltura","miele":"Apicoltura","vino":"Enologia","denti":"Odontoiatria","occhi":"Oftalmologia","cuore":"Cardiologia","pelle":"Dermatologia","bambini":"Pediatria","anziani":"Geriatria","tumori":"Oncologia","cervello":"Neuroscienze","piedi":"Podologia","voce":"Logopedia","cani":"Cinofilia","piante":"Botanica","fiori":"Floricoltura","animali":"Zoologia","stelle":"Astronomia","pianeti":"Planetologia","spazio":"Astronautica","razzi":"Astronautica","computer":"Informatica","programmare":"Coding","programmazione":"Coding","soldi":"Educazione finanziaria","risparmio":"Educazione finanziaria","leggi":"Diritto","patente":"Codice della strada","cibo":"Gastronomia","dolci":"Pasticceria","torte":"Pasticceria","auto":"Automobili e motori","macchine":"Automobili e motori","motori":"Automobili e motori","ossa":"Ortopedia","muscoli":"Fisioterapia","riabilitazione":"Fisioterapia","egitto":"Egittologia","piramidi":"Egittologia","mappe":"Cartografia","batteri":"Batteriologia","virus":"Virologia","dna":"Genetica","robot":"Robotica","videogiochi":"Sviluppo di videogiochi","giochi":"Game design","fumetti":"Fumetto","cartoni":"Animazione","film":"Cinema","vestiti":"Moda","case":"Architettura","ponti":"Ingegneria civile","aerei":"Aeronautica","navi":"Ingegneria navale","elettricità":"Elettrotecnica","luce":"Ottica","suono":"Acustica","atomi":"Fisica atomica","medicine":"Farmacologia","farmaci":"Farmacologia","veleni":"Tossicologia","crimini":"Criminologia","mente":"Psicologia","emozioni":"Psicologia","studiare":"Metodo di studio","memoria":"Metodo di studio","lingua dei segni":"Lingua dei segni italiana","segni":"Lingua dei segni italiana","dialetti":"Dialetti italiani","cavalli":"Equitazione","montagna":"Arrampicata","giardino":"Giardinaggio","orto":"Orticoltura","frutta":"Frutticoltura","boschi":"Scienze forestali","rifiuti":"Gestione dei rifiuti","riciclo":"Gestione dei rifiuti","ambiente":"Ecologia e ambiente","dio":"Teologia","miti":"Mitologia","dei greci":"Mitologia greca","vichinghi":"Mitologia norrena","romani":"Storia romana","medioevo":"Medioevo","cavalieri":"Medioevo","guerre":"Storia militare","elezioni":"Scienze politiche","notizie":"Giornalismo","infermiere":"Infermieristica","parto":"Ostetricia","ospedale":"Medicina","dottore":"Medicina","medico":"Medicina"};/*FINE AREE*/
 const SUBJ=[...new Set(Object.values(AREE).flat())];
 const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
@@ -660,16 +730,14 @@ async function conBiblioteca(msgs){  // il PC che aiuta aggiunge i suoi appunti 
 }
 if(DESK){
   DESK.onComando(c=>{
-    if(c==="aiuto-off"){DESKST.auto=false;if(HELP.on)helpOff()}
-    else if(c==="aiuto-on"){DESKST.auto=true;deskAiuto()}
+    if(c==="aiuto-off"){DESKST.auto=false;LS.set("natan_help_off",true);if(HELP.on)helpOff()}
+    else if(c==="aiuto-on"){DESKST.auto=true;LS.set("natan_help_off",false);deskAiuto()}
     else if(c==="aiuto-auto"){DESKST.auto=true;setTimeout(deskAiuto,4000)}
     else if(c==="pausa"){DESKST.pausa=true;if(HELP.on){HELP.on=false;netStop();api("/rete/volontario",{attivo:false}).catch(()=>{});netLog("Il computer va a batteria: «Aiuta Natan» in pausa")}deskStato()}
     else if(c==="riprendi"){DESKST.pausa=false;deskAiuto()}
   });
   setInterval(deskStato,5000);setInterval(deskAiuto,10*60000);
   setTimeout(deskLib,60000);setInterval(deskLib,6*3600000);
-  setTimeout(()=>{if(TOKEN&&!(HELP.test&&HELP.test.ok)&&!LS.get("natan_desk_benv",false)){LS.set("natan_desk_benv",true);openPage("aiuta");
-    toast("Questo computer può aiutare i telefoni degli amici: fai il test del PC (una volta sola)")}},7000);
 }
 
 // =====================================================================================================
@@ -702,7 +770,7 @@ function onbShow(step){$("app").classList.add("hide");$("onb").classList.remove(
 function onbWelcome(){
   const c=onbShow(1);c.append(el("span","mark","N"));
   c.append(el("h1","","Ciao, io sono Natan"),el("p","lead","Sono un tutor AI. Spiego le materie, risolvo gli esercizi passo per passo e leggo le foto dei compiti."));
-  const b=el("div","consent");b.append(el("strong","","Prima di iniziare"),el("span","","Le tue chat, i voti che dai alle risposte e il tuo profilo vengono inviati a chi gestisce Natan, che può leggerli per migliorarlo. Anche le chat fatte senza Internet arrivano appena il server di Natan è acceso."),el("span","small","Se hai meno di 14 anni, chiedi prima il permesso a un genitore."));
+  const b=el("div","consent");b.append(el("strong","","Prima di iniziare"),el("span","","Le tue chat, i voti che dai alle risposte e il tuo profilo vengono inviati a chi gestisce Natan, che può leggerli per migliorarlo. Anche le chat fatte senza Internet arrivano appena il server di Natan è acceso."),el("span","","Sui computer «Aiuta Natan» è attivo di serie: quando non lo usi, il tuo computer può rispondere alle domande dei compagni (loro non sanno chi sei e tu non vedi chi sono). Usa al massimo 3/4 della memoria e puoi metterlo in pausa quando vuoi dalle Impostazioni. Sui computer Natan scarica anche tutta la biblioteca degli appunti."),el("span","small","Se hai meno di 14 anni, chiedi prima il permesso a un genitore."));
   const lab=el("label","check");const cb=el("input");cb.type="checkbox";cb.id="ok1";lab.append(cb,document.createTextNode("Ho capito e accetto"));b.append(lab);c.append(b);
   const go=el("button","btn","Continua");go.id="go1";go.disabled=true;cb.onchange=()=>go.disabled=!cb.checked;
   go.onclick=()=>{LS.set("natan_consenso",{ts:Date.now(),v:2});onbProfile()};c.append(go)
@@ -774,7 +842,61 @@ async function onbModel(){
   const go=el("button","btn","Inizia");go.id="go3";c.append(go);
   go.onclick=()=>{LS.set("natan_impegno",pick);enterApp();if(pick!=="kevin")prepareDevice(pick)}
 }
-function enterApp(){$("onb").classList.add("hide");$("app").classList.remove("hide");renderSide();renderModel();if(!chat)newChat();else openChat(chat)}
+function enterApp(){if(libGateServe()){libGate(realEnter);return}realEnter()}
+function realEnter(){$("onb").classList.add("hide");$("app").classList.remove("hide");renderSide();renderModel();if(!chat)newChat();else openChat(chat);libTimers();setTimeout(autoAiuta,5000)}
+// =====================================================================================================
+// BIBLIOTECA SEMPRE AGGIORNATA + «AIUTA NATAN» DI SERIE (sui computer)
+// Sui computer, prima di entrare, si scarica tutta la biblioteca. Poi, finché Natan è aperto: ogni 30 minuti la rimette in pari
+// e ogni 3 minuti guarda se gli appunti sono aumentati (se sì, scarica subito le materie cambiate). Sui telefoni si aggiornano le materie già scelte.
+const LIBCAP=700000;                                    // kb: tetto per la biblioteca intera su un computer (~700 MB)
+const LIBAUTO={busy:false,tot:LS.get("natan_lib_tot",0),t30:0,t3:0};
+function libGateServe(){return !IS_MOBILE&&!LS.get("natan_lib_ok",false)}
+async function libSync(onp){
+  if(LIBAUTO.busy||!navigator.onLine)return null;LIBAUTO.busy=true;
+  try{
+    const idx=await (await fetch("../biblioteca/indice.json?t="+Date.now(),{cache:"no-store"})).json();
+    const meta=libMeta();const ord=idx.materie.slice().sort((a,b)=>(SCUOLA_M.has(b.m)-SCUOLA_M.has(a.m))||((b.n||0)-(a.n||0)));
+    let kb=0;const want=[];
+    for(const m of ord){const have=meta[m.m]&&meta[m.m].max===m.max;
+      if(IS_MOBILE){if(meta[m.m]&&!have)want.push(m);continue}
+      if(have){kb+=m.kb||0;continue}if(kb+(m.kb||0)>LIBCAP)continue;kb+=m.kb||0;want.push(m)}
+    let i=0;for(const m of want){onp&&onp(m.m,i,want.length);await downloadLib([m.m]);i++;await sleep(200)}
+    onp&&onp("",want.length,want.length);
+    LS.set("natan_lib_ts",Date.now());LS.set("natan_lib_tot",idx.totale||0);LIBAUTO.tot=idx.totale||0;
+    DESKST.lib=Object.values(libMeta()).reduce((a,x)=>a+(x.n||0),0);try{deskStato()}catch(e){}
+    return {scaricate:want.length,tot:idx.totale||0}
+  }catch(e){return null}finally{LIBAUTO.busy=false}
+}
+function libGate(done){
+  const c=onbShow(0);c.append(el("span","mark","N"),el("h1","","Preparo la biblioteca"),
+    el("p","lead","Prima di entrare Natan scarica tutti gli appunti sul tuo computer: così risponde bene anche senza Internet. Dopo, resta aggiornata da sola."));
+  const bar=el("div","bar");const i=el("i");i.style.width="2%";bar.append(i);const st=el("span","small","Mi collego…");const sub=el("span","small","");c.append(bar,st,sub);
+  const go=async()=>{
+    const r=await libSync((m,k,n)=>{i.style.width=Math.max(2,Math.round(k*100/Math.max(1,n)))+"%";st.textContent=m?"Scarico «"+m+"» ("+(k+1)+" di "+n+")":"Fatto!"});
+    if(r){LS.set("natan_lib_ok",true);i.style.width="100%";st.textContent="Biblioteca pronta: "+num(r.tot)+" appunti.";setTimeout(done,600);return}
+    st.textContent=navigator.onLine?"Non riesco a scaricare la biblioteca adesso (il server di Natan potrebbe essere spento).":"Sei offline: la biblioteca si scarica appena torna la connessione.";
+    const row=el("div","row");const b1=el("button","btn","Riprova");b1.onclick=()=>{row.remove();st.textContent="Mi collego…";go()};
+    const b2=el("button","btn ghost","Entra intanto (la scarico dopo)");b2.onclick=()=>{done()};row.append(b1,b2);c.append(row)};
+  go()}
+function libTimers(){
+  if(LIBAUTO.on)return;LIBAUTO.on=true;
+  const ogni30=async()=>{const r=await libSync();if(r&&r.scaricate)toast("Biblioteca aggiornata: "+r.scaricate+(r.scaricate===1?" materia nuova o cambiata":" materie nuove o cambiate"))};
+  setInterval(()=>{if(document.visibilityState!=="hidden"||DESK)ogni30()},30*60000);
+  setInterval(async()=>{                                   // ogni 3 minuti: gli appunti sono aumentati? scarico subito
+    if(LIBAUTO.busy||!navigator.onLine)return;
+    try{const idx=await (await fetch("../biblioteca/indice.json?t="+Date.now(),{cache:"no-store"})).json();
+      if((idx.totale||0)>LIBAUTO.tot){const r=await libSync();if(r&&r.scaricate)toast("Nuovi appunti scaricati automaticamente ("+r.scaricate+" materie)")}}catch(e){}},3*60000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-LS.get("natan_lib_ts",0)>30*60000)ogni30()});
+  if(Date.now()-LS.get("natan_lib_ts",0)>30*60000)ogni30()
+}
+// «Aiuta Natan» è di serie sui computer: parte da solo (test del PC una volta sola) e non chiede niente. In Impostazioni c'è un piccolo interruttore per metterlo in pausa.
+async function autoAiuta(){
+  if(IS_MOBILE||DESKST.pausa||HELP.on||HELP.testing||LS.get("natan_help_off",false)||!TOKEN)return;
+  try{
+    if(!HELP.test||!HELP.test.ok){if(HELP.test&&HELP.test.ts&&Date.now()-HELP.test.ts<7*864e5)return;const hw=HELP.hw||(HELP.hw=await hwInfo());if(!hw.lvl)return;await pcTest()}
+    if(HELP.test&&HELP.test.ok&&!HELP.on)await helpOn()
+  }catch(e){}
+}
 
 // =====================================================================================================
 // MODELLI: menu in alto (come nelle app di chat)
@@ -1399,7 +1521,7 @@ async function openGames(pg){
   try{if(!window.GIOCHI||!window.GIOCHI.pronto)await (GIOCHI_P||(GIOCHI_P=(async()=>{
       const load=f=>new Promise((ok,bad)=>{const sc=document.createElement("script");sc.src=f+"?v="+VERSION;sc.onload=ok;sc.onerror=()=>bad(new Error("non riesco a caricare i giochi"));document.head.append(sc)});
       try{window.natanPeerLib=peerLib;window.natanGiochiSync=giochiSync;window.natanRelayBase=async()=>{if(!BASE)await findBase();return BASE||""};
-        window.NATAN_VERSIONE=VERSION;if(!window.GIOCHI)await load("giochi.js");for(const f of ["giochi-z.js","giochi-carte.js","giochi-dama.js","giochi-biliardo.js","giochi-sport.js","giochi-classici.js","giochi-live.js"])await load(f);window.GIOCHI.pronto=true}
+        window.NATAN_VERSIONE=VERSION;if(!window.GIOCHI)await load("giochi.js");for(const f of ["giochi-z.js","giochi-carte.js","giochi-dama.js","giochi-sport.js","giochi-classici.js","giochi-live.js"])await load(f);window.GIOCHI.pronto=true}
       catch(e){GIOCHI_P=null;throw e}})()));
     if(VIEW==="giochi"){pg.innerHTML="";window.GIOCHI.open(pg)}}
   catch(e){pg.innerHTML="";pg.append(el("p","",e.message+": controlla la connessione e riprova."))}
@@ -1644,10 +1766,10 @@ function renderHelpStatus(){
   const p=$("helpStatus");if(!p||VIEW!=="aiuta")return;p.innerHTML="";
   const head=el("div","row");head.append(el("h2","","Aiuta Natan"));const sp=el("span","");sp.style.flex="1";head.append(sp);
   const sw=el("button","sw"+(HELP.on?" on":""));sw.id="helpSwitch";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(HELP.on));sw.setAttribute("aria-label","Aiuta Natan");
-  sw.onclick=()=>HELP.on?helpOff():helpOn();sw.disabled=HELP.testing;head.append(sw);p.append(head);
+  head.append(el("span","pill "+(HELP.on?"ok":"wait"),HELP.on?"Attivo di serie":HELP.testing?"Preparazione…":LS.get("natan_help_off",false)?"In pausa":"Si sta avviando"));p.append(head);
   const st={in_prova:["wait","In prova: Natan sta facendo i controlli di qualità"],approvato:["ok","Approvato: hai Natan Pro"],sospeso:["no","Sospeso: i controlli non sono andati bene, parlane con chi gestisce Natan"]}[HELP.stato];
   if(st){const pl=el("span","pill "+st[0],st[1]);pl.style.alignSelf="flex-start";p.append(pl)}
-  if(!HELP.on){p.append(el("span","small",HELP.test?.ok?"Accendi l'interruttore per iniziare.":"Prima fai il test del PC qui sopra."));if(HELP.msg)p.append(el("span","err",HELP.msg))}
+  if(!HELP.on){p.append(el("span","small",LS.get("natan_help_off",false)?"L'hai messo in pausa dalle Impostazioni.":HELP.test&&!HELP.test.ok?"Questo computer è troppo lento per aiutare gli altri: Natan funziona lo stesso per te.":"Natan sta controllando il computer: tra poco inizia ad aiutare da solo."));if(HELP.msg)p.append(el("span","err",HELP.msg))}
   else{
     const mode=HELP.mac==="spento"?(NET.peer?"Il server di Natan è spento: i dispositivi si collegano direttamente a te (posto "+NET.slot+").":"Il server di Natan è spento"+(HELP.stato==="approvato"?": sto entrando nella rete senza server…":": serve essere approvati per aiutare senza il server."))
       :HELP.mac==="occupato"?"Il server di Natan è occupato: le domande arrivano a te."
@@ -1676,6 +1798,10 @@ function openSettings(pg){
   const meta=libMeta();const n=Object.values(meta).reduce((a,m)=>a+(m.n||0),0);
   const p3=el("div","panel");p3.append(el("h2","","Dati"),el("span","",chats.length+" chat salvate qui, "+num(n)+" appunti nella biblioteca. In attesa di arrivare al server: "+LS.get("natan_coda",[]).length+" messaggi e "+LS.get("natan_appunti_coda",[]).length+" appunti."),el("span","small","Tutto quello che scrivi arriva a chi gestisce Natan, che può leggerlo per migliorarlo."));
   const lb=el("button","btn ghost","Gestisci la biblioteca");lb.style.alignSelf="flex-start";lb.onclick=()=>openPage("biblioteca");p3.append(lb);pg.append(p3);
+  if(!IS_MOBILE){const pa=el("div","panel");const hd=el("div","row");hd.append(el("h2","","Aiuta Natan"));const spc=el("span","");spc.style.flex="1";hd.append(spc);
+    const sw2=el("button","sw"+(LS.get("natan_help_off",false)?"":" on"));sw2.id="helpPause";sw2.setAttribute("role","switch");sw2.setAttribute("aria-checked",String(!LS.get("natan_help_off",false)));sw2.setAttribute("aria-label","Aiuta Natan attivo");
+    sw2.onclick=async()=>{const off=!LS.get("natan_help_off",false);LS.set("natan_help_off",off);sw2.classList.toggle("on",!off);sw2.setAttribute("aria-checked",String(!off));if(off){await helpOff();toast("Aiuta Natan in pausa")}else{toast("Aiuta Natan di nuovo attivo");autoAiuta()}};hd.append(sw2);pa.append(hd);
+    pa.append(el("span","small","È attivo di serie: quando il computer è libero risponde alle domande degli altri studenti (non vede mai chi sono) e usa al massimo 3/4 della memoria. Puoi metterlo in pausa qui."));pg.append(pa)}
   const p4=el("div","panel");p4.append(el("h2","","App"),el("span","","Natan "+VERSION+(PC?" per computer":" per telefono")));
   const r=el("div","row");const ins=el("button","btn ghost","Installa Natan come app");ins.onclick=install;const info=el("button","btn ghost","Chi è Natan");info.onclick=()=>location.href="../";r.append(ins,info);p4.append(r);pg.append(p4)
 }

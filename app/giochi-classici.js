@@ -149,7 +149,7 @@ register({id:"memory",ord:14,nome:"Memory",ic:"🃏",col:"#6c5ce7",sub:"Trova le
   pausa(S){return S.last&&S.last.ok?1000:1500},
   msgTurno(S,c,seat){return "Tocca a te: gira due carte"},
   bot(S,seat,lv){const li=clamp(lv==null?1:lv,0,3),mem=[3,6,10,16][li],rec=S.seen.slice(-mem*1),R=mulberry(7+S.nm*13+seat);
-    const known=rec.filter(i=>S.got[i]<0),unk=[];for(let i=0;i<16;i++)if(S.got[i]<0&&!known.includes(i))unk.push(i);
+    const known=[...new Set(rec)].filter(i=>S.got[i]<0),unk=[];for(let i=0;i<16;i++)if(S.got[i]<0&&!known.includes(i))unk.push(i);
     const out=[],mk=(i,j,v,pt)=>out.push({a:{k:`m|${i}|${j}`,i,j},f:{valore:v,punti:pt,attacco:pt,difesa:0,rischio:0,conserva:0,posizione:0,futuro:v*.5,finale:pt}});
     for(let x=0;x<known.length;x++)for(let y=x+1;y<known.length;y++)if(S.v[known[x]]===S.v[known[y]])mk(known[x],known[y],1,1);
     if(unk.length>=2){for(let n=0;n<6;n++){const i=unk[Math.floor(R()*unk.length)];let j=unk[Math.floor(R()*unk.length)];if(i===j)continue;mk(i,j,.1+ (known.some(k=>S.v[k]===S.v[j])?0:.2),0)}}

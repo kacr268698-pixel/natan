@@ -83,7 +83,7 @@ register({id:"scopa",ord:2,nome:"Scopa d'Assi",ic:"🧹",sub:"Carte italiane: l'
     const cardEl=(c,tag)=>{const e=document.createElement(tag||"div");e.className="zcard";const v=val(c),lab={1:"A",8:"F",9:"C",10:"R"}[v]||v;
       e.innerHTML=`<span class="cv">${lab}</span><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#su-${suit(c)}"/></svg>${v>7?`<span class="fig">${VNAME[v]}</span>`:`<span class="cv b">${lab}</span>`}`;
       e.title=cname(c);e.dataset.c=c;if(tag==="button")e.type="button";return e};
-    const nm=(c,s)=>c.seats[s]?c.seats[s].nome:"?";
+    const nm=(c,s)=>c.seats[s]?String(c.seats[s].nome).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])):"?";
     const mossa=(S,c)=>{const m=S.lastMove;if(!m)return "";const who=m.by===c.me?"Hai giocato":`${nm(c,m.by)} gioca`;
       let t=`${who} ${cname(m.card)}`;if(m.ace)t+=" e prende tutto";else if(m.take.length)t+=` e prende ${m.take.map(x=>VNAME[val(x)]).join(" + ")}`;
       if(m.scopa)t+=" · SCOPA!";if(m.rest)t+=` · le ultime carte vanno a ${m.rest.to===c.me?"te":nm(c,m.rest.to)}`;return t};
@@ -236,7 +236,7 @@ register({id:"uno",ord:6,nome:"Uno",ic:"🃏",sub:"Resta senza carte per primo",
     const root=E("div","zuno");sh.g.append(root);
     const opps=E("div","zuopps"),mid=E("div","zumid"),ev=E("div","zuev"),mine=E("div","zuhand"),ctl=E("div","zuctl");
     root.append(opps,mid,ev,mine,ctl);
-    const nm=(c,s)=>c.seats[s]?c.seats[s].nome:"?";
+    const nm=(c,s)=>c.seats[s]?String(c.seats[s].nome).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])):"?";
     const evText=(S,c)=>{const e=S.ev;if(!e)return "";const io=e.seat===c.me,who=io?"Tu":nm(c,e.seat);
       if(e.t==="gioca")return `${who} ${io?"hai giocato":"ha giocato"} ${labelUno(e.card.v)} ${CN[e.card.c]}${e.card.c==="n"?" → "+CN[e.col]:""}`
         +(e.vit>=0?` · ${e.vit===c.me?"peschi":nm(c,e.vit)+" pesca"} ${e.n} carte`:"")+(e.acc?` · penalità accumulata: +${e.acc}`:"")

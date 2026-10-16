@@ -32,7 +32,7 @@ function frame(sh,ctx,id,LW,LH,help,metaT,objetivo){
   const hp=E("p","lvhelp",help);root.append(sc,cv,hp);const R={root,sc,cv,S:1};
   R.fit=()=>{R.S=fitc(root,cv,LW,LH)};R.fit();window.addEventListener("resize",()=>{if(document.body.contains(cv))R.fit()});
   R.pt=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*LW,y:(e.clientY-r.top)/r.height*LH}};
-  R.score=(a,b,t,flash)=>{const n=[ctx.seats[0].nome,ctx.seats[1].nome];sc.innerHTML=`<span><small>${n[0]}</small></span><b${flash===0?' class="pop"':''}>${a}</b><span>—</span><b${flash===1?' class="pop"':''}>${b}</b><span><small>${n[1]}</small></span><small>⏱ ${Math.max(0,Math.ceil(t))}s</small>`};
+  R.score=(a,b,t,flash)=>{const esc=t=>String(t).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));const n=[esc(ctx.seats[0].nome),esc(ctx.seats[1].nome)];sc.innerHTML=`<span><small>${n[0]}</small></span><b${flash===0?' class="pop"':''}>${a}</b><span>—</span><b${flash===1?' class="pop"':''}>${b}</b><span><small>${n[1]}</small></span><small>⏱ ${Math.max(0,Math.ceil(t))}s</small>`};
   return R}
 function avvio(R,sh,ctx,go){   // schermata «Pronti?» con un bottone, poi parte
   const c=R.cv.getContext("2d");const b=E("button","btn lvbtn","▶ Inizia la partita");b.id="lvStart";R.root.insertBefore(b,R.cv);b.onclick=()=>{b.remove();snd("whistle");go()};sh.status.textContent="Premi «Inizia la partita» quando sei pronto";}

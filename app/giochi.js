@@ -2,7 +2,7 @@
 // GIOCHI DI NATAN (nucleo): menu, tutorial, lobby (livelli, numero di giocatori, online), bot con nome ed esperienza,
 // consiglio dei 35 agenti dietro ogni bot e motore delle partite a turni.
 // I giochi veri (il «Giardino Zen» di Natan) stanno in giochi-z.js (suoni, musica, Sudoku e Mahjong), giochi-carte.js (Scopa d'Assi e Uno),
-// giochi-dama.js (Dama) e giochi-biliardo.js (Biliardo). Sudoku e Mahjong girano nella pagina a parte zen.html.
+// giochi-dama.js (Dama). Sudoku e Mahjong girano nella pagina a parte zen.html.
 //
 // Come funziona un bot: per ogni mossa possibile il gioco calcola alcune caratteristiche (valore, punti, attacco, difesa,
 // rischio...). Ognuno dei 35 agenti le pesa a modo suo e vota; vince la mossa con più voti. Ogni bot ha i suoi pesi
@@ -381,7 +381,7 @@ async function unisciti(code,nick,onLobby){
   if(r==="ok")return net;
   net.close();
   if(r==="pieno")throw new Error("La stanza è già piena.");
-  if(r==="nort")throw new Error("Questo gioco in tempo reale ha bisogno della connessione diretta tra i telefoni, che qui è bloccata. Scegliete un gioco a turni (dama, biliardo, carte…) oppure collegatevi alla stessa rete Wi-Fi.");
+  if(r==="nort")throw new Error("Questo gioco in tempo reale ha bisogno della connessione diretta tra i telefoni, che qui è bloccata. Scegliete un gioco a turni (dama, forza 4, carte…) oppure collegatevi alla stessa rete Wi-Fi.");
   if(r==="nostanza")throw new Error("Non trovo la stanza «"+code+"». Controlla il codice e chiedi all'amico di tenere aperta la pagina della stanza (se esce o blocca il telefono, il codice smette di funzionare).");
   throw new Error("La stanza «"+code+"» c'è, ma la connessione non parte"+(provato?" nemmeno passando dal Mac di Kevin":" (la rete la blocca)")+". Riprova tra un attimo.")
 }
