@@ -269,20 +269,31 @@ $("spoilBtn").onclick=()=>{$("spoiler").classList.add("aperto");$("spoilBtn").re
 const svg=$("netSvg"),NS="http://www.w3.org/2000/svg";
 const mk=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).append(e);return e};
 const pcs=[{x:250,y:250,n:"Server di Natan",big:1},{x:120,y:150,n:"PC di Sara"},{x:380,y:140,n:"PC di Leo"},{x:400,y:340,n:"Mac di Teo"},{x:110,y:350,n:"PC di Ada"}];
-const phones=[{x:60,y:60},{x:250,y:40},{x:450,y:60},{x:470,y:240},{x:440,y:460},{x:250,y:470},{x:50,y:460},{x:30,y:250}];
+const phones=[{x:60,y:60},{x:250,y:40},{x:450,y:60},{x:470,y:250},{x:440,y:460},{x:250,y:470},{x:50,y:460},{x:30,y:250}];
 const wires=[];
 phones.forEach((p,i)=>pcs.forEach((c,j)=>{const d=Math.hypot(p.x-c.x,p.y-c.y);if(d<(c.big?230:200)){wires.push({p:i,c:j,el:mk("line",{x1:p.x,y1:p.y,x2:c.x,y2:c.y,class:"wire"})})}}));
+const swires=[];pcs.forEach((c,j)=>{if(j===0)return;swires.push({c:j,el:mk("line",{x1:pcs[0].x,y1:pcs[0].y,x2:c.x,y2:c.y,class:"wire",style:"stroke:#ff9f43;stroke-opacity:.35;stroke-width:2;stroke-dasharray:6 6"})})});
 pcs.forEach(c=>{const g=mk("g",{});mk("rect",{x:c.x-(c.big?34:26),y:c.y-(c.big?24:18),width:c.big?68:52,height:c.big?44:34,rx:7,fill:c.big?"#7c83ff":"#1d2452",stroke:"#7c83ff","stroke-width":2},g);
   mk("rect",{x:c.x-(c.big?14:10),y:c.y+(c.big?22:16),width:c.big?28:20,height:5,rx:2,fill:"#7c83ff"},g);
   const t=mk("text",{x:c.x,y:c.y+(c.big?48:40),"text-anchor":"middle",class:"lbl"},g);t.textContent=c.n;c.g=g;
   if(c.big){const n=mk("text",{x:c.x,y:c.y+8,"text-anchor":"middle",fill:"#fff","font-family":"Sora,sans-serif","font-weight":"800","font-size":"22"},g);n.textContent="N"}});
 phones.forEach(p=>{mk("rect",{x:p.x-11,y:p.y-18,width:22,height:36,rx:5,fill:"#141a3d",stroke:"#c3c8ea","stroke-width":2});mk("circle",{x:0,cx:p.x,cy:p.y+12,r:2,fill:"#c3c8ea"})});
-const dot=mk("circle",{r:6,class:"pulse",opacity:0});
+const dot=mk("circle",{r:6,class:"pulse",opacity:0});const dotA=mk("circle",{r:5,fill:"#ff9f43",opacity:0}),dotB=mk("circle",{r:5,fill:"#ff9f43",opacity:0});
 let serverOn=true,step=0;
-const cap=$("netCap");
+const cap=$("netCap");{const lg=document.createElement("div");lg.className="caption";lg.style.cssText="color:#ff9f43;font-size:13px;margin-top:2px";lg.textContent="Arancione: il server e i computer si scambiano informazioni";cap.after(lg)}
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function anima(a,b,ms){return new Promise(ok=>{const t0=performance.now();dot.setAttribute("opacity",1);
-  (function f(t){const k=Math.min(1,(t-t0)/ms),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;dot.setAttribute("cx",a.x+(b.x-a.x)*e);dot.setAttribute("cy",a.y+(b.y-a.y)*e);k<1?requestAnimationFrame(f):ok()})(t0)})}
+function anima(a,b,ms,d){d=d||dot;return new Promise(ok=>{const t0=performance.now();d.setAttribute("opacity",1);
+  (function f(t){const k=Math.min(1,(t-t0)/ms),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;d.setAttribute("cx",a.x+(b.x-a.x)*e);d.setAttribute("cy",a.y+(b.y-a.y)*e);k<1?requestAnimationFrame(f):ok()})(t0)})}
+// il server e i computer si scambiano informazioni (arancione) quando il server è acceso: vanno e vengono in tutte e due le direzioni
+async function sync(){
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  for(;;){
+    swires.forEach(w=>{w.el.style.strokeOpacity=serverOn?".35":".08"});
+    if(!serverOn){await sleep(600);continue}
+    const w=swires[Math.floor(Math.random()*swires.length)],c=pcs[w.c];w.el.style.strokeOpacity="1";
+    await Promise.all([anima(pcs[0],c,1100,dotA),anima(c,pcs[0],1100,dotB)]);
+    dotA.setAttribute("opacity",0);dotB.setAttribute("opacity",0);w.el.style.strokeOpacity=".35";await sleep(450+Math.random()*500)}
+}
 async function giro(){
   if(reduce){cap.textContent="I telefoni chiedono, i computer della rete rispondono.";return}
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -297,7 +308,7 @@ async function giro(){
     await anima(c,p,900);dot.setAttribute("opacity",0);w.el.style.stroke="";await sleep(700);
   }
 }
-giro();
+giro();if(!reduce)sync();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 })();
 </script>

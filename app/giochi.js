@@ -88,14 +88,19 @@ const CSS=`
 .gm .emobar button:active{transform:scale(1.25)}.gm .emobar button:disabled{opacity:.45}
 .gm .xpgain{color:#6ee7a0;font-weight:700;font-size:13px;animation:xpup .9s ease both}.gm .xpgain.up{color:#ffd166;animation:xpup .9s ease both,xpglow 1.4s ease .9s 2}
 @keyframes xpup{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}@keyframes xpglow{50%{text-shadow:0 0 14px #ffd166}}
-.gm.full{position:fixed;inset:0;z-index:9000;background:var(--bg);overflow:auto;padding:8px 66px 8px 8px;box-sizing:border-box;max-width:none;margin:0;-webkit-overflow-scrolling:touch}
-.gm.full>h1{display:none}.gm.full .emobar{position:fixed;right:6px;top:50%;transform:translateY(-50%);flex-direction:column;overflow:visible;z-index:9001;background:rgba(20,22,30,.6);padding:8px 5px;border-radius:30px;gap:5px;backdrop-filter:blur(6px)}
+.gm.full{position:fixed;inset:0;z-index:9000;background:var(--bg);overflow:auto;padding:14px 68px 14px 14px;box-sizing:border-box;max-width:none;margin:0;gap:8px;-webkit-overflow-scrolling:touch;align-items:center;justify-content:safe center}
+.gm.full .lvhelp{display:none}
+.gm.full>h1,.gm.full>.pls,.gm.full>.ng,.gm.full>.think,.gm.full>.agdet,.gm.full>.status{display:none}
+.gm.full>.top{position:fixed;left:8px;top:8px;z-index:9002;gap:0}.gm.full>.top>*:not(#gmFull){display:none}
+.gm.full #gmFull{padding:4px 11px;font-size:13px;opacity:.8;border-radius:20px;background:rgba(20,22,30,.6);backdrop-filter:blur(6px)}
+.gm.full>*:not(.top):not(.emobar){max-width:100%}
+.gm.full .emobar{position:fixed;right:8px;top:50%;transform:translateY(-50%);flex-direction:column;overflow:visible;z-index:9001;background:rgba(20,22,30,.6);padding:8px 5px;border-radius:30px;gap:5px;backdrop-filter:blur(6px)}
 .gm.full .emobar small{display:none}.gm.full .emobar button{width:40px;height:40px;font-size:21px}
 .gm.full .emobar button:hover{transform:scale(1.15)}
 .gm .emob{position:absolute;right:8px;top:-16px;font-size:30px;line-height:1;background:var(--raise);border:1px solid var(--line);border-radius:18px;padding:3px 9px;box-shadow:0 4px 14px rgba(0,0,0,.35);animation:emopop 2.6s ease forwards;pointer-events:none;z-index:5}
 @keyframes emopop{0%{transform:translateY(10px) scale(.3);opacity:0}10%{transform:translateY(0) scale(1.18);opacity:1}18%{transform:scale(1)}82%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
 .gm .code{font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;padding:8px;border-radius:14px;border:2px dashed var(--acc)}
-.gm input.tx{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:12px;padding:10px 12px;font:inherit}
+.gm input.tx,.gm select.tx{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:12px;padding:10px 12px;font:inherit}
 .gm .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(100%,340px);align-self:center}
 .gm .ttt button{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:var(--raise);font-size:min(16vw,64px);font-weight:800;cursor:pointer;color:var(--text)}
 .gm .ttt button.x{color:#e2463c}.gm .ttt button.o{color:#2f6fd6}.gm .ttt button.win{background:#ffe9a8;color:#222}
@@ -275,7 +280,7 @@ async function relayCreatore(net,accogli){
   const R=net.rel;const conns={};let da=0,errs=0;
   while(!R.stop){
     try{const r=await relayPost(R.base,{op:"poll",c:net.code,chi:"h",tok:R.tok,da,att:15},25000);errs=0;
-      if(r.err==="nostanza"){const x=await relayPost(R.base,{op:"crea",c:net.code,tok:R.tok},9000);if(!x.ok)break;continue}
+      if(r.err==="nostanza"){const x=await relayPost(R.base,Object.assign({op:"crea",c:net.code,tok:R.tok},net.pub?{pub:{g:net.pub.g,n:net.max||net.pub.n}}:{}),9000);if(!x.ok)break;continue}
       if(r.err)break;
       for(const [n,de,m] of r.m||[]){da=Math.max(da,n);let c=conns[de];
         if(!c){if(!m||m.t!=="hello")continue;c=conns[de]=relayOspiteLato(net,de);accogli(c)}
@@ -283,10 +288,10 @@ async function relayCreatore(net,accogli){
         c.emit("data",m)}}
     catch(e){if(++errs>8)break;await sleep(1500)}}
 }
-async function stanzaNuova(nick,onChange){
+async function stanzaNuova(nick,onChange,pub){
   let P=null,perr=null;
   try{if(!window.natanPeerLib)throw new Error("La rete non è disponibile.");P=await window.natanPeerLib()}catch(e){perr=e}
-  const net=new Net(true);net.nick=nick;net.max=2;
+  const net=new Net(true);net.nick=nick;net.max=2;net.pub=pub||null;
   if(P){
     for(let tent=0;tent<6&&!net.peer;tent++){
       const code=genCode();
@@ -300,7 +305,7 @@ async function stanzaNuova(nick,onChange){
     const R={base,tok:RID(),stop:false};net.rel=R;
     const prova=async()=>{try{
       for(let k=0;k<(net.code?1:6);k++){
-        const code=net.code||genCode();const r=await relayPost(base,{op:"crea",c:code,tok:R.tok},7000);
+        const code=net.code||genCode();const r=await relayPost(base,Object.assign({op:"crea",c:code,tok:R.tok},net.pub?{pub:net.pub}:{}),7000);
         if(r.ok){net.code=code;return true}
         if(net.code)return false}}catch(e){}return false};
     net.relOk=await prova();if(!net.relOk){net.rel=null}}
@@ -332,7 +337,8 @@ async function stanzaNuova(nick,onChange){
   };
   if(net.peer)net.peer.on("connection",accogli);
   if(net.rel)relayCreatore(net,accogli);
-  net.stato=()=>{if(net.started)return;net.bcast({t:"lobby",game:net.game,umani:[net.nick,...net.conns.map(x=>x.nome)],n:net.n,lv:net.lv})};
+  net.stato=()=>{if(net.rel&&net.pub){relayPost(net.rel.base,{op:"apri",c:net.code,tok:net.rel.tok,aperta:!net.started&&net.conns.length+1<(net.max||2)},6000).catch(()=>{})}
+    if(net.started)return;net.bcast({t:"lobby",game:net.game,umani:[net.nick,...net.conns.map(x=>x.nome)],n:net.n,lv:net.lv})};
   return net
 }
 async function unisciti(code,nick,onLobby){
@@ -496,7 +502,7 @@ function gameShell(pg,info,ctx){
   const fs=E("button","btn ghost","⛶ Schermo intero");fs.id="gmFull";
   const fullOff=()=>{g.classList.remove("full");fs.textContent="⛶ Schermo intero";try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen()}catch(e){}setTimeout(()=>window.dispatchEvent(new Event("resize")),60)};
   fs.onclick=()=>{if(g.classList.contains("full")){fullOff();return}
-    g.classList.add("full");fs.textContent="✕ Esci dallo schermo intero";try{const r=document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen;if(r)Promise.resolve(r.call(document.documentElement)).catch(()=>{})}catch(e){}
+    g.classList.add("full");fs.textContent="✕ Esci";try{const r=document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen;if(r)Promise.resolve(r.call(document.documentElement)).catch(()=>{})}catch(e){}
     setTimeout(()=>{window.dispatchEvent(new Event("resize"));try{g.scrollTo(0,0)}catch(e){}},80)};
   document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&g.classList.contains("full")&&g.isConnected){fullOff()}});
   top.append(fs,help);g.append(top,E("h1","",info.ic+" "+info.nome));
@@ -678,11 +684,11 @@ function conclusione(sh,info,seats,ctx,o,storia,pg,cfg,net,me){
 }
 
 // ------------------------------------------------------------------ lobby: livello, numero di giocatori, online
-function lobby(pg,info){
+function lobby(pg,info,pre){
   style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
   const mn=info.min||2,mx=info.max||2;
-  const cfg={mode:"bot",lv:Math.min(3,Math.max(0,+LSG.get("natan_gaming_lv",1)||0)),n:Math.min(mx,Math.max(mn,+LSG.get("natan_gaming_n_"+info.id,mn)||mn)),nick:nickSalvato(),bots:[]};
-  cfg.opz=Object.assign({},...(info.opzioni||[]).map(o=>({[o.id]:!!o.def})),LSG.get("natan_gaming_opz_"+info.id,{}));
+  const cfg={pub:false,mode:"bot",lv:Math.min(3,Math.max(0,+LSG.get("natan_gaming_lv",1)||0)),n:Math.min(mx,Math.max(mn,+LSG.get("natan_gaming_n_"+info.id,mn)||mn)),nick:nickSalvato(),bots:[]};
+  cfg.opz=Object.assign({},...(info.opzioni||[]).map(o=>({[o.id]:o.tipo==="scelta"?o.def:!!o.def})),LSG.get("natan_gaming_opz_"+info.id,{}));
   cfg.bots=scegliBot(cfg.n-1);
   let net=null,errore="";
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.onclick=()=>{if(net)net.close();menu(pg)};top.append(back);
@@ -706,7 +712,9 @@ function lobby(pg,info){
       b3.append(st,E("small","",cfg.mode==="bot"?"Tu e gli altri sono bot.":"Gli amici entrano con il codice; i posti liberi li prendono i bot."));body.append(b3)}
     if(info.opzioni&&info.opzioni.length){
       const b6=E("div","box");b6.append(E("h3","","Regole"));
-      info.opzioni.forEach(o=>{const lab=E("label");lab.style.cssText="display:flex;gap:10px;align-items:flex-start;cursor:pointer";
+      info.opzioni.filter(o=>o.tipo==="scelta").forEach(o=>{const w=E("div");w.style.cssText="display:flex;flex-direction:column;gap:6px";w.append(E("b","",o.nome),E("small","",o.desc));const row=E("div");row.style.cssText="display:flex;flex-wrap:wrap;gap:6px";
+        o.sc.forEach(x=>{const bt=E("button","btn"+(+cfg.opz[o.id]===x.v?"":" ghost"),x.nome);bt.id="opz_"+o.id+"_"+x.v;bt.onclick=()=>{cfg.opz[o.id]=x.v;LSG.set("natan_gaming_opz_"+info.id,cfg.opz);render()};row.append(bt)});w.append(row);b6.append(w)});
+      info.opzioni.filter(o=>o.tipo!=="scelta").forEach(o=>{const lab=E("label");lab.style.cssText="display:flex;gap:10px;align-items:flex-start;cursor:pointer";
         const cb=E("input");cb.type="checkbox";cb.id="opz_"+o.id;cb.checked=!!cfg.opz[o.id];cb.onchange=()=>{cfg.opz[o.id]=cb.checked;LSG.set("natan_gaming_opz_"+info.id,cfg.opz)};
         const tx=E("span");tx.append(E("b","",o.nome),E("br"),E("small","",o.desc));lab.append(cb,tx);b6.append(lab)});
       body.append(b6)}
@@ -722,9 +730,11 @@ function lobby(pg,info){
         const ni=E("input","tx");ni.value=cfg.nick;ni.placeholder="Il tuo nome";ni.maxLength=14;ni.id="nickIn";ni.oninput=()=>{cfg.nick=pulisci(ni.value)||"Giocatore";LSG.set("natan_gaming_nick",cfg.nick)};
         const cr=E("button","btn","➕ Crea una stanza");cr.id="creaStanza";
         cr.onclick=async()=>{cr.disabled=true;cr.textContent="Creo la stanza…";errore="";
-          try{const nn=await stanzaNuova(cfg.nick,()=>{cfg.bots=scegliBot(Math.max(0,cfg.n-umani().length));render()});nn.max=cfg.n;nn.n=cfg.n;nn.lv=cfg.lv;nn.game=info.id;net=nn;render()}
+          try{const nn=await stanzaNuova(cfg.nick,()=>{cfg.bots=scegliBot(Math.max(0,cfg.n-umani().length));render()},cfg.pub?{g:info.id,n:cfg.n}:null);nn.max=cfg.n;nn.n=cfg.n;nn.lv=cfg.lv;nn.game=info.id;net=nn;render()}
           catch(e){errore=e.message||"errore";render()}};
-        b5.append(E("small","","Scrivi il tuo nome (solo il nome, niente dati personali), poi crea la stanza e dai il codice ai tuoi amici."),ni,cr)}
+        const lp=E("label");lp.style.cssText="display:flex;gap:10px;align-items:flex-start;cursor:pointer";const cp=E("input");cp.type="checkbox";cp.id="pubChk";cp.checked=cfg.pub;cp.onchange=()=>{cfg.pub=cp.checked};
+        const tp=E("span");tp.append(E("b","","🎲 Casuale"),E("br"),E("small","","Anche chi non conosce il codice può entrare con «Partita casuale» (serve il Mac di Kevin acceso)."));lp.append(cp,tp);
+        b5.append(E("small","","Scrivi il tuo nome (solo il nome, niente dati personali), poi crea la stanza e dai il codice ai tuoi amici."),ni,lp,cr)}
       else{
         const c=E("div","code",net.code);c.id="codiceStanza";
         b5.append(E("small","","Codice della stanza: i tuoi amici aprono Giochi → «Entra in una stanza con un codice» e lo scrivono. Tieni aperta questa pagina e il telefono acceso finché non sono entrati."),c,E("small","",`${umani().length} di ${cfg.n} giocatori presenti. I posti liberi li prendono i bot.`),
@@ -738,12 +748,13 @@ function lobby(pg,info){
       const pool=cfg.bots.slice();while(pool.length<nn-hum.length)pool.push(...scegliBot(1,pool.map(b=>b.id)));
       pool.slice(0,nn-hum.length).forEach(b=>seats.push({tipo:"bot",nome:b.nome,botId:b.id}));
       const c={game:info.id,seats,lv:cfg.lv,seed:(Math.random()*2**31)|0,opz:cfg.opz};
-      if(net){net.started=true;net.conns.forEach((x,i)=>{x.seat=i+1});
+      if(net){net.started=true;try{net.stato()}catch(e){}net.conns.forEach((x,i)=>{x.seat=i+1});
         net.conns.forEach((x,i)=>{try{x.conn.send({t:"start",cfg:c,seat:i+1})}catch(e){}});avvia(pg,info,c,net,0)}
       else avvia(pg,info,c,null,0)};
     body.append(go);
   }
-  render()
+  render();
+  if(pre&&pre.auto){cfg.mode="online";cfg.n=Math.min(mx,Math.max(mn,pre.n||cfg.n));cfg.pub=!!pre.pub;cfg.bots=scegliBot(cfg.n-1);render();const b=document.getElementById("creaStanza");if(b)b.click()}
 }
 
 // ospite: è arrivato il messaggio «start» dalla stanza
@@ -751,7 +762,7 @@ function avviaOnlineGuest(pg,m){
   const info=GAMES[m.cfg.game];const net=window.__netGuest;if(!info||!net)return;
   avvia(pg,info,m.cfg,net,m.seat)
 }
-function entraStanza(pg){
+function entraStanza(pg,pre){
   style();pg.innerHTML="";const g=E("div","gm");pg.append(g);
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna ai giochi");back.onclick=()=>{if(window.__netGuest){window.__netGuest.close();window.__netGuest=null}menu(pg)};top.append(back);
   g.append(top,E("h1","","🔑 Entra in una stanza"));
@@ -773,7 +784,47 @@ function entraStanza(pg){
       net.h.start=m=>avviaOnlineGuest(pg,m);
       net.h.bye=()=>{msg.textContent="La stanza si è chiusa."};
     }catch(e){msg.textContent=e.message||"Non riesco a entrare.";bt.disabled=false}};
+  if(pre&&pre.code){ci.value=String(pre.code).toUpperCase().slice(0,5);if(pre.auto)bt.click()}
 }
+// pannello «Sale online» in cima al menu: entra con un codice, crea una sala (privata o casuale), cerca una partita casuale
+function salePanel(pg){
+  const box=E("div","box");box.id="salePanel";box.style.cssText="display:flex;flex-direction:column;gap:16px";
+  box.append(E("h3","","🎮 Sale online"));
+  const gi=Object.values(GAMES).filter(i=>!i.noOnline&&!i.solo&&!i.apri&&(i.max||2)>=2).sort((a,b)=>(a.ord||99)-(b.ord||99));
+  // 1) entra con un codice
+  const A=E("div");A.style.cssText="display:flex;flex-direction:column;gap:8px";A.append(E("b","","Entra in una sala"),E("small","","Scrivi il codice che ti ha dato il tuo amico."));
+  const rowA=E("div");rowA.style.cssText="display:flex;gap:8px";
+  const ci=E("input","tx");ci.id="salaCode";ci.placeholder="Codice (5 caratteri)";ci.maxLength=5;ci.style.cssText="text-transform:uppercase;flex:1;min-width:0";
+  const be=E("button","btn","Entra");be.id="salaEntra";const ma=E("small","");ma.id="salaMsg";
+  be.onclick=()=>{const c=ci.value.trim();if(c.length<4){ma.textContent="Scrivi il codice della sala.";return}entraStanza(pg,{code:c,auto:true})};
+  ci.onkeydown=e=>{if(e.key==="Enter")be.click()};rowA.append(ci,be);A.append(rowA,ma);box.append(A);
+  if(!gi.length)return box;
+  const sel=()=>{const s=E("select","tx");s.style.cssText="width:100%";gi.forEach(i=>{const o=E("option","",i.ic+" "+i.nome);o.value=i.id;s.append(o)});return s};
+  // 2) crea una sala
+  const B=E("div");B.style.cssText="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px";B.append(E("b","","Crea una sala"));
+  const sg=sel();sg.id="salaGioco";const saved=LSG.get("natan_gaming_sala_gioco","");if(saved&&GAMES[saved]&&!GAMES[saved].noOnline)sg.value=saved;
+  const st=E("div","stepper"),mi=E("button","","−"),pl=E("button","","+"),vv=E("b","","2");mi.id="salaMeno";pl.id="salaPiu";vv.id="salaN";st.append(mi,vv,pl);
+  const lab=E("small","","Quanti giocatori?");let n=2;
+  const upd=()=>{const i=GAMES[sg.value];const lo=i.min||2,hi=i.max||2;n=Math.min(hi,Math.max(lo,n));vv.textContent=String(n);mi.disabled=n<=lo;pl.disabled=n>=hi;st.style.display=hi>lo?"":"none";lab.textContent=hi>lo?`Quanti giocatori? (da ${lo} a ${hi})`:`${hi} giocatori`};
+  mi.onclick=()=>{n--;upd()};pl.onclick=()=>{n++;upd()};sg.onchange=()=>{LSG.set("natan_gaming_sala_gioco",sg.value);n=GAMES[sg.value].min||2;upd()};
+  let pub=false;const seg=E("div","seg"),bp=E("button","on","🔒 Privata (con codice)"),br=E("button","","🎲 Casuale");bp.id="salaPriv";br.id="salaRand";
+  bp.onclick=()=>{pub=false;bp.className="on";br.className=""};br.onclick=()=>{pub=true;br.className="on";bp.className=""};seg.append(bp,br);
+  const hint=E("small","","Privata: la trovano solo gli amici che hanno il codice. Casuale: può entrare anche chi cerca una partita a caso.");
+  const cr=E("button","btn","➕ Crea la sala");cr.id="salaCrea";cr.onclick=()=>{LSG.set("natan_gaming_sala_gioco",sg.value);const i=GAMES[sg.value];lobby(pg,i,{auto:true,pub,n})};
+  B.append(sg,lab,st,seg,hint,cr);box.append(B);upd();
+  // 3) partita casuale
+  const C=E("div");C.style.cssText="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px";C.append(E("b","","Partita casuale"),E("small","","Scegli il gioco: ti metto in una sala aperta di qualcuno che sta cercando avversari."));
+  const sc=sel();sc.id="salaCercaGioco";const bc=E("button","btn ghost","🎲 Cerca una partita");bc.id="salaCerca";const mc=E("small","");mc.id="salaCercaMsg";const crc=E("button","btn","➕ Creane una tu e aspetta");crc.id="salaCreaRand";crc.style.display="none";
+  bc.onclick=async()=>{bc.disabled=true;crc.style.display="none";mc.textContent="Cerco…";
+    try{const base=await relayBase();if(!base){mc.textContent="La ricerca casuale funziona solo quando il Mac di Kevin è acceso e raggiungibile. Prova con una sala con il codice.";bc.disabled=false;return}
+      const r=await relayPost(base,{op:"cerca",g:sc.value},9000);
+      if(r&&r.c){mc.textContent="Trovata! Entro…";entraStanza(pg,{code:r.c,auto:true});return}
+      mc.textContent="Per ora nessuno sta cercando questo gioco.";crc.style.display=""}
+    catch(e){mc.textContent="Non riesco a collegarmi. Riprova tra poco."}
+    bc.disabled=false};
+  crc.onclick=()=>{const i=GAMES[sc.value];lobby(pg,i,{auto:true,pub:true,n:i.min||2})};
+  C.append(sc,bc,mc,crc);box.append(C);
+  return box}
 
 // ------------------------------------------------------------------ menu
 const GAMES={};
@@ -789,12 +840,11 @@ function menu(pg){
   const top=E("div","top");const back=E("button","btn ghost","← Ritorna");back.id="gmBack";back.onclick=()=>{try{window.openChat()}catch(e){location.reload()}};top.append(back);g.append(top);
   const hero=E("div","zhero");const hl=E("div");const h1=E("h1","","Giochi");
   hl.append(h1,E("p","","Giochi calmi da soli, contro i bot di Natan Gaming o con gli amici online."));hero.append(hl);
-  if(Z){const ctl=E("div","zctl");const mb=E("button","","Musica: "+Z.STYLES[Z.Music.idx].name);mb.id="musicBtn";mb.onclick=()=>{Z.A.init();Z.Music.cycle();mb.textContent="Musica: "+Z.STYLES[Z.Music.idx].name};
-    const sb=E("button","",Z.A.sfx?"Suoni accesi":"Suoni spenti");sb.id="sfxBtn";sb.onclick=()=>{Z.A.sfx=!Z.A.sfx;LSG.set("natan_zen_sfx",Z.A.sfx);sb.textContent=Z.A.sfx?"Suoni accesi":"Suoni spenti";if(Z.A.sfx)Z.sfx("hint")};
-    ctl.append(mb,sb);hero.append(ctl);
-    g.addEventListener("pointerdown",()=>{try{Z.A.init();Z.Music.start()}catch(e){}},{once:true});setTimeout(()=>{try{Z.Music.start()}catch(e){}},50)}
+  if(Z){const ctl=E("div","zctl");    const sb=E("button","",Z.A.sfx?"Suoni accesi":"Suoni spenti");sb.id="sfxBtn";sb.onclick=()=>{Z.A.sfx=!Z.A.sfx;LSG.set("natan_zen_sfx",Z.A.sfx);sb.textContent=Z.A.sfx?"Suoni accesi":"Suoni spenti";if(Z.A.sfx)Z.sfx("hint")};
+    ctl.append(sb);hero.append(ctl)}
   g.append(hero);
   const ng=ngPanel();ng.el.forEach(x=>g.append(x));
+  g.append(salePanel(pg));
   const st=LSG.get("natan_gaming_stats",{});
   const c=E("div","cards zcards");g.append(c);
   const lista=Object.entries(GAMES).sort((a,b)=>(a[1].ord||99)-(b[1].ord||99));
@@ -805,7 +855,6 @@ function menu(pg){
     b.append(t);
     b.onclick=()=>info.apri?info.apri(pg,()=>menu(pg)):tutorial(pg,info,()=>lobby(pg,info));c.append(b)}
   const tb=E("button","btn ghost");tb.id="trofeiBtn";{const T=trofei();tb.textContent=`🏆 Trofei (${T.filter(t=>t.ok).length}/${T.length})`}tb.onclick=()=>schermataTrofei(pg);tb.style.marginRight="8px";g.append(tb);
-  const j=E("button","btn ghost","🔑 Entra in una stanza con un codice");j.id="entraStanza";j.onclick=()=>entraStanza(pg);g.append(j);
   const dt=E("details","box");dt.id="botList";dt.append(E("summary","","🤖 I 30 bot di Natan Gaming (nome, esperienza, 35 agenti ciascuno)"));
   const lst=BOTS.map(b=>botInfo(b.id)).sort((a,b)=>b.xp-a.xp);const w=E("div","pls");w.style.marginTop="10px";
   lst.forEach(i=>w.append(botCard(BOTS.find(b=>b.id===i.id))));dt.append(w);g.append(dt);

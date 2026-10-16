@@ -66,7 +66,7 @@ function blSnd(k,v){                                  // suoni del biliardo (urt
 const STYLES=[{id:"campane",name:"Campane"},{id:"koto",name:"Koto"},{id:"flauto",name:"Flauto"},{id:"off",name:"spenta"}];
 const Music={idx:Math.max(0,Math.min(STYLES.length-1,+LSG.get("natan_zen_music",0)||0)),timer:null,next:0,
   get style(){return STYLES[this.idx].id},
-  start(){if(this.style==="off"||document.hidden||this.timer||!document.querySelector(".gm.zmenu"))return;const ctx=A.init();if(!ctx)return;
+  start(){return;if(this.style==="off"||document.hidden||this.timer||!document.querySelector(".gm.zmenu"))return;const ctx=A.init();if(!ctx)return;
     this.next=ctx.currentTime+.15;this.timer=setInterval(()=>this.tick(),250);this.tick()},
   stop(){clearInterval(this.timer);this.timer=null},
   tick(){if(!document.querySelector(".gm.zmenu")){this.stop();return}const ctx=A.ctx;if(!ctx)return;while(this.next<ctx.currentTime+1.2)this.next+=this[this.style](this.next)},

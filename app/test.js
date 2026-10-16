@@ -130,7 +130,7 @@ function natan(estado){const e=estado||"";return `<svg class="nat ${e}" viewBox=
 <g class="${e==="intro"?"intro":""}"><rect x="250" y="22" width="150" height="110" rx="8" fill="#fbf8ee" stroke="rgba(0,0,0,.25)" stroke-width="2"/>
 <g stroke="#9aa0b5" stroke-width="3" stroke-linecap="round" fill="none"><line class="ln" x1="262" y1="44" x2="380" y2="44"/><line class="ln" x1="262" y1="66" x2="360" y2="66"/><line class="ln" x1="262" y1="88" x2="380" y2="88"/><line class="ln" x1="262" y1="110" x2="340" y2="110"/></g>
 <g class="pen"><polygon points="262,36 284,26 288,32 266,42" fill="#f5b84a" stroke="#a8741a"/></g>
-<g class="body"><ellipse cx="118" cy="132" rx="38" ry="6" fill="rgba(0,0,0,.2)"/><circle cx="118" cy="82" r="46" fill="url(#ntb${e})" stroke="#fff" stroke-opacity=".6" stroke-width="3"/><text x="118" y="100" text-anchor="middle" font-size="22" font-weight="800" fill="#fff" opacity=".9" font-family="system-ui,sans-serif">N</text>
+<g class="body"><ellipse cx="118" cy="132" rx="38" ry="6" fill="rgba(0,0,0,.2)"/><circle cx="118" cy="82" r="46" fill="url(#ntb${e})" stroke="#fff" stroke-opacity=".6" stroke-width="3"/>
 <ellipse class="eye" cx="101" cy="64" rx="7" ry="8" fill="#fff"/><ellipse class="eye" cx="135" cy="64" rx="7" ry="8" fill="#fff"/><circle cx="103" cy="66" r="3.5" fill="#222"/><circle cx="137" cy="66" r="3.5" fill="#222"/>
 <circle cx="90" cy="80" r="6" fill="#ff7ab6" opacity=".45"/><circle cx="146" cy="80" r="6" fill="#ff7ab6" opacity=".45"/>
 ${e==="sad"?'<path d="M104 84 Q118 76 132 84" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>':'<path d="M104 78 Q118 90 132 78" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>'}</g></g>

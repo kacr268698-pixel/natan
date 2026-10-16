@@ -35,14 +35,17 @@ const pic=(id,em,col)=>{try{Z.PIC[id]=`<svg class="pic pic-sp" viewBox="0 0 240 
 .rv button.last{outline:2px solid #ffd166;outline-offset:-2px}
 @keyframes rvnew{from{transform:scale(0)}to{transform:scale(1)}}
 @keyframes rvflip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg) scale(1.1)}100%{transform:rotateY(0)}}
-.gm.full .f4,.gm.full .rv,.gm.full .mm{width:min(76vw,70vh,520px)}
+.gm.full .f4,.gm.full .rv,.gm.full .mm{width:min(calc(100vw - 100px),80vh,560px)}
 .mm{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(94vw,420px,60vh)}
+.mm.mid,.mm.big{width:min(96vw,640px,72vh)}
+.gm.full .mm.mid,.gm.full .mm.big{width:min(calc(100vw - 100px),88vh,780px)}
 .mm button{aspect-ratio:1;border:0;background:none;padding:0;perspective:600px;cursor:pointer}
 .mm .in{position:absolute;inset:0;transition:transform .5s;transform-style:preserve-3d}
 .mm button{position:relative}
-.mm .fa,.mm .fb{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;font-size:clamp(26px,9vw,52px)}
+.mm .fa,.mm .fb{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;line-height:1;overflow:hidden}
 .mm .fa{background:linear-gradient(135deg,#6c5ce7,#a29bfe);box-shadow:inset 0 0 0 3px #fff3}
-.mm .fa::after{content:"?";color:#fff8;font-weight:800}
+.mm .fa::after{content:"?";color:#fff8;font-weight:800;font-size:.7em}
+.mm.big .fa,.mm.big .fb{border-radius:3px}.mm.big .fa::after{content:""}.mm.mid .fa,.mm.mid .fb{border-radius:6px}
 .mm .fb{background:#fff;transform:rotateY(180deg);box-shadow:0 2px 8px #0004}
 .mm button.up .in{transform:rotateY(180deg)}
 .mm button.ok .fb{background:#d3f9d8;animation:mmok .6s}
@@ -137,33 +140,42 @@ pic("reversi","⚫","#267a41");
 // =============================================================== MEMORY
 const MEM=["🍎","🚀","🐙","🎸","🌵","🦄","🍕","⚽","🐳","🌈","🎲","🍩"];
 register({id:"memory",ord:14,nome:"Memory",ic:"🃏",col:"#6c5ce7",sub:"Trova le coppie uguali e ricorda dove sono",min:2,max:2,noEval:true,
-  tut:[["🃏","Lo scopo","Ci sono 8 coppie di carte coperte: vince chi ne trova di più."],["👆","Come si gioca","Gira due carte. Se sono uguali le tieni e giochi ancora, se sono diverse si rigirano e tocca all'altro."],["🧠","Consiglio","Ricorda anche le carte che gira l'avversario!"]],
-  init(n,seed){const R=mulberry((seed|0)+99),v=[];for(let i=0;i<8;i++)v.push(i,i);for(let i=15;i>0;i--){const j=Math.floor(R()*(i+1));[v[i],v[j]]=[v[j],v[i]]}
-    return {v,got:new Array(16).fill(-1),sc:[0,0],turn:0,nm:0,last:null,ev:[],seen:[]}},
+  opzioni:[{id:"liv",nome:"Livello",desc:"Quante carte sul tavolo.",tipo:"scelta",def:4,sc:[{v:4,nome:"4×4 · facile"},{v:8,nome:"8×8 · medio"},{v:16,nome:"16×16 · difficile"},{v:24,nome:"24×24 · estremo"}]}],
+  tut:[["🃏","Lo scopo","Ci sono tante coppie di carte coperte: vince chi ne trova di più."],["👆","Come si gioca","Gira due carte. Se sono uguali le tieni e giochi ancora, se sono diverse si rigirano e tocca all'altro."],["🧠","Consiglio","Ricorda anche le carte che gira l'avversario!"]],
+  init(n,seed,opz){const N=[4,8,16,24].includes(+(opz||{}).liv)?+opz.liv:4,T=N*N,P=T/2,R=mulberry((seed|0)+99),v=[];for(let i=0;i<P;i++)v.push(i,i);for(let i=T-1;i>0;i--){const j=Math.floor(R()*(i+1));[v[i],v[j]]=[v[j],v[i]]}
+    return {N,v,got:new Array(T).fill(-1),sc:[0,0],turn:0,nm:0,last:null,ev:[],seen:[]}},
   turn(S){return S.turn},
-  legal(S,seat){return [{k:"m"}]},
-  parse(S,seat,k){const t=String(k).split("|");if(t[0]!=="m")return null;const i=+t[1],j=+t[2];if(!Number.isInteger(i)||!Number.isInteger(j)||i===j||i<0||j<0||i>15||j>15||S.got[i]>=0||S.got[j]>=0)return null;return {k:`m|${i}|${j}`,i,j}},
-  apply(S,seat,a){const ok=S.v[a.i]===S.v[a.j];S.last={i:a.i,j:a.j,ok,by:seat};S.nm++;S.seen=S.seen.concat([a.i,a.j]).slice(-32);
+  legal(S,seat){const l=[];for(let i=0;i<S.v.length&&l.length<2;i++)if(S.got[i]<0)l.push({k:"m|"+i+"|"+i});return l},
+  parse(S,seat,k){const t=String(k).split("|");if(t[0]!=="m")return null;const i=+t[1],j=+t[2],T=S.v.length;if(!Number.isInteger(i)||!Number.isInteger(j)||i===j||i<0||j<0||i>=T||j>=T||S.got[i]>=0||S.got[j]>=0)return null;return {k:`m|${i}|${j}`,i,j}},
+  apply(S,seat,a){const ok=S.v[a.i]===S.v[a.j];S.last={i:a.i,j:a.j,ok,by:seat};S.nm++;S.seen=S.seen.concat([a.i,a.j]).slice(-700);
     if(ok){S.got[a.i]=seat;S.got[a.j]=seat;S.sc[seat]++;S.seen=S.seen.filter(x=>x!==a.i&&x!==a.j)}else S.turn=1-seat;return S},
   over(S){if(S.got.some(x=>x<0))return null;const [a,b]=S.sc;return a===b?{win:[],text:`Pareggio ${a} a ${b}`}:{win:[a>b?0:1],text:s=>`${s[a>b?0:1].nome} vince ${Math.max(a,b)} a ${Math.min(a,b)}`}},
   pausa(S){return S.last&&S.last.ok?1000:1500},
   msgTurno(S,c,seat){return "Tocca a te: gira due carte"},
-  bot(S,seat,lv){const li=clamp(lv==null?1:lv,0,3),mem=[3,6,10,16][li],rec=S.seen.slice(-mem*1),R=mulberry(7+S.nm*13+seat);
-    const known=[...new Set(rec)].filter(i=>S.got[i]<0),unk=[];for(let i=0;i<16;i++)if(S.got[i]<0&&!known.includes(i))unk.push(i);
+  bot(S,seat,lv){const li=clamp(lv==null?1:lv,0,3),T=S.v.length,mem=Math.round([3,6,10,16][li]*Math.max(1,Math.sqrt(T/16))),rec=S.seen.slice(-mem),R=mulberry(7+S.nm*13+seat);
+    const known=[...new Set(rec)].filter(i=>S.got[i]<0),kn=new Set(known),unk=[];for(let i=0;i<T;i++)if(S.got[i]<0&&!kn.has(i))unk.push(i);
     const out=[],mk=(i,j,v,pt)=>out.push({a:{k:`m|${i}|${j}`,i,j},f:{valore:v,punti:pt,attacco:pt,difesa:0,rischio:0,conserva:0,posizione:0,futuro:v*.5,finale:pt}});
-    for(let x=0;x<known.length;x++)for(let y=x+1;y<known.length;y++)if(S.v[known[x]]===S.v[known[y]])mk(known[x],known[y],1,1);
-    if(unk.length>=2){for(let n=0;n<6;n++){const i=unk[Math.floor(R()*unk.length)];let j=unk[Math.floor(R()*unk.length)];if(i===j)continue;mk(i,j,.1+ (known.some(k=>S.v[k]===S.v[j])?0:.2),0)}}
-    if(!out.length){const l=[];for(let i=0;i<16;i++)if(S.got[i]<0)l.push(i);mk(l[0],l[1],0,0)}
+    const byV={};for(const k of known){(byV[S.v[k]]=byV[S.v[k]]||[]).push(k)}
+    for(const k in byV)if(byV[k].length>=2)mk(byV[k][0],byV[k][1],1,1);
+    if(!out.length&&unk.length>=2){for(let n=0;n<6;n++){const i=unk[Math.floor(R()*unk.length)];let j=unk[Math.floor(R()*unk.length)];if(i===j)continue;mk(i,j,.1+(known.some(k=>S.v[k]===S.v[j])?0:.2),0)}}
+    if(!out.length){const l=[];for(let i=0;i<T&&l.length<2;i++)if(S.got[i]<0)l.push(i);mk(l[0],l[1],0,0)}
     return out},
   view(sh,ctx){
     const root=E("div","clw"),inf=E("div","clinfo"),bd=E("div","mm");root.append(inf,bd);sh.g.append(root);
-    const bt=[];for(let i=0;i<16;i++){const b=E("button");b.dataset.i=String(i);const n=E("div","in");n.append(E("div","fa"),E("div","fb"));b.append(n);bd.append(b);bt.push(b)}
+    let bt=[],N=0;const FACCE=["🍎","🚀","🐙","🎸","🌵","🦄","🍕","⚽","🐳","🌈","🎲","🍩","🐶","🍉","🎈","🚗","🦋","🍔","🎧","🌻","🐸","🍦","⭐","🔔"],COL=["#ffffff","#ffe3e3","#e3f2ff","#e6ffe3","#fff6d6","#f0e3ff","#ffe9d6","#d9fff6","#ffdff0","#e8e8ff","#f3ffd1","#d6e4ff"];
+    const fit=()=>{if(!N)return;const w=bd.clientWidth||300;bd.style.fontSize=Math.max(6,Math.floor((w/N)*.62))+"px"};
+    const build=n=>{N=n;bd.innerHTML="";bt=[];bd.style.gridTemplateColumns=`repeat(${n},1fr)`;bd.style.gap=n>=16?"1px":n>=8?"3px":"8px";bd.classList.toggle("big",n>=16);bd.classList.toggle("mid",n===8);
+      for(let i=0;i<n*n;i++){const b=E("button");b.dataset.i=String(i);const x=E("div","in");x.append(E("div","fa"),E("div","fb"));b.append(x);bd.append(b);bt.push(b)}
+      fit()};
+    addEventListener("resize",fit);
     let SS=null,cc=null,first=-1,seen=-1,until=0,tm=0;
-    const draw=(S,c)=>{SS=S;cc=c;
+    const draw=(S,c)=>{SS=S;cc=c;if(N!==S.N)build(S.N);
       if(S.nm!==seen){seen=S.nm;first=-1;if(S.last){until=Date.now()+(S.last.ok?900:1400);clearTimeout(tm);tm=setTimeout(()=>{if(document.body.contains(bd))draw(SS,cc)},until-Date.now()+30);sfx(S.last.ok?"dcap":"piece")}}
-      const show=Date.now()<until&&S.last?[S.last.i,S.last.j]:[];
-      for(let i=0;i<16;i++){const b=bt[i];b.querySelector(".fb").textContent=(S.got[i]>=0||show.includes(i)||first===i)?MEM[S.v[i]]:"";
-        b.className=(S.got[i]>=0?"up ok":"")+(show.includes(i)||first===i?" up":"");b.disabled=S.got[i]>=0}
+      const show=Date.now()<until&&S.last?[S.last.i,S.last.j]:[];fit();
+      for(let i=0;i<S.v.length;i++){const b=bt[i],got=S.got[i]>=0,open=got||show.includes(i)||first===i,fb=b.lastChild.lastChild,p=S.v[i];
+        const key=open?p+(got?"g":"p"):"";
+        if(fb._k!==key){fb._k=key;fb.textContent=open?FACCE[p%24]:"";fb.style.background=open&&!got?COL[Math.floor(p/24)%12]:""}
+        b.className=(got?"up ok":"")+(show.includes(i)||first===i?" up":"");b.disabled=got}
       inf.textContent=`${nomeDi(c,0)} ${S.sc[0]}  ·  ${nomeDi(c,1)} ${S.sc[1]}  —  ${S.turn===c.me?"tocca a te":"gioca "+nomeDi(c,S.turn)}`};
     bd.onclick=e=>{const b=e.target.closest("button");if(!b||!SS||!cc||!cc.myTurn||Date.now()<until)return;const i=+b.dataset.i;if(SS.got[i]>=0||i===first)return;
       if(first<0){first=i;sfx("lift");draw(SS,cc)}else{const f=first;first=-1;cc.act(`m|${f}|${i}`)}};

@@ -65,11 +65,12 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const num=v=>(Math.round(v*100)/100).toFixed(2);
 // animazione a fotogrammi registrati (60 al secondo): chiama draw(i) fino alla fine
 function play(frames,evs,drawFn,snd2,done){
-  const t0=performance.now();let ie=0,stop=false;const n=frames.length;
-  const step=ts=>{if(stop)return;const i=Math.min(n-1,Math.floor((ts-t0)*.06));
+  const t0=performance.now();let ie=0,stop=false,fin=false;const n=frames.length;
+  const finish=()=>{if(fin)return;fin=true;stop=true;try{done()}catch(e){console.error(e)}};      // (il timer di sicurezza evita che la partita resti bloccata se l'animazione si ferma)
+  const step=()=>{if(stop)return;const i=Math.max(0,Math.min(n-1,Math.floor((performance.now()-t0)*.06)));
     while(evs&&ie<evs.length&&evs[ie][0]<=i){try{snd2(evs[ie][1],evs[ie][2])}catch(e){}ie++}
-    drawFn(i);if(i>=n-1){done();return}requestAnimationFrame(step)};
-  requestAnimationFrame(step);return ()=>{stop=true}}
+    try{drawFn(i)}catch(e){console.error(e)}if(i>=n-1){finish();return}requestAnimationFrame(step)};
+  requestAnimationFrame(step);setTimeout(finish,n*1000/60+2500);return ()=>{stop=true}}
 const nomeDi=(c,s)=>s===c.me?"Tu":(c.seats[s]?c.seats[s].nome:"?");
 const FALSE2=[{k:"tira"},{k:"tira2"}];     // due voci finte: il tiro vero arriva con parse()
 
