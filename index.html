@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="it">
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1430">
+<meta name="description" content="Natan è un tutor AI: spiega le materie, risolve gli esercizi, ti fa le verifiche. App per Windows, Mac, Linux e Android.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone/apple-touch-icon.png">
+<link rel="icon" href="icone/icon-192.png">
+<title>Natan · il tutor che studia con te</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0f1430;--ink2:#141a3d;--grid:rgba(124,131,255,.09);--text:#eef0ff;--soft:#c3c8ea;--muted:#8a91bd;--acc:#7c83ff;--vio:#a07bff;--hl:#ffd75a;--ok:#3ecf8e;--line:#262e63}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:var(--text);font:17px/1.6 Figtree,system-ui,-apple-system,Segoe UI,sans-serif;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;background-attachment:fixed}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:Sora,system-ui,sans-serif;line-height:1.08;margin:0}
+h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.02em;margin-bottom:14px}
+p{margin:0 0 14px}
+.lead{color:var(--soft);font-size:clamp(17px,2vw,20px);max-width:36em}
+:focus-visible{outline:3px solid var(--hl);outline-offset:3px;border-radius:6px}
+header{display:flex;align-items:center;gap:20px;padding:20px 0}
+.brand{display:flex;align-items:center;gap:10px;font:800 21px Sora,sans-serif;text-decoration:none}
+.mark{width:34px;height:34px;border-radius:50%;background:var(--acc);display:grid;place-items:center;font:800 18px Sora,sans-serif;color:#fff}
+nav{margin-left:auto;display:flex;gap:22px;font-weight:600;font-size:15px}
+nav a{text-decoration:none;color:var(--soft)}nav a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:14px;background:var(--acc);color:#fff;font-weight:700;font-size:16px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#9198ff}.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 2px var(--line)}.btn.ghost:hover{box-shadow:inset 0 0 0 2px var(--acc)}
+.btn[aria-disabled=true]{background:var(--line);color:var(--muted);cursor:default}
+.btn small{font-weight:500;opacity:.8}
+section{padding:72px 0}
+
+/* HERO: la rete che lavora davanti ai tuoi occhi */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:36px;align-items:center;padding:30px 0 50px}
+.hero h1{font-size:clamp(40px,6.4vw,76px);letter-spacing:-.035em;font-weight:800}
+.hero .lead{margin:20px 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.cta .note{color:var(--muted);font-size:14px;width:100%}
+.net{position:relative;aspect-ratio:1/1;max-width:520px;width:100%;justify-self:end}
+.net svg{width:100%;height:100%;overflow:visible}
+.net .lbl{font:600 12px Figtree,sans-serif;fill:var(--soft)}
+.net .wire{stroke:var(--line);stroke-width:2}
+.net .pulse{fill:var(--hl)}
+.net .caption{position:absolute;left:0;right:0;bottom:-16px;text-align:center;color:var(--muted);font-size:14px;min-height:22px;transition:opacity .3s}
+
+/* DOWNLOAD */
+.dl{border-top:2px solid var(--line)}
+.row{display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:center;padding:20px 4px;border-bottom:2px solid var(--line)}
+.row.me{background:linear-gradient(90deg,rgba(124,131,255,.13),transparent 70%);border-radius:12px}
+.row .ic{font-size:32px;text-align:center}
+.row h3{font-size:20px;margin-bottom:2px}
+.row .req{color:var(--muted);font-size:15px}
+.row .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.row details{grid-column:2/4;color:var(--soft);font-size:15px}
+.row summary{cursor:pointer;color:var(--acc);font-weight:600;width:max-content}
+.row ol{margin:8px 0 0;padding-left:22px}
+.tag{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--hl);color:#2b2200;font-size:12px;font-weight:700;vertical-align:middle}
+
+/* COSA C'È DENTRO: piccoli pezzi veri dell'app */
+.inside{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:26px}
+.inside > div{display:flex;flex-direction:column;gap:12px}
+.inside h3{font-size:19px}.inside p{color:var(--soft);font-size:15px}
+.mock{background:var(--ink2);border:2px solid var(--line);border-radius:16px;padding:14px;min-height:150px;font-size:14px;display:flex;flex-direction:column;gap:8px;justify-content:center}
+.bub{background:#262b55;border-radius:14px 14px 14px 4px;padding:8px 12px;align-self:flex-start;max-width:90%}
+.bub.me{background:var(--acc);border-radius:14px 14px 4px 14px;align-self:flex-end}
+.opt{border:2px solid var(--line);border-radius:10px;padding:5px 10px}.opt.ok{border-color:var(--ok);background:rgba(62,207,142,.14)}
+.cards{display:flex;gap:6px;justify-content:center}
+.uc{width:42px;height:62px;border-radius:7px;border:3px solid #fff;display:grid;place-items:center;font:800 19px Sora,sans-serif;color:#fff;transform:rotate(var(--r))}
+.big{font:800 40px Sora,sans-serif;color:var(--hl);text-align:center}
+.small{color:var(--muted);font-size:13px;text-align:center}
+
+/* LA RETE: tre passi, sono davvero una sequenza */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:28px;counter-reset:s}
+.steps > div{border-left:3px solid var(--acc);padding:4px 0 4px 18px}
+.steps b{display:block;font:700 18px Sora,sans-serif;margin-bottom:6px}
+.steps b::before{counter-increment:s;content:counter(s) ". ";color:var(--acc)}
+.steps p{color:var(--soft);font-size:16px}
+.priv{margin-top:30px;padding:18px 20px;border:2px dashed var(--line);border-radius:14px;color:var(--soft);max-width:760px}
+
+/* SPOILER */
+.spoiler{position:relative;margin-top:10px;border-radius:22px;padding:34px;background:#f4f1ff;color:#16163a;overflow:hidden}
+.spoiler h2{color:#16163a}
+.spoiler .redact{background:#16163a;color:transparent;border-radius:4px;padding:0 4px;user-select:none;transition:color .5s,background .5s}
+.spoiler.aperto .redact{background:var(--hl);color:#16163a}
+.spoiler .hint{color:#4b4b7a;font-size:15px;margin-top:6px}
+.spoiler .btn{margin-top:14px}
+.stamp{position:absolute;right:24px;top:22px;transform:rotate(8deg);border:3px solid #c0392b;color:#c0392b;font:800 15px Sora,sans-serif;padding:4px 10px;border-radius:6px;letter-spacing:.04em}
+
+footer{border-top:2px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px 30px;justify-content:space-between}
+dialog{background:var(--ink2);color:var(--text);border:2px solid var(--line);border-radius:18px;max-width:440px;padding:24px}
+dialog::backdrop{background:rgba(5,7,20,.7)}
+@media (max-width:900px){.hero{grid-template-columns:1fr}.net{justify-self:center;max-width:420px}.inside{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}}
+@media (max-width:560px){nav{display:none}.inside{grid-template-columns:1fr}.row{grid-template-columns:40px 1fr}.row .acts{grid-column:1/3;justify-content:flex-start}.row details{grid-column:1/3}.spoiler{padding:24px}.stamp{position:static;display:inline-block;margin-bottom:10px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="#"><span class="mark">N</span>Natan</a>
+    <nav><a href="#scarica">Scarica</a><a href="#dentro">Cosa c'è dentro</a><a href="#rete">La rete</a><a href="#novita">In arrivo</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Il tutor che studia con te, su ogni dispositivo.</h1>
+      <p class="lead">Natan spiega le materie, risolve gli esercizi passo per passo, ti fa le verifiche e gioca con te. Ora è un'app vera per il computer e per Android.</p>
+      <div class="cta" id="heroCta">
+        <a class="btn" id="heroBtn" href="#scarica">Scarica Natan</a>
+        <a class="btn ghost" href="app/">Usalo nel browser</a>
+        <span class="note" id="heroNote"></span>
+      </div>
+    </div>
+    <div class="net" aria-hidden="true">
+      <svg id="netSvg" viewBox="0 0 500 500"></svg>
+      <div class="caption" id="netCap"></div>
+    </div>
+  </div>
+</div>
+
+<section id="scarica">
+  <div class="wrap">
+    <h2>Scarica Natan</h2>
+    <p class="lead">Scegli il tuo dispositivo. Le app sono gratis e si aggiornano da sole.</p>
+    <div class="dl" id="dl">
+      <div class="row" data-os="windows">
+        <div class="ic">🪟</div>
+        <div><h3>Windows</h3><div class="req">Windows 10 o 11, almeno 8 GB di RAM</div></div>
+        <div class="acts"><a class="btn" data-k="windows" href="#">Scarica per Windows</a></div>
+        <details><summary>Come si installa</summary><ol><li>Apri il file scaricato <b>Natan-Windows.exe</b>.</li><li>Se compare «Windows ha protetto il PC», premi <b>Ulteriori informazioni</b> e poi <b>Esegui comunque</b> (succede alle app nuove senza firma a pagamento).</li><li>Natan si installa da solo e compare sul desktop e nel menu Start.</li></ol></details>
+      </div>
+      <div class="row" data-os="mac">
+        <div class="ic">💻</div>
+        <div><h3>Mac</h3><div class="req">macOS 11 o più recente</div></div>
+        <div class="acts"><a class="btn" data-k="mac_arm" href="#">Mac con chip Apple (M1 e successivi)</a><a class="btn ghost" data-k="mac_intel" href="#">Mac con Intel</a></div>
+        <details><summary>Come si installa</summary><ol><li>Apri il file <b>.dmg</b> e trascina Natan nella cartella <b>Applicazioni</b>.</li><li>La prima volta macOS lo blocca perché l'app non è registrata da Apple: apri <b>Impostazioni di Sistema → Privacy e sicurezza</b> e premi <b>Apri comunque</b>.</li><li>Da quel momento Natan si apre normalmente.</li></ol></details>
+      </div>
+      <div class="row" data-os="linux">
+        <div class="ic">🐧</div>
+        <div><h3>Linux</h3><div class="req">64 bit, almeno 8 GB di RAM</div></div>
+        <div class="acts"><a class="btn" data-k="linux" href="#">Scarica per Linux</a></div>
+        <details><summary>Come si installa</summary><ol><li>Tasto destro su <b>Natan-Linux.AppImage</b> → Proprietà → «Consenti l'esecuzione come programma».</li><li>Fai doppio clic per aprire Natan.</li></ol></details>
+      </div>
+      <div class="row" data-os="android">
+        <div class="ic">🤖</div>
+        <div><h3>Android</h3><div class="req">Android 7 o più recente</div></div>
+        <div class="acts"><a class="btn" data-k="android" href="#">Scarica per Android</a></div>
+        <details><summary>Come si installa</summary><ol><li>Apri il file <b>Natan-Android.apk</b> appena scaricato.</li><li>Se il telefono lo chiede, permetti al browser di <b>installare app sconosciute</b> (si fa una volta sola).</li><li>Premi <b>Installa</b>: Natan compare tra le tue app.</li></ol></details>
+      </div>
+      <div class="row" data-os="ios">
+        <div class="ic">📱</div>
+        <div><h3>iPhone e iPad</h3><div class="req">Si aggiunge dalla Home con Safari e si apre a tutto schermo, come un'app</div></div>
+        <div class="acts"><button class="btn" id="iosBtn" type="button">Mettilo sulla Home</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dentro">
+  <div class="wrap">
+    <h2>Cosa c'è dentro</h2>
+    <p class="lead">Tutto nella stessa app, sul telefono e sul computer.</p>
+    <div class="inside">
+      <div>
+        <div class="mock"><span class="bub me">Mi spieghi le derivate?</span><span class="bub">Certo! La derivata misura quanto cambia una funzione…</span></div>
+        <h3>Chat</h3><p>Fai domande, manda le foto dei compiti, parla con Natan a voce.</p>
+      </div>
+      <div>
+        <div class="mock"><b style="font-size:14px">Dove avviene la fotosintesi?</b><span class="opt">Nei mitocondri</span><span class="opt ok">Nei cloroplasti ✓</span><span class="opt">Nel nucleo</span></div>
+        <h3>Natan Test</h3><p>Verifiche su qualsiasi argomento: scuola media, superiori o università, quattro livelli di difficoltà.</p>
+      </div>
+      <div>
+        <div class="mock"><div class="cards"><span class="uc" style="background:#e2463c;--r:-8deg">7</span><span class="uc" style="background:#2f6fd6;--r:2deg">+2</span><span class="uc" style="background:#33a65a;--r:10deg">⇄</span></div><div class="small">Uno, Scopa d'Assi, Dama, Basket, Sudoku, Mahjong</div></div>
+        <h3>Giochi e trofei</h3><p>I giochi di Natan: Sudoku, Scopa d’Assi, Mahjong, Dama, Uno, Basket, Bowling, Minigolf, Calcio, Forza 4, Reversi e altri da soli, contro i bot o online con gli amici, e più di quaranta trofei da sbloccare.</p>
+      </div>
+      <div>
+        <div class="mock"><div class="big" id="nAppunti">migliaia</div><div class="small">appunti nella biblioteca · <span id="nAgg">si aggiorna ogni 30 minuti</span></div></div>
+        <h3>Biblioteca</h3><p>Natan studia da solo e controlla i suoi appunti, così risponde anche senza Internet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rete">
+  <div class="wrap">
+    <h2>La rete dei computer</h2>
+    <p class="lead">Ogni computer con l'app di Natan può dare una mano ai telefoni degli amici. Così Natan risponde anche quando il server principale è spento.</p>
+    <div class="steps">
+      <div><b>Il telefono fa una domanda</b><p>Se il server di Natan è occupato o spento, la domanda va a un computer della rete.</p></div>
+      <div><b>Un computer risponde</b><p>Usa la biblioteca di Natan, che tiene aggiornata da solo ogni giorno, e il modello installato sul computer.</p></div>
+      <div><b>La risposta torna indietro</b><p>In pochi secondi, senza che nessuno sappia chi ha chiesto cosa.</p></div>
+    </div>
+    <div class="priv">Chi usa il computer vede solo <b>quante</b> risposte ha dato, mai le domande. L'app aiuta solo con il computer collegato alla corrente e la puoi mettere in pausa in qualsiasi momento dall'icona vicino all'orologio. Chi aiuta riceve Natan Pro: il modello più grande, con il ragionamento lungo.</div>
+  </div>
+</section>
+
+<section id="novita">
+  <div class="wrap">
+    <div class="spoiler" id="spoiler">
+      <span class="stamp">TOP SECRET</span>
+      <h2>Nel prossimo aggiornamento…</h2>
+      <p style="font-size:20px;margin-top:12px">Natan Test diventa una <span class="redact">sfida in diretta con tutta la classe</span>: le stesse domande nello stesso momento, una <span class="redact">classifica che cambia a ogni risposta</span> e <span class="redact">trofei di classe</span>.</p>
+      <p class="hint">Per ora non possiamo dire di più.</p>
+      <button class="btn" type="button" id="spoilBtn">Sbircia lo spoiler</button>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  <span>Natan · beta</span>
+  <span>Le chat vengono inviate a chi gestisce Natan, che può leggerle per migliorarlo. Appunti da Wikipedia (CC BY-SA).</span>
+</div></footer>
+
+<dialog id="dlg">
+  <h3 style="margin-bottom:10px">Natan sull'iPhone</h3>
+  <ol>
+    <li>Apri questa pagina con <b>Safari</b>.</li>
+    <li>Tocca <b>Condividi</b> (il quadrato con la freccia).</li>
+    <li>Scegli <b>Aggiungi alla schermata Home</b>.</li>
+    <li>Apri Natan dalla nuova icona: si apre a tutto schermo, senza le barre del browser.</li>
+  </ol>
+  <p style="color:var(--muted);font-size:14px">Un'app da App Store richiede un account sviluppatore Apple a pagamento: per ora Natan sull'iPhone funziona così.</p>
+  <div class="cta"><a class="btn" href="app/">Apri Natan</a><button class="btn ghost" type="button" id="close">Chiudi</button></div>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+// --- che dispositivo è?
+const ua=navigator.userAgent;
+const OS=/Android/i.test(ua)?"android":/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)?"ios":/Windows/i.test(ua)?"windows":/Mac/i.test(ua)?"mac":/Linux|X11|CrOS/i.test(ua)?"linux":"";
+let appleChip=true;
+try{const gl=document.createElement("canvas").getContext("webgl");const ext=gl&&gl.getExtension("WEBGL_debug_renderer_info");const r=ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):"";if(/Intel/i.test(r))appleChip=false}catch(e){}
+const NOMI={windows:"Windows",mac:"Mac",linux:"Linux",android:"Android",ios:"iPhone"};
+const rows=[...document.querySelectorAll(".row")];
+if(OS){const r=rows.find(x=>x.dataset.os===OS);if(r){r.classList.add("me");r.querySelector("h3").insertAdjacentHTML("beforeend",'<span class="tag">il tuo dispositivo</span>');$("dl").prepend(r)}}
+
+// --- dove sono le app (le costruisce GitHub; finché non sono pronte il pulsante lo dice)
+const LINK={};
+function bottoni(){
+  document.querySelectorAll("[data-k]").forEach(a=>{const u=LINK[a.dataset.k];
+    if(u){a.href=u;a.removeAttribute("aria-disabled")}else{a.href="app/";a.setAttribute("aria-disabled","true");a.title="L'app è in preparazione: intanto puoi usare Natan nel browser"}});
+  const hb=$("heroBtn"),k=OS==="mac"?(appleChip?"mac_arm":"mac_intel"):OS;
+  if(OS==="ios"){hb.textContent="Mettilo sulla Home";hb.href="#";hb.onclick=e=>{e.preventDefault();$("dlg").showModal()}}
+  else if(k&&LINK[k]){hb.textContent="Scarica per "+NOMI[OS];hb.href=LINK[k];$("heroNote").textContent="Gratis. Si aggiorna da solo."}
+  else if(k){hb.textContent="Scarica Natan";hb.href="#scarica";$("heroNote").textContent="L'app per "+NOMI[OS]+" è in preparazione: intanto usalo nel browser."}
+}
+bottoni();
+fetch("app.json",{cache:"no-store"}).then(r=>r.json()).then(async c=>{
+  let nomi=new Set();
+  try{const rel=await (await fetch("https://api.github.com/repos/"+c.repo+"/releases/latest")).json();(rel.assets||[]).forEach(a=>nomi.add(a.name))}catch(e){}
+  for(const [k,u] of Object.entries(c.link||{})){const f=u.split("/").pop();if(nomi.has(f))LINK[k]=u}
+  bottoni();
+}).catch(()=>{});
+function contaAppunti(){fetch("numeri.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.json()).then(d=>{const n=d.appunti;if(n)$("nAppunti").textContent=n.toLocaleString("it-IT");
+  if(d.aggiornato){const t=new Date(d.aggiornato*1000);$("nAgg").textContent="aggiornato alle "+t.toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}}).catch(()=>{})}
+contaAppunti();setInterval(contaAppunti,30*60*1000);
+
+$("iosBtn").onclick=()=>$("dlg").showModal();$("close").onclick=()=>$("dlg").close();
+$("spoilBtn").onclick=()=>{$("spoiler").classList.add("aperto");$("spoilBtn").remove()};
+
+// --- la rete nell'intestazione: un telefono chiede, un computer risponde
+const svg=$("netSvg"),NS="http://www.w3.org/2000/svg";
+const mk=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).append(e);return e};
+const pcs=[{x:250,y:250,n:"Server di Natan",big:1},{x:120,y:150,n:"PC di Sara"},{x:380,y:140,n:"PC di Leo"},{x:400,y:340,n:"Mac di Teo"},{x:110,y:350,n:"PC di Ada"}];
+const phones=[{x:60,y:60},{x:250,y:40},{x:450,y:60},{x:470,y:250},{x:440,y:460},{x:250,y:470},{x:50,y:460},{x:30,y:250},{x:155,y:22},{x:350,y:24},{x:488,y:155},{x:490,y:360},{x:345,y:478},{x:150,y:480},{x:20,y:372},{x:18,y:140}];
+const wires=[];
+phones.forEach((p,i)=>pcs.forEach((c,j)=>{const d=Math.hypot(p.x-c.x,p.y-c.y);if(d<(c.big?230:200)){wires.push({p:i,c:j,el:mk("line",{x1:p.x,y1:p.y,x2:c.x,y2:c.y,class:"wire"})})}}));
+const swires=[];pcs.forEach((c,j)=>{if(j===0)return;swires.push({c:j,el:mk("line",{x1:pcs[0].x,y1:pcs[0].y,x2:c.x,y2:c.y,class:"wire",style:"stroke:#ff9f43;stroke-opacity:.35;stroke-width:2;stroke-dasharray:6 6"})})});
+pcs.forEach(c=>{const g=mk("g",{});mk("rect",{x:c.x-(c.big?34:26),y:c.y-(c.big?24:18),width:c.big?68:52,height:c.big?44:34,rx:7,fill:c.big?"#7c83ff":"#1d2452",stroke:"#7c83ff","stroke-width":2},g);
+  mk("rect",{x:c.x-(c.big?14:10),y:c.y+(c.big?22:16),width:c.big?28:20,height:5,rx:2,fill:"#7c83ff"},g);
+  const t=mk("text",{x:c.x,y:c.y+(c.big?48:40),"text-anchor":"middle",class:"lbl"},g);t.textContent=c.n;c.g=g;
+  if(c.big){const n=mk("text",{x:c.x,y:c.y+8,"text-anchor":"middle",fill:"#fff","font-family":"Sora,sans-serif","font-weight":"800","font-size":"22"},g);n.textContent="N"}});
+phones.forEach(p=>{mk("rect",{x:p.x-11,y:p.y-18,width:22,height:36,rx:5,fill:"#141a3d",stroke:"#c3c8ea","stroke-width":2});mk("circle",{x:0,cx:p.x,cy:p.y+12,r:2,fill:"#c3c8ea"})});
+const dot=mk("circle",{r:6,class:"pulse",opacity:0});const dotA=mk("circle",{r:5,fill:"#ff9f43",opacity:0}),dotB=mk("circle",{r:5,fill:"#ff9f43",opacity:0});
+let serverOn=true,step=0;
+const cap=$("netCap");{const lg=document.createElement("div");lg.className="caption";lg.style.cssText="color:#ff9f43;font-size:13px;bottom:-44px";cap.parentElement.style.marginBottom="54px";lg.textContent="Arancione: il server e i computer si scambiano informazioni";cap.after(lg)}
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function anima(a,b,ms,d){d=d||dot;return new Promise(ok=>{const t0=performance.now();d.setAttribute("opacity",1);
+  (function f(t){const k=Math.min(1,(t-t0)/ms),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;d.setAttribute("cx",a.x+(b.x-a.x)*e);d.setAttribute("cy",a.y+(b.y-a.y)*e);k<1?requestAnimationFrame(f):ok()})(t0)})}
+// il server e i computer si scambiano informazioni (arancione) quando il server è acceso: vanno e vengono in tutte e due le direzioni
+async function sync(){
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  for(;;){
+    swires.forEach(w=>{w.el.style.strokeOpacity=serverOn?".35":".08"});
+    if(!serverOn){await sleep(600);continue}
+    const w=swires[Math.floor(Math.random()*swires.length)],c=pcs[w.c];w.el.style.strokeOpacity="1";
+    await Promise.all([anima(pcs[0],c,1100,dotA),anima(c,pcs[0],1100,dotB)]);
+    dotA.setAttribute("opacity",0);dotB.setAttribute("opacity",0);w.el.style.strokeOpacity=".35";await sleep(450+Math.random()*500)}
+}
+async function giro(){
+  if(reduce){cap.textContent="I telefoni chiedono, i computer della rete rispondono.";return}
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  for(;;){
+    step++;if(step%3===0)serverOn=!serverOn;
+    pcs[0].g.style.opacity=serverOn?1:.35;
+    const usable=wires.filter(w=>serverOn?true:w.c!==0);const w=usable[Math.floor(Math.random()*usable.length)];
+    if(!w){await sleep(800);continue}
+    const p=phones[w.p],c=pcs[w.c];w.el.style.stroke="#ffd75a";
+    const chi=c.big?"il server di Natan":"il "+c.n;cap.textContent=serverOn?"Un telefono chiede, risponde "+chi+".":"Il server è spento: risponde "+chi+".";
+    await anima(p,c,900);c.g.style.filter="drop-shadow(0 0 10px #ffd75a)";await sleep(500);c.g.style.filter="";
+    await anima(c,p,900);dot.setAttribute("opacity",0);w.el.style.stroke="";await sleep(700);
+  }
+}
+giro();if(!reduce)sync();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+<style>.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.3,1),transform .7s cubic-bezier(.2,.8,.3,1)}.rv.in{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}</style>
+<script>(function(){try{if(!("IntersectionObserver" in window))return;const els=document.querySelectorAll("section .wrap > *, .inside > div");const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+els.forEach((e,i)=>{e.classList.add("rv");e.style.transitionDelay=(i%4)*70+"ms";io.observe(e)})}catch(e){}})();</script>
+</body>
+</html>

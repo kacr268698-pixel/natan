@@ -1,0 +1,1854 @@
+<!doctype html>
+<html lang="it">
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#15161c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Natan">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icone/apple-touch-icon.png">
+<link rel="icon" href="../icone/icon-192.png">
+<title>Natan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15161c;--side:#0f1015;--raise:#1f2129;--raise2:#2a2d38;--hover:#252833;--line:#2c2f3b;
+  --text:#ececf1;--soft:#c5c8d6;--muted:#8b8fa3;--acc:#7c83ff;--acc-h:#929aff;--vio:#a07bff;--blue:#4da3ff;
+  --good:#3ecf8e;--bad:#f06464;--warn:#f5b84a;
+  --sans:Figtree,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--head:Sora,Figtree,-apple-system,sans-serif;
+  --col:768px;--r:14px
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+a{color:#aab0ff}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:8px}
+.hide{display:none!important}
+svg{flex:none}
+/* pulsanti */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;background:var(--acc);color:#fff;font-weight:600}
+.btn:hover{background:var(--acc-h)}
+.btn.ghost{background:var(--raise);color:var(--text);border:1px solid var(--line)}.btn.ghost:hover{background:var(--hover)}
+.btn.red{background:var(--bad)}.btn:disabled{opacity:.45;cursor:default}
+.ib{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:var(--soft)}
+.ib:hover{background:var(--hover);color:var(--text)}
+.field{width:100%;min-height:46px;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:11px 14px;outline:none}
+.field:focus{border-color:var(--acc)}
+textarea.field{resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--raise);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--soft)}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.err{color:#ff9393;font-size:14px;min-height:20px}
+.small{font-size:13px;color:var(--muted)}
+/* avvio */
+#splash{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:90;transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+.logo{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;animation:reveal 1.9s ease-in-out forwards}
+.logo svg{position:absolute;inset:0;animation:orbit 2.4s linear infinite}
+.logo b{font:800 100px/1 var(--head);color:#fff}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes reveal{0%{opacity:0;filter:blur(16px);transform:scale(.85)}30%{opacity:1;filter:blur(0);transform:scale(1)}75%{opacity:1;filter:blur(0)}100%{opacity:0;filter:blur(22px);transform:scale(1.1)}}
+.mark{width:28px;height:28px;border-radius:8px;background:#000;display:inline-flex;align-items:center;justify-content:center;font:800 15px/1 var(--head);color:#fff;border:1px solid #2c2f3b;flex:none}
+/* primo avvio */
+#onb{position:fixed;inset:0;overflow-y:auto;display:flex;justify-content:center;padding:max(32px,env(safe-area-inset-top)) 18px 32px}
+#onb .card{width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px;margin:auto 0}
+#onb h1{font:700 30px/1.15 var(--head);margin:0;letter-spacing:-.4px}
+#onb .lead{color:var(--soft);margin:0}
+.steps{display:flex;gap:6px}.steps i{height:4px;flex:1;border-radius:2px;background:var(--line)}.steps i.on{background:var(--acc)}
+.consent{background:var(--raise);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px}
+.check{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:600}.check input{width:20px;height:20px;accent-color:var(--acc);flex:none}
+/* struttura */
+#app{position:fixed;inset:0;display:flex}
+#side{width:264px;flex:none;background:var(--side);display:flex;flex-direction:column;padding:max(12px,env(safe-area-inset-top)) 10px 10px;gap:2px;z-index:40;transition:transform .22s ease}
+.side-top{display:flex;align-items:center;gap:10px;padding:4px 6px 12px}
+.side-top b{font:700 19px/1 var(--head);flex:1}
+.sbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:10px;color:var(--soft);font-weight:500;font-size:15px;min-height:40px}
+.sbtn:hover{background:var(--hover);color:var(--text)}.sbtn.on{background:var(--raise2);color:var(--text)}
+.sbtn .badge{margin-left:auto;font-size:12px;font-weight:700;background:#1f3b2f;color:#8be3b8;border-radius:999px;padding:1px 8px}
+.slabel{font-size:12px;color:var(--muted);padding:16px 10px 6px;font-weight:600}
+#chatList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:1px;margin:0 -4px;padding:0 4px}
+#chatList .sbtn{font-size:14px;padding:8px 10px;min-height:36px}
+#chatList .sbtn span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.me{border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--acc);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.me small{display:block;color:var(--muted);font-size:12px}
+#shade{display:none}
+#main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+#top{display:flex;align-items:center;gap:6px;padding:max(8px,env(safe-area-inset-top)) 12px 8px;min-height:56px}
+#sideOpen{display:none}
+#modelBtn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;font:600 17px/1 var(--head)}
+#modelBtn:hover{background:var(--hover)}#modelBtn span{color:var(--muted);font-weight:600}
+.menu{position:absolute;top:56px;left:12px;z-index:50;width:min(360px,calc(100vw - 24px));background:var(--raise);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:0 18px 48px rgba(0,0,0,.45)}
+.mi{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:10px 12px;border-radius:11px}
+.mi:hover{background:var(--hover)}.mi.lock{opacity:.6}
+.mi strong{display:block;font-weight:600}.mi small{display:block;color:var(--muted);font-size:13px;line-height:1.4}
+.mi .tick{margin-left:auto;color:var(--acc);font-weight:700;visibility:hidden}.mi.on .tick{visibility:visible}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;background:#1f3b2f;color:#8be3b8;vertical-align:1px}
+.tag.warn{background:#3d3018;color:#ffd27a}.tag.no{background:#3d1f24;color:#ff9ea2}
+.menu .foot{font-size:12px;color:var(--muted);padding:8px 12px 6px;border-top:1px solid var(--line);margin-top:4px}
+.status{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);padding:6px 10px;border-radius:999px;background:var(--raise);white-space:nowrap}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status i.on{background:var(--good)}.status i.dev{background:var(--blue)}.status i.net{background:var(--vio)}.status i.busy{background:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+/* chat */
+#chatView{flex:1;min-height:0;display:flex;flex-direction:column}
+#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#thread{max-width:var(--col);margin:0 auto;padding:8px 20px 24px}
+#chatView.empty #scroll{flex:none;margin-top:auto}
+#chatView.empty #dock{margin-bottom:auto}
+.hello{text-align:center;padding:0 0 22px}
+.hello h2{font:600 28px/1.2 var(--head);margin:14px 0 0;letter-spacing:-.3px}
+.sugg{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.sugg button{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--soft)}.sugg button:hover{background:var(--hover)}
+.msg{margin:22px 0}
+.msg.u{display:flex;justify-content:flex-end}
+.msg.u>div{display:flex;flex-direction:column;align-items:flex-end;max-width:82%;min-width:0}
+.msg.u .bub{background:var(--raise2);border-radius:20px;padding:10px 16px;max-width:100%;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal}
+.th{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:6px}.th img{width:64px;height:64px;object-fit:cover;border-radius:12px}
+.msg.a{display:flex;gap:14px}
+.msg.a .mark{margin-top:2px}
+.msg.a .body{flex:1;min-width:0}
+.msg.a .txt{white-space:pre-wrap;word-wrap:break-word;line-height:1.65;color:#e4e5ec}
+.math.disp{display:block;overflow-x:auto;overflow-y:hidden;margin:4px 0;padding:2px 0;text-align:center}.math .katex{font-size:1.08em;white-space:nowrap}
+.math .katex-display{margin:0}
+.creaz{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:10px;white-space:normal}.cimg{width:min(100%,380px);border-radius:14px;display:block}
+.cvid{width:min(100%,560px);border-radius:14px;background:#000}.cdl{font-size:14px;padding:8px 14px;min-height:0;text-decoration:none}
+.msg.a .txt.wait{color:var(--muted)}
+.acts{display:flex;align-items:center;gap:2px;margin-top:8px;flex-wrap:wrap;color:var(--muted)}
+.acts .ib{width:32px;height:32px}.acts .ib.up{color:var(--good)}.acts .ib.dn{color:var(--bad)}
+.acts .tb{font-size:13px;padding:6px 10px;border-radius:9px;color:var(--soft)}.acts .tb:hover{background:var(--hover)}
+.acts .meta{margin-left:auto;font-size:12px}
+.why{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+#dock{max-width:var(--col);width:100%;margin:0 auto;padding:0 12px max(8px,calc(env(safe-area-inset-bottom) - 14px))}
+#notice{font-size:13px;color:var(--soft);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px}
+.bar{height:6px;border-radius:4px;background:var(--raise2);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+#pics{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;align-items:center}
+#pics img{width:52px;height:52px;object-fit:cover;border-radius:10px;flex:none}
+.composer{background:var(--raise);border:1px solid var(--line);border-radius:24px;padding:10px 10px 8px 16px;display:flex;flex-direction:column;gap:6px}
+.composer:focus-within{border-color:#3d4152}
+#inp{resize:none;background:transparent;border:0;outline:none;min-height:28px;max-height:200px;padding:4px 0;line-height:1.5}
+.cbar{display:flex;align-items:center;gap:4px;margin-left:-8px}
+.tg{font-size:13px;font-weight:600;border-radius:999px;padding:6px 11px;color:var(--muted);border:1px solid transparent}
+.tg:hover{background:var(--hover)}.tg.on{color:var(--soft);border-color:var(--line)}
+#send{width:36px;height:36px;border-radius:50%;background:var(--text);color:#15161c;display:inline-flex;align-items:center;justify-content:center;margin-left:auto}
+#send:disabled{opacity:.3;cursor:default}
+#mic.rec{background:var(--bad);color:#fff}
+.fine{text-align:center;font-size:11px;color:var(--muted);margin:5px 0 0}
+@media (max-width:899px){.fine{display:none}}
+/* menu della chat: fissa, rinomina, elimina */
+#chatList .crow{display:flex;align-items:center;border-radius:10px}
+#chatList .crow:hover,#chatList .crow.on{background:var(--hover)}#chatList .crow.on{background:var(--raise2)}
+#chatList .crow .sbtn{flex:1;min-width:0;background:none}
+#chatList .crow .more{width:30px;height:30px;flex:none;border-radius:8px;color:var(--muted);opacity:.0}
+#chatList .crow:hover .more,#chatList .crow.on .more,#chatList .crow .more:focus{opacity:1}
+@media (hover:none){#chatList .crow .more{opacity:1}}
+.pin{font-size:11px;color:var(--muted);margin-right:2px}
+.cmenu{position:fixed;z-index:60;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:5px;min-width:170px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.cmenu button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;font-size:14px}.cmenu button:hover{background:var(--hover)}
+.cmenu button.red{color:#ff8a8a}
+/* pagine */
+#pageView{flex:1;min-height:0;overflow-y:auto}
+.page{max-width:900px;margin:0 auto;padding:8px 20px 40px;display:flex;flex-direction:column;gap:16px}
+.page h1{font:700 26px/1.2 var(--head);margin:4px 0 0;letter-spacing:-.3px}
+.page .lead{color:var(--soft);margin:0;max-width:640px}
+.panel{background:var(--raise);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel h2{font:600 17px/1.3 var(--head);margin:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--bg);border-radius:12px;padding:12px 14px}.stat b{display:block;font:700 28px/1.1 var(--head)}.stat span{font-size:13px;color:var(--muted)}
+.log{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--soft)}.log time{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:8px}
+.hw{display:flex;flex-direction:column;gap:6px;font-size:14px}.hw div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.hw b{min-width:120px;color:var(--muted);font-weight:500}
+.sw{position:relative;width:52px;height:30px;border-radius:999px;background:var(--raise2);flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:var(--good)}.sw.on::after{transform:translateX(22px)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border-radius:999px;padding:4px 10px;background:var(--raise2);color:var(--soft)}
+.pill.ok{background:#1f3b2f;color:#8be3b8}.pill.wait{background:#3d3018;color:#ffd27a}.pill.no{background:#3d1f24;color:#ff9ea2}
+.list{display:flex;flex-direction:column;gap:8px}
+.li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--bg)}
+.li.off{opacity:.55}.libarea{border-radius:12px;background:var(--raise);padding:4px 10px}.libarea>summary{cursor:pointer;padding:10px 4px;list-style-position:inside}
+.libarea>.list{padding:0 0 10px}.subjpick{display:flex;flex-direction:column;gap:10px}#subj{max-height:260px;overflow:auto}
+.li .grow{flex:1;min-width:0;display:flex;flex-direction:column}.li input{width:20px;height:20px;accent-color:var(--acc)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{padding:10px 14px;color:var(--muted);font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--text);border-color:var(--acc)}
+.imp{display:flex;gap:12px;min-height:360px;height:calc(100vh - 380px)}
+.imp .col{background:var(--raise);border:1px solid var(--line);border-radius:14px;padding:6px;overflow-y:auto;display:flex;flex-direction:column;gap:1px;font-size:14px}
+.imp .c1{width:200px;flex:none}.imp .c2{width:240px;flex:none}
+.imp .c3{flex:1;min-width:0;background:var(--raise);border:1px solid var(--line);border-radius:14px;padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.imp .col button{text-align:left;padding:8px 10px;border-radius:9px;color:var(--soft)}.imp .col button:hover{background:var(--hover)}
+.imp .col button.on{background:var(--raise2);color:var(--text);font-weight:600}
+.imp .col strong{color:var(--acc);padding:8px 10px 2px;font-size:13px}
+.imp .c3 p{margin:0;line-height:1.65;color:var(--soft);white-space:pre-wrap}
+.live{font-size:14px;color:#9fd3ff}
+/* chiamata */
+#call{position:fixed;inset:0;z-index:97;background:radial-gradient(circle at 50% 40%,#191b26 0,#0b0c11 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px}
+#orb{width:min(70vw,340px);height:min(70vw,340px)}
+#callState{font:600 20px/1.3 var(--head);text-align:center;min-height:26px}
+#callSub{color:var(--muted);text-align:center;max-width:520px;min-height:44px;font-size:15px}
+.cbtns{display:flex;gap:16px}
+.cbtns .ib{width:60px;height:60px;border-radius:50%;background:var(--raise2);color:var(--text)}
+.cbtns .end{background:var(--bad);color:#fff}
+.cbtns .ib.off{background:#fff;color:#111}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--raise2);border:1px solid var(--line);padding:10px 16px;border-radius:12px;font-size:14px;z-index:95;transition:opacity .3s;max-width:90vw;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+/* telefono e finestre strette */
+@media (max-width:899px){
+  #side{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);width:min(84vw,300px)}
+  #app.open #side{transform:none}
+  #app.open #shade{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:35}
+  #sideOpen{display:inline-flex}
+  #sideClose{display:inline-flex}
+  .status span{display:none}.status{padding:8px}
+  #thread{padding:8px 16px 20px}
+  .imp{flex-direction:column;height:auto}.imp .c1,.imp .c2{width:auto;max-height:200px}
+}
+@media (min-width:900px){#sideClose{display:none}#app.closed #side{display:none}#app.closed #sideOpen{display:inline-flex}}
+@media (prefers-reduced-motion:reduce){.logo,.logo svg{animation:none}*{transition:none!important}}
+</style>
+<style id="plus">
+/* ===== Natan 2.9 · grafica più viva e animazioni (si può disattivare con «riduci movimento» del sistema) ===== */
+:root{--grad:linear-gradient(135deg,#7c83ff 0%,#a77bff 55%,#ff7ab6 100%);--glow:0 8px 26px rgba(124,131,255,.35);--ease:cubic-bezier(.2,.8,.3,1);--spring:cubic-bezier(.3,1.4,.5,1)}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1200px 600px at 85% -10%,rgba(124,131,255,.10),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(255,122,182,.07),transparent 60%),var(--bg);background-attachment:fixed}
+#app,#main{background:transparent}
+/* pulsanti */
+.btn{background:var(--grad);background-size:140% 100%;background-position:0 0;box-shadow:var(--glow);transition:transform .18s var(--ease),box-shadow .2s,background-position .35s,filter .2s}
+.btn:hover{background:var(--grad);background-size:140% 100%;background-position:100% 0;transform:translateY(-2px);box-shadow:0 12px 30px rgba(124,131,255,.45)}
+.btn:active{transform:scale(.96);box-shadow:var(--glow)}
+.btn.ghost{background:var(--raise);box-shadow:none}.btn.ghost:hover{background:var(--hover);box-shadow:0 6px 18px rgba(0,0,0,.25);transform:translateY(-1px)}
+.btn.red{background:var(--bad);box-shadow:0 8px 22px rgba(240,100,100,.3)}
+.ib{transition:background .15s,transform .15s var(--spring),color .15s}.ib:hover{transform:scale(1.1)}.ib:active{transform:scale(.9)}
+.chip,.sugg button{transition:transform .18s var(--spring),background .18s,border-color .18s,box-shadow .18s}
+.chip:hover,.sugg button:hover{transform:translateY(-2px);border-color:var(--acc)}.chip:active,.sugg button:active{transform:scale(.95)}
+.chip.on{background:var(--grad);border-color:transparent;box-shadow:0 6px 16px rgba(124,131,255,.35)}
+.field{transition:border-color .2s,box-shadow .2s,background .2s}.field:focus{box-shadow:0 0 0 4px rgba(124,131,255,.2);background:#222530}
+/* barra laterale */
+#side{background:linear-gradient(180deg,#12131a,#0d0e13)}
+.side-top .mark{background:var(--grad);border:0;box-shadow:0 6px 18px rgba(124,131,255,.45);animation:markFloat 5s ease-in-out infinite}
+.sbtn{position:relative;transition:background .18s,color .18s,transform .18s var(--ease),padding .18s}
+.sbtn svg{transition:transform .25s var(--spring),color .2s}.sbtn:hover{transform:translateX(3px)}.sbtn:hover svg{transform:scale(1.18) rotate(-6deg);color:var(--acc-h)}
+.sbtn.on{background:linear-gradient(90deg,rgba(124,131,255,.22),rgba(124,131,255,.05));color:#fff}
+.sbtn.on::before{content:"";position:absolute;left:-4px;top:9px;bottom:9px;width:4px;border-radius:4px;background:var(--grad);animation:barIn .35s var(--spring)}
+.av{background:var(--grad);box-shadow:0 4px 12px rgba(124,131,255,.4)}
+#chatList .sbtn{animation:slideL .35s var(--ease) both}
+/* chat */
+.hello .mark,.hello>div:first-child{animation:markFloat 5s ease-in-out infinite}
+.hello h2{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .6s var(--ease) both}
+.sugg button{animation:rise .5s var(--ease) both}.sugg button:nth-child(1){animation-delay:.1s}.sugg button:nth-child(2){animation-delay:.18s}.sugg button:nth-child(3){animation-delay:.26s}.sugg button:nth-child(4){animation-delay:.34s}
+#chatView.empty::before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;left:50%;top:18%;transform:translateX(-50%);background:radial-gradient(circle,rgba(124,131,255,.16),transparent 65%);filter:blur(10px);pointer-events:none;animation:breathe 7s ease-in-out infinite}
+.msg:nth-last-child(-n+2){animation:msgIn .45s var(--ease) both}
+.msg.u .bub{background:linear-gradient(135deg,#363a52,#2c2f44);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.msg.a .mark{background:var(--grad);border:0;box-shadow:0 4px 14px rgba(124,131,255,.4)}
+.msg.a .txt.wait{background:linear-gradient(90deg,var(--muted) 0%,#fff 50%,var(--muted) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 1.6s linear infinite}
+.composer{transition:box-shadow .25s,border-color .25s}
+.composer:focus-within{box-shadow:0 0 0 1px rgba(124,131,255,.55),0 10px 34px rgba(124,131,255,.18)}
+/* pagine e pannelli */
+#page>*{animation:rise .5s var(--ease) both}#page>*:nth-child(2){animation-delay:.06s}#page>*:nth-child(3){animation-delay:.12s}#page>*:nth-child(4){animation-delay:.18s}#page>*:nth-child(5){animation-delay:.24s}#page>*:nth-child(n+6){animation-delay:.3s}
+.page h1,#page h1{letter-spacing:-.5px;text-shadow:0 2px 24px rgba(124,131,255,.35)}
+.panel{transition:transform .25s var(--ease),border-color .25s,box-shadow .25s}.panel:hover{border-color:rgba(124,131,255,.45);box-shadow:0 12px 32px rgba(0,0,0,.28);transform:translateY(-2px)}
+.stat{transition:transform .2s var(--spring),background .2s}.stat:hover{transform:translateY(-3px) scale(1.02);background:#1b1d26}
+.stat b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.li{transition:background .15s,transform .18s var(--ease)}.li:hover{background:#1c1e27;transform:translateX(3px)}
+.pill{transition:transform .2s var(--spring)}.pill:hover{transform:scale(1.06)}.pill.wait{animation:pulse 1.6s ease-in-out infinite}
+.bar i,.prog i{background:var(--grad);position:relative;overflow:hidden}.bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 1.8s linear infinite}
+.sw{transition:background .25s}.sw::after{transition:transform .28s var(--spring);box-shadow:0 2px 6px rgba(0,0,0,.35)}.sw.on{background:linear-gradient(135deg,#3ecf8e,#2fb67c)}
+.menu{animation:pop .22s var(--spring) both;transform-origin:top left}.mi{transition:background .15s,transform .15s var(--ease)}.mi:hover{transform:translateX(3px)}
+.toast:not(.hide){animation:toastIn .35s var(--spring) both}
+.status i.on{box-shadow:0 0 0 0 rgba(62,207,142,.6);animation:ping 2.2s ease-out infinite}
+.tag,.badge{animation:pop .35s var(--spring) both}
+/* avvio e primo avvio */
+#onb .card{animation:rise .6s var(--ease) both}#onb .mark{width:54px;height:54px;border-radius:16px;font-size:28px;background:var(--grad);border:0;box-shadow:0 10px 30px rgba(124,131,255,.5);animation:markFloat 4.5s ease-in-out infinite}
+#onb h1{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.steps i{transition:background .4s;overflow:hidden;position:relative}.steps i.on{background:var(--grad)}
+.consent{transition:border-color .25s,box-shadow .25s}.consent:hover{border-color:rgba(124,131,255,.45)}
+/* movimenti */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes msgIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes barIn{from{transform:scaleY(0)}to{transform:none}}
+@keyframes markFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes breathe{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.12)}}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes shine{from{transform:translateX(-120%)}to{transform:translateX(220%)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px) scale(.95)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,207,142,.55)}70%,100%{box-shadow:0 0 0 8px rgba(62,207,142,0)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="logo" aria-label="Natan">
+    <svg viewBox="0 0 220 220" aria-hidden="true">
+      <circle cx="110" cy="110" r="92" fill="none" stroke="#1d2030" stroke-width="2"/>
+      <path d="M52 40 A92 92 0 0 1 182 55" fill="none" stroke="#a07bff" stroke-width="4" stroke-linecap="round"/>
+      <path d="M182 55 l-13 -3 m13 3 l-4 13" stroke="#a07bff" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M197 137 A92 92 0 0 1 102 201" fill="none" stroke="#7c83ff" stroke-width="4" stroke-linecap="round"/>
+      <path d="M102 201 l12 -5 m-12 5 l9 10" stroke="#7c83ff" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M26 144 A92 92 0 0 1 22 94" fill="none" stroke="#8f96ff" stroke-width="4" stroke-linecap="round"/>
+      <path d="M22 94 l-5 11 m5 -11 l8 9" stroke="#8f96ff" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </svg>
+    <b>N</b>
+  </div>
+</div>
+
+<div id="onb" class="hide"><div class="card" id="onbCard"></div></div>
+
+<div id="app" class="hide">
+  <aside id="side" aria-label="Menu">
+    <div class="side-top"><span class="mark">N</span><b>Natan</b>
+      <button class="ib" id="sideClose" aria-label="Chiudi il menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button></div>
+    <button class="sbtn" id="newChat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Nuova chat</button>
+    <button class="sbtn" data-p="impara"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0A2 2 0 0 0 6 22h13"/></svg>Impara</button>
+    <button class="sbtn" data-p="aiuta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8Z"/></svg>Aiuta Natan<span class="badge hide" id="helpBadge"></span></button>
+    <button class="sbtn" data-p="giochi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4M8 10v4"/><circle cx="15.5" cy="11" r="1"/><circle cx="18" cy="13.5" r="1"/></svg>Giochi</button>
+    <button class="sbtn" data-p="test"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Test</button>
+    <div class="slabel">Chat</div>
+    <div id="chatList"></div>
+    <button class="sbtn me" data-p="impostazioni"><span class="av" id="meAv">?</span><span><span id="meName"></span><small>Impostazioni</small></span></button>
+  </aside>
+  <div id="shade"></div>
+  <section id="main">
+    <header id="top">
+      <button class="ib" id="sideOpen" aria-label="Apri il menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+      <button id="modelBtn" aria-haspopup="true" aria-expanded="false">Natan <span id="modelName"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="menu hide" id="modelMenu" role="menu"></div>
+      <div style="flex:1"></div>
+      <span class="status" id="status"><i></i><span></span></span>
+      <button class="ib" id="callBtn" aria-label="Chiamata con Natan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg></button>
+    </header>
+    <div id="chatView">
+      <div id="scroll"><div id="thread"></div></div>
+      <div id="dock">
+        <div id="notice" class="hide"></div>
+        <div id="pics" class="hide"></div>
+        <div class="composer">
+          <textarea id="inp" rows="1" placeholder="Chiedi a Natan" aria-label="Messaggio"></textarea>
+          <div class="cbar">
+            <button class="ib" id="attach" aria-label="Allega foto (massimo 30)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            <input type="file" id="file" accept="image/*" multiple class="hide">
+            <button class="tg on" id="tNet" aria-pressed="true">Internet</button>
+            <button class="tg on" id="tLib" aria-pressed="true">Biblioteca</button>
+            <button class="tg" id="tVoice" aria-pressed="false">Voce</button>
+            <button class="ib hide" id="mic" aria-label="Detta"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+            <button id="send" aria-label="Invia" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+          </div>
+        </div>
+        <p class="fine">Natan può sbagliare. Le chat vengono lette per migliorare Natan.</p>
+      </div>
+    </div>
+    <div id="pageView" class="hide"><div class="page" id="page"></div></div>
+  </section>
+</div>
+
+<div id="call" class="hide" role="dialog" aria-label="Chiamata con Natan">
+  <canvas id="orb" width="680" height="680"></canvas>
+  <div id="callState">Ti ascolto</div>
+  <div id="callSub"></div>
+  <div class="cbtns">
+    <button class="ib" id="callMute" aria-label="Spegni il microfono"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <button class="ib end" id="callEnd" aria-label="Chiudi la chiamata"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</div>
+<div class="toast hide" id="toast"></div>
+
+<script>
+"use strict";
+const VERSION="2.9.7";
+/*AREE*/const AREE={"Scuola superiore":["Matematica","Fisica","Chimica","Biologia","Fisiologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Economia","Arte","Musica","Geografia"],"Matematica e logica":["Analisi matematica","Algebra lineare","Algebra astratta","Geometria","Geometria analitica","Geometria differenziale","Topologia","Teoria dei numeri","Combinatoria","Teoria dei grafi","Probabilità","Statistica","Logica matematica","Teoria degli insiemi","Analisi numerica","Ricerca operativa","Matematica finanziaria","Matematica discreta","Trigonometria","Teoria dei giochi","Equazioni differenziali","Analisi complessa","Analisi funzionale","Storia della matematica"],"Fisica e astronomia":["Meccanica classica","Termodinamica","Elettromagnetismo","Ottica","Acustica","Meccanica quantistica","Relatività","Fisica nucleare","Fisica delle particelle","Fisica della materia condensata","Fisica del plasma","Fluidodinamica","Fisica atomica","Fisica medica","Biofisica","Geofisica","Astronomia","Astrofisica","Cosmologia","Planetologia","Astronautica","Astrobiologia","Storia della fisica"],"Chimica e materiali":["Chimica organica","Chimica inorganica","Chimica fisica","Chimica analitica","Biochimica","Elettrochimica","Chimica dei polimeri","Chimica industriale","Chimica farmaceutica","Chimica ambientale","Chimica degli alimenti","Radiochimica","Scienza dei materiali","Cristallografia","Spettroscopia"],"Biologia, animali e piante":["Botanica","Zoologia","Biologia cellulare","Biologia molecolare","Genetica","Microbiologia","Virologia","Batteriologia","Micologia","Parassitologia","Immunologia","Ecologia e ambiente","Biologia evolutiva","Embriologia","Istologia","Anatomia comparata","Fisiologia vegetale","Biologia marina","Limnologia","Paleontologia","Paleoantropologia","Etologia","Entomologia","Mirmecologia","Aracnologia","Ornitologia","Erpetologia","Ittiologia","Mammalogia","Malacologia","Primatologia","Cetologia","Lepidotterologia","Briologia","Ficologia","Lichenologia","Dendrologia","Biologia della conservazione","Biotecnologie","Bioinformatica","Biostatistica","Etnobotanica","Palinologia"],"Medicina e salute":["Medicina","Anatomia","Patologia","Farmacologia","Cardiologia","Neurologia","Oncologia","Pediatria","Ginecologia","Ostetricia","Dermatologia","Oftalmologia","Otorinolaringoiatria","Ortopedia","Psichiatria","Chirurgia","Anestesiologia","Radiologia","Medicina d'urgenza","Geriatria","Endocrinologia","Gastroenterologia","Nefrologia","Urologia","Pneumologia","Ematologia","Reumatologia","Malattie infettive","Epidemiologia","Sanità pubblica","Medicina legale","Medicina dello sport","Medicina del lavoro","Allergologia","Genetica medica","Anatomia patologica","Neurochirurgia","Cardiochirurgia","Chirurgia plastica","Odontoiatria","Ortodonzia","Dietetica e nutrizione","Fisioterapia","Infermieristica","Logopedia","Ortottica","Podologia","Osteopatia","Terapia occupazionale","Medicina di laboratorio","Audiologia","Neuropsichiatria infantile","Primo soccorso","Farmacia","Tossicologia","Medicina riabilitativa"],"Psicologia e mente":["Psicologia","Psicologia cognitiva","Psicologia dello sviluppo","Psicologia sociale","Psicologia clinica","Psicologia del lavoro","Psicologia dello sport","Psicologia dell'educazione","Psicologia giuridica","Psicometria","Neuropsicologia","Psicoterapia","Psicologia della personalità","Neuroscienze","Psicobiologia","Scienze cognitive"],"Ingegneria e tecnologia":["Ingegneria","Ingegneria meccanica","Ingegneria civile","Ingegneria elettrica","Elettronica","Elettrotecnica","Ingegneria informatica","Ingegneria gestionale","Ingegneria aerospaziale","Ingegneria chimica","Ingegneria biomedica","Ingegneria ambientale","Ingegneria nucleare","Ingegneria navale","Ingegneria dei materiali","Ingegneria edile","Ingegneria energetica","Telecomunicazioni","Robotica","Controlli automatici","Meccatronica","Idraulica","Geotecnica","Ingegneria dei trasporti","Nanotecnologie","Energie rinnovabili","Aeronautica","Scienza delle costruzioni","Disegno tecnico","Stampa 3D","Topografia","Metrologia"],"Informatica e digitale":["Intelligenza artificiale","Reti e sicurezza informatica","Algoritmi e strutture dati","Basi di dati","Sistemi operativi","Crittografia","Apprendimento automatico","Computer grafica","Sviluppo web","App per smartphone","Teoria della calcolabilità","Linguaggi di programmazione","Cloud computing","Blockchain","Scienza dei dati","Ingegneria del software","Sviluppo di videogiochi","Interazione uomo-computer","Architettura dei calcolatori","Informatica teorica","Elaborazione digitale delle immagini"],"Economia e impresa":["Microeconomia","Macroeconomia","Econometria","Economia politica","Economia aziendale","Finanza","Contabilità","Management e marketing","Risorse umane","Logistica","Economia internazionale","Storia economica","Banca e assicurazioni","Commercio","Commercio elettronico","Imprenditorialità","Economia comportamentale","Economia dello sviluppo","Economia ambientale","Turismo","Educazione finanziaria","Revisione contabile","Scienza delle finanze","Pubblicità"],"Diritto e politica":["Diritto","Diritto civile","Diritto penale","Diritto costituzionale","Diritto amministrativo","Diritto commerciale","Diritto del lavoro","Diritto tributario","Diritto internazionale","Diritto dell'Unione europea","Diritto privato","Procedura civile","Procedura penale","Diritto romano","Diritto canonico","Filosofia del diritto","Criminologia","Educazione civica","Scienze politiche","Relazioni internazionali","Geopolitica","Pubblica amministrazione","Diplomazia","Diritti umani"],"Società e comunicazione":["Sociologia","Antropologia culturale","Antropologia fisica","Demografia","Scienze della comunicazione","Giornalismo","Pedagogia","Servizio sociale","Studi di genere","Urbanistica","Geografia umana","Etnologia","Semiotica","Mass media"],"Storia e archeologia":["Preistoria","Storia antica","Antica Grecia","Storia romana","Medioevo","Età moderna","Età contemporanea","Storia d'Italia","Storia dell'arte","Storia della scienza","Storia della medicina","Storia militare","Archeologia","Egittologia","Assiriologia","Impero bizantino","Paleografia","Archivistica","Numismatica","Araldica","Epigrafia","Papirologia","Genealogia","Etruscologia","Storia degli Stati Uniti d'America","Storia della Cina","Storia del Giappone","Storia dell'Africa"],"Filosofia e religioni":["Logica","Etica","Estetica","Metafisica","Epistemologia","Filosofia della mente","Filosofia politica","Filosofia della scienza","Filosofia del linguaggio","Bioetica","Filosofia antica","Filosofia medievale","Filosofia orientale","Teologia","Religioni","Mitologia","Mitologia greca","Mitologia norrena","Storia delle religioni"],"Lingue e letterature":["Greco antico","Spagnolo","Francese","Tedesco","Portoghese","Russo","Cinese","Giapponese","Arabo","Coreano","Ebraico","Hindi","Olandese","Svedese","Polacco","Turco","Greco moderno","Rumeno","Albanese","Ucraino","Esperanto","Lingua dei segni italiana","Letteratura","Letteratura italiana","Letteratura inglese","Letteratura statunitense","Letteratura latina","Letteratura greca","Letteratura russa","Letteratura spagnola","Letteratura tedesca","Letteratura francese","Letteratura per ragazzi","Filologia","Filologia romanza","Glottologia","Linguistica","Fonetica","Sociolinguistica","Psicolinguistica","Traduzione","Retorica","Critica letteraria","Scrittura creativa","Dialetti italiani","Metrica"],"Arte, design e spettacolo":["Pittura","Scultura","Disegno","Fotografia","Grafica","Design industriale","Moda","Architettura","Restauro","Museologia","Cinema","Teatro","Danza","Composizione musicale","Armonia","Musicologia","Etnomusicologia","Canto","Strumenti musicali","Pianoforte","Chitarra","Musica elettronica","Storia della musica","Jazz","Fumetto","Animazione","Game design","Scenografia","Televisione","Radio","Calligrafia","Ceramica","Oreficeria","Arredamento"],"Terra, ambiente e spazio":["Geologia","Mineralogia","Petrografia","Vulcanologia","Sismologia","Oceanografia","Meteorologia","Climatologia","Idrologia","Glaciologia","Geografia fisica","Cartografia","Geomorfologia","Speleologia","Pedologia","Paleoclimatologia","Scienze ambientali","Conservazione della natura","Gestione dei rifiuti"],"Agraria, cibo e animali":["Agraria","Veterinaria","Agronomia","Zootecnia","Enologia","Viticoltura","Scienze forestali","Orticoltura","Frutticoltura","Apicoltura","Acquacoltura","Tecnologie alimentari","Gastronomia","Cucina","Pasticceria","Giardinaggio","Floricoltura","Pesca","Agricoltura biologica","Cinofilia"],"Sport e movimento":["Scienze motorie","Educazione fisica","Atletica leggera","Calcio","Nuoto","Pallavolo","Pallacanestro","Tennis","Ciclismo","Arti marziali","Ginnastica","Rugby","Sci","Scacchi","Equitazione","Vela","Arrampicata","Yoga"],"Vita pratica e mestieri":["Metodo di studio","Codice della strada","Automobili e motori","Falegnameria","Sartoria","Impianti elettrici","Economia domestica","Orientamento"]};const ALIAS={"formiche":"Mirmecologia","insetti":"Entomologia","ragni":"Aracnologia","uccelli":"Ornitologia","rettili":"Erpetologia","serpenti":"Erpetologia","anfibi":"Erpetologia","rane":"Erpetologia","pesci":"Ittiologia","mammiferi":"Mammalogia","molluschi":"Malacologia","conchiglie":"Malacologia","scimmie":"Primatologia","balene":"Cetologia","delfini":"Cetologia","farfalle":"Lepidotterologia","muschi":"Briologia","alghe":"Ficologia","licheni":"Lichenologia","alberi":"Dendrologia","funghi":"Micologia","fossili":"Paleontologia","dinosauri":"Paleontologia","vulcani":"Vulcanologia","terremoti":"Sismologia","mare":"Oceanografia","oceani":"Oceanografia","meteo":"Meteorologia","clima":"Climatologia","ghiacciai":"Glaciologia","grotte":"Speleologia","monete":"Numismatica","stemmi":"Araldica","api":"Apicoltura","miele":"Apicoltura","vino":"Enologia","denti":"Odontoiatria","occhi":"Oftalmologia","cuore":"Cardiologia","pelle":"Dermatologia","bambini":"Pediatria","anziani":"Geriatria","tumori":"Oncologia","cervello":"Neuroscienze","piedi":"Podologia","voce":"Logopedia","cani":"Cinofilia","piante":"Botanica","fiori":"Floricoltura","animali":"Zoologia","stelle":"Astronomia","pianeti":"Planetologia","spazio":"Astronautica","razzi":"Astronautica","computer":"Informatica","programmare":"Coding","programmazione":"Coding","soldi":"Educazione finanziaria","risparmio":"Educazione finanziaria","leggi":"Diritto","patente":"Codice della strada","cibo":"Gastronomia","dolci":"Pasticceria","torte":"Pasticceria","auto":"Automobili e motori","macchine":"Automobili e motori","motori":"Automobili e motori","ossa":"Ortopedia","muscoli":"Fisioterapia","riabilitazione":"Fisioterapia","egitto":"Egittologia","piramidi":"Egittologia","mappe":"Cartografia","batteri":"Batteriologia","virus":"Virologia","dna":"Genetica","robot":"Robotica","videogiochi":"Sviluppo di videogiochi","giochi":"Game design","fumetti":"Fumetto","cartoni":"Animazione","film":"Cinema","vestiti":"Moda","case":"Architettura","ponti":"Ingegneria civile","aerei":"Aeronautica","navi":"Ingegneria navale","elettricità":"Elettrotecnica","luce":"Ottica","suono":"Acustica","atomi":"Fisica atomica","medicine":"Farmacologia","farmaci":"Farmacologia","veleni":"Tossicologia","crimini":"Criminologia","mente":"Psicologia","emozioni":"Psicologia","studiare":"Metodo di studio","memoria":"Metodo di studio","lingua dei segni":"Lingua dei segni italiana","segni":"Lingua dei segni italiana","dialetti":"Dialetti italiani","cavalli":"Equitazione","montagna":"Arrampicata","giardino":"Giardinaggio","orto":"Orticoltura","frutta":"Frutticoltura","boschi":"Scienze forestali","rifiuti":"Gestione dei rifiuti","riciclo":"Gestione dei rifiuti","ambiente":"Ecologia e ambiente","dio":"Teologia","miti":"Mitologia","dei greci":"Mitologia greca","vichinghi":"Mitologia norrena","romani":"Storia romana","medioevo":"Medioevo","cavalieri":"Medioevo","guerre":"Storia militare","elezioni":"Scienze politiche","notizie":"Giornalismo","infermiere":"Infermieristica","parto":"Ostetricia","ospedale":"Medicina","dottore":"Medicina","medico":"Medicina"};/*FINE AREE*/
+const SUBJ=[...new Set(Object.values(AREE).flat())];
+const REASONS=["Troppo lunga","Sbagliata","Non chiara","Altro"];
+const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const LIBURL="https://huggingface.co/datasets/Natan121/natan-biblioteca/resolve/main/biblioteca/";   // la biblioteca sta solo su Hugging Face (gratis), non su GitHub
+const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const PC=!IS_MOBILE;
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
+function svg(path,size=18){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("width",size);s.setAttribute("height",size);s.setAttribute("viewBox","0 0 24 24");s.setAttribute("fill","none");s.setAttribute("stroke","currentColor");s.setAttribute("stroke-width","2");s.setAttribute("stroke-linecap","round");s.setAttribute("stroke-linejoin","round");s.innerHTML=path;return s}
+const IC={copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',up:'<path d="M5 12l5 5L20 7"/>',dn:'<path d="M6 6l12 12M18 6L6 18"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',spk:'<path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>'};
+function toast(t){const e=$("toast");e.textContent=t;e.classList.remove("hide");e.style.opacity=1;clearTimeout(e._t);e._t=setTimeout(()=>{e.style.opacity=0;setTimeout(()=>e.classList.add("hide"),300)},3200)}
+function rid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function mb(kb){return kb>1024?(kb/1024).toFixed(1).replace(".",",")+" MB":kb+" KB"}
+function num(n){return Number(n||0).toLocaleString("it-IT")}
+function hhmm(t){return new Date(t).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}
+
+const q=new URLSearchParams(location.search);
+if(q.get("codice"))LS.set("natan_codice",q.get("codice"));
+const WANT_HELP=q.get("aiuta")==="1",WANT_GAMES=q.get("giochi")==="1";
+if(q.toString())history.replaceState(null,"",location.pathname);
+let TOKEN=LS.get("natan_codice","");
+let prof=LS.get("natan_profilo",null);
+let chats=LS.get("natan_chats",[]);
+let chat=LS.get("natan_chat","");
+let hist=[];let busy=false;let photos=[];const MAXP=30;let online=false;let PRO=LS.get("natan_pro",false);let VIEW="chat";
+
+// =====================================================================================================
+// IL NATAN DI KEVIN (il Mac). L'indirizzo è in ponte.json sul sito, insieme ai dati della rete dei volontari.
+let BASE="";
+const direct=/trycloudflare\.com$|ts\.net$/.test(location.hostname);
+async function findBase(force){
+  if(direct){BASE=location.origin;return BASE}
+  if(BASE&&!force)return BASE;
+  try{const r=await fetch("../ponte.json?t="+Date.now(),{cache:"no-store"});const d=await r.json();
+    if(d&&d.rete)LS.set("natan_rete",d.rete);
+    if(d&&d.url){BASE=d.url.replace(/\/$/,"");LS.set("natan_base",BASE);return BASE}}catch(e){}
+  BASE=LS.get("natan_base","");return BASE
+}
+async function api(path,body,retry=true){
+  if(!BASE)await findBase();
+  if(!BASE)throw Object.assign(new Error("offline"),{code:0});
+  let r;
+  try{r=await fetch(BASE+path,{method:body?"POST":"GET",headers:{"Authorization":"Bearer "+TOKEN,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}
+  catch(e){if(retry){await findBase(true);if(!await quickOk()&&await tryLocal()){}return api(path,body,false)}throw Object.assign(new Error("offline"),{code:0})}
+  if(r.status===502||r.status===530||r.status===1033){if(retry&&BASE!==LOCAL&&await tryLocal())return api(path,body,false);throw Object.assign(new Error("offline"),{code:0})}
+  let d={};try{d=await r.json()}catch(e){}
+  if(!r.ok){const er=new Error(d.error||("errore "+r.status));er.code=r.status;er.data=d;throw er}
+  return d
+}
+async function quickOk(){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),4000);const r=await fetch(BASE+"/ping",{cache:"no-store",signal:c.signal});clearTimeout(t);return r.ok}catch(e){return false}}
+let statusAt=0;
+const LOCAL="http://127.0.0.1:8765";
+async function tryLocal(){                      // sul computer dove gira il server di Natan funziona anche senza tunnel
+  try{const c=new AbortController();const t=setTimeout(()=>c.abort(),1500);const r=await fetch(LOCAL+"/ping",{cache:"no-store",signal:c.signal});clearTimeout(t);
+    if(r.ok){const d=await r.json();if(d.app==="natan"){BASE=LOCAL;return true}}}catch(e){}
+  return false
+}
+async function ping(){
+  try{await findBase();if(!BASE)throw 0;const r=await fetch(BASE+"/ping",{cache:"no-store"});online=r.ok;if(!r.ok)throw 0}
+  catch(e){online=false;await findBase(true);
+    try{if(BASE&&BASE!==LOCAL){const r=await fetch(BASE+"/ping",{cache:"no-store"});online=r.ok}}catch(e2){}
+    if(!online)online=await tryLocal()}
+  if(online&&TOKEN){flushQueue();flushNotes();
+    if(Date.now()-statusAt>60000){statusAt=Date.now();api("/status").then(d=>{PRO=!!d.pro;LS.set("natan_pro",PRO);if(d.volontario){HELP.stato=d.volontario;LS.set("natan_vol",d.volontario)}renderModel();renderHelpBadge()}).catch(()=>{})}}
+  updateStatus();updateNotice()
+}
+
+// =====================================================================================================
+// NATAN SUL DISPOSITIVO (WebLLM + WebGPU). Si scarica una volta sola.
+const LEVELS={
+  veloce:{name:"Basico",params:"1,7 miliardi",gb:1.2,ram:2.5,ids:["Qwen3-1.7B-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC","Qwen3-0.6B-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC"]},
+  medio:{name:"Medio",params:"4 miliardi",gb:2.4,ram:4,ids:["Qwen3-4B-q4f16_1-MLC","Qwen2.5-3B-Instruct-q4f16_1-MLC"]},
+  massimo:{name:"Alto",params:"8 miliardi",gb:4.8,ram:6,ids:["Qwen3-8B-q4f16_1-MLC","Qwen2.5-7B-Instruct-q4f16_1-MLC"]}
+};
+if(IS_IOS){                       // su iPhone Safari dà poca memoria alle pagine: modelli più piccoli, sennò l'app si chiude
+  Object.assign(LEVELS.veloce,{params:"0,6 miliardi",gb:0.5,ram:1.5,ids:["Qwen3-0.6B-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC"]});
+  Object.assign(LEVELS.medio,{params:"1,7 miliardi",gb:1.2,ram:3,ids:["Qwen3-1.7B-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC"]});
+  Object.assign(LEVELS.massimo,{params:"4 miliardi",gb:2.4,ram:8,ids:["Qwen3-4B-q4f16_1-MLC"]});
+}else LEVELS.veloce.ids=["Qwen3-1.7B-q4f16_1-MLC","Qwen3-0.6B-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC"];
+const ORDER=["veloce","medio","massimo"];
+const WEBLLM=["https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm","https://esm.run/@mlc-ai/web-llm@0.2.79","https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm"];
+let WL=null;
+async function webllm(){
+  if(window.NATAN_FAKE)return window.NATAN_FAKE;
+  if(WL)return WL;
+  for(const u of WEBLLM){try{WL=await import(u);return WL}catch(e){}}
+  throw new Error("Non riesco a scaricare il motore di Natan: controlla la connessione e riprova.")
+}
+const ENG={e:null,id:"",lvl:"",loading:null,queue:Promise.resolve(),prog:null};
+function hasWebGPU(){return !!(window.NATAN_FAKE||navigator.gpu)}
+let GPU=null;
+async function gpuInfo(){
+  if(GPU)return GPU;
+  if(window.NATAN_FAKE){GPU=window.NATAN_FAKE.gpu||{ok:true,f16:true,vendor:"nvidia",arch:"ampere",desc:"",maxBuf:4e9};return GPU}
+  if(!navigator.gpu)return GPU={ok:false};
+  try{const a=await navigator.gpu.requestAdapter({powerPreference:"high-performance"});if(!a)return GPU={ok:false};
+    let info=a.info||{};if(!info.vendor&&a.requestAdapterInfo){try{info=await a.requestAdapterInfo()}catch(e){}}
+    GPU={ok:true,f16:a.features.has("shader-f16"),vendor:(info.vendor||"").toLowerCase(),arch:(info.architecture||"").toLowerCase(),desc:info.description||"",maxBuf:a.limits.maxBufferSize||0}}
+  catch(e){GPU={ok:false}}
+  return GPU
+}
+async function pickId(lvl,wl){
+  const g=await gpuInfo();const list=((wl.prebuiltAppConfig&&wl.prebuiltAppConfig.model_list)||[]).map(m=>m.model_id);
+  const crashed=LS.get("natan_crash",{});
+  for(let id of LEVELS[lvl].ids){if(!g.f16)id=id.replace("q4f16","q4f32");if(crashed[id])continue;if(!list.length||list.includes(id))return id}
+  throw new Error("Natan "+LEVELS[lvl].name+" è troppo pesante per questo dispositivo: scegli un livello più leggero o Altissimo dal menu in alto.")
+}
+function level(){return LS.get("natan_impegno","")||"kevin"}
+function downloaded(){return LS.get("natan_scaricato",{})}
+function deviceLevel(){if(typeof NO_DEVICE!=="undefined"&&NO_DEVICE)return "";const l=level();if(l!=="kevin")return l;const d=downloaded();return ["massimo","medio","veloce"].find(x=>d[x])||""}
+async function loadEngine(lvl){
+  if(ENG.e&&ENG.lvl===lvl)return ENG.e;
+  if(ENG.loading&&ENG.lvl===lvl)return ENG.loading;
+  if(!hasWebGPU())throw new Error("Questo browser non può far girare Natan sul dispositivo (manca WebGPU). Aggiorna il browser oppure scegli Altissimo.");
+  ENG.lvl=lvl;
+  ENG.loading=(async()=>{
+    const wl=await webllm();const id=await pickId(lvl,wl);
+    if(ENG.e){try{await ENG.e.unload()}catch(e){}}ENG.e=null;
+    ENG.prog={p:0};updateNotice();
+    LS.set("natan_carico",{id,lvl,ts:Date.now(),gia:!!downloaded()[lvl]});               // se l'app si chiude mentre carico, al prossimo avvio lo so
+    const e=await wl.CreateMLCEngine(id,{initProgressCallback:p=>{ENG.prog={p:p.progress||0};if((p.progress||0)>0.97){const c=LS.get("natan_carico",null);if(c&&!c.fine){c.fine=true;LS.set("natan_carico",c)}}updateNotice();if(VIEW==="aiuta")renderHelpTest()}},{context_window_size:IS_IOS?2048:IS_MOBILE?4096:8192});
+    ENG.e=e;ENG.id=id;ENG.prog=null;try{localStorage.removeItem("natan_carico")}catch(x){}
+    const d=downloaded();d[lvl]=id;LS.set("natan_scaricato",d);updateNotice();renderModel();return e
+  })();
+  try{return await ENG.loading}catch(err){ENG.lvl="";ENG.prog=null;try{localStorage.removeItem("natan_carico")}catch(x){}updateNotice();throw err}finally{ENG.loading=null}
+}
+function withEngine(fn){const p=ENG.queue.then(fn,fn);ENG.queue=p.catch(()=>{});return p}
+function cleanOut(s,final){
+  let t=s.replace(/<think>[\s\S]*?<\/think>/g,"");
+  if(/<think>/.test(t)){if(!final)return "Ci penso un attimo…";t=t.replace(/<think>[\s\S]*/,"")}
+  return t.replace(/\*\*|__/g,"").replace(/^#{1,6}\s*/gm,"").replace(/^\s+/,"")
+}
+async function gen(lvl,messages,{maxTokens=900,think=false,onText}={}){
+  return withEngine(async()=>{
+    const e=await loadEngine(lvl);
+    const q3=/Qwen3/i.test(ENG.id||"");
+    const msgs=messages.map(m=>({role:m.role,content:String(m.content||"")}));
+    if(q3){for(let i=msgs.length-1;i>=0;i--)if(msgs[i].role==="user"){msgs[i].content+=think?" /think":" /no_think";break}}
+    const st=await e.chat.completions.create({messages:msgs,stream:true,temperature:think?0.6:0.7,top_p:think?0.95:0.8,max_tokens:maxTokens+(think?900:0)});
+    let raw="",n=0;const t0=performance.now();
+    for await(const ch of st){const d=(ch.choices&&ch.choices[0]&&ch.choices[0].delta&&ch.choices[0].delta.content)||"";if(!d)continue;raw+=d;n++;if(onText)onText(cleanOut(raw,false))}
+    const secs=Math.max(0.1,(performance.now()-t0)/1000);
+    return {text:cleanOut(raw,true).trim(),toks:n/secs,tokens:n,secs}
+  })
+}
+
+// =====================================================================================================
+// BIBLIOTECA SUL DISPOSITIVO (appunti di Wikipedia per materia, in IndexedDB)
+const DB={_db:null,
+  open(){if(this._db)return Promise.resolve(this._db);return new Promise((ok,bad)=>{const r=indexedDB.open("natan",1);r.onupgradeneeded=()=>r.result.createObjectStore("lib");r.onsuccess=()=>{this._db=r.result;ok(r.result)};r.onerror=()=>bad(r.error)})},
+  async run(mode,fn){const d=await this.open();return new Promise((ok,bad)=>{const tx=d.transaction("lib",mode);const rq=fn(tx.objectStore("lib"));tx.oncomplete=()=>ok(rq&&rq.result);tx.onerror=()=>bad(tx.error)})},
+  get(k){return this.run("readonly",s=>s.get(k))},set(k,v){return this.run("readwrite",s=>s.put(v,k))},del(k){return this.run("readwrite",s=>s.delete(k))}
+};
+const MINE="Miei appunti";
+let MEM=null;
+const IMP={tab:"az",mat:"",title:"",rows:{}};
+function libMeta(){return LS.get("natan_lib",{})}
+function setLibMeta(m){LS.set("natan_lib",m);MEM=null;IMP.rows={}}
+const STOP=new Set("che chi cosa come dove quando perche quale quali quanto quanti sono sei era erano essere avere del della dello dei degli delle dal dalla dai dagli nel nella nei negli nelle sul sulla sui sugli sulle con per tra fra una uno gli le lo la il mi ti ci si vi me te noi voi loro suo sua tuo tua mio mia questo questa questi quello quella fammi dimmi spiegami spiega scrivi fai puoi vorrei voglio sapere anche ancora molto poco piu meno tutto tutti tutte the and for with what how".split(" "));
+function norm(s){return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")}
+async function loadMem(){
+  if(MEM)return MEM;const out=[];
+  for(const m of Object.keys(libMeta())){let rows=[];try{rows=(await DB.get("m:"+m))||[]}catch(e){}for(const r of rows)out.push({m,t:r[2],x:r[3],k:norm(r[2]+" "+r[3]),tk:norm(r[2])})}
+  MEM=out;return MEM
+}
+async function searchLib(query,k=3){
+  const terms=[...new Set(norm(query).match(/[a-z0-9]{3,}/g)||[])].filter(t=>!STOP.has(t)).slice(0,10).map(t=>t.length>6?t.slice(0,6):t);
+  if(!terms.length)return [];
+  const mem=await loadMem();if(!mem.length)return [];
+  const df=terms.map(()=>0),hits=[];
+  for(const n of mem){let any=false;const c=terms.map(t=>{if(n.k.indexOf(t)<0)return 0;any=true;return 1});if(any){hits.push({n,c});c.forEach((v,i)=>df[i]+=v)}}
+  const N=mem.length,idf=df.map(d=>Math.log(1+N/(1+d)));
+  for(const h of hits){let s=0;terms.forEach((t,i)=>{if(h.c[i])s+=idf[i]*(h.n.tk.includes(t)?3:1)});h.s=s}
+  hits.sort((a,b)=>b.s-a.s);
+  return hits.slice(0,k).filter(h=>h.s>0).map(h=>h.n)
+}
+async function wiki(params){
+  const u="https://it.wikipedia.org/w/api.php?"+new URLSearchParams({format:"json",origin:"*",...params});
+  const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),9000);
+  try{const r=await fetch(u,{signal:ctl.signal});if(!r.ok)throw new Error("Wikipedia "+r.status);return await r.json()}finally{clearTimeout(t)}
+}
+async function wikiContext(query){
+  if(!navigator.onLine||!$("tNet").classList.contains("on"))return [];
+  try{
+    const s=await wiki({action:"query",list:"search",srlimit:2,srsearch:query.slice(0,200)});
+    const ids=((s.query&&s.query.search)||[]).map(x=>x.pageid);if(!ids.length)return [];
+    const e=await wiki({action:"query",prop:"extracts",exintro:1,explaintext:1,exchars:1200,pageids:ids.join("|")});
+    return Object.values((e.query&&e.query.pages)||{}).map(p=>({t:p.title,x:p.extract||""})).filter(p=>p.x)
+  }catch(e){return []}
+}
+async function downloadLib(list,onp){
+  const idx=await (await fetch(LIBURL+"indice.json?t="+Date.now(),{cache:"no-store"})).json();
+  const meta=libMeta();let done=0;
+  for(const name of list){
+    const it=idx.materie.find(m=>m.m===name);if(!it)continue;
+    let rows=[];
+    for(const f of it.files){onp&&onp(name,done,list.length);const d=await (await fetch(LIBURL+f+"?v="+it.max)).json();rows=rows.concat(d.n)}
+    await DB.set("m:"+name,rows);meta[name]={n:rows.length,max:it.max,kb:it.kb};done++
+  }
+  setLibMeta(meta);return idx
+}
+async function autoLib(){
+  if(Object.keys(libMeta()).some(m=>m!==MINE))return;
+  try{const idx=await (await fetch(LIBURL+"indice.json",{cache:"no-store"})).json();
+    const want=idx.materie.filter(m=>(prof?.interests||[]).some(i=>norm(i)===norm(m.m))).map(m=>m.m);
+    if(want.length){await downloadLib(want);toast("Biblioteca scaricata: "+want.join(", "))}}catch(e){}
+}
+
+// =====================================================================================================
+// CODA: quello che succede senza il server di Natan gli arriva appena si riaccende
+function queue(ev){const c=LS.get("natan_coda",[]);const i=c.findIndex(x=>x.uid===ev.uid);if(i>=0)c[i]=ev;else c.push(ev);LS.set("natan_coda",c.slice(-800))}
+let flushing=false;
+async function flushQueue(){
+  const c=LS.get("natan_coda",[]);if(!c.length||flushing)return;flushing=true;
+  try{const part=c.slice(0,300);await api("/sync",{events:part});LS.set("natan_coda",LS.get("natan_coda",[]).slice(part.length))}catch(e){}finally{flushing=false}
+}
+async function flushNotes(){
+  const c=LS.get("natan_appunti_coda",[]);if(!c.length)return;
+  try{const part=c.slice(0,200);await api("/appunti",{appunti:part});LS.set("natan_appunti_coda",LS.get("natan_appunti_coda",[]).slice(part.length));STUDY.sent+=part.length;if(VIEW==="impara")renderImpTop()}catch(e){}
+}
+
+// =====================================================================================================
+// RETE DEI VOLONTARI SENZA IL MAC: i telefoni si collegano direttamente ai PC dei volontari (WebRTC, cifrato).
+// Ogni volontario ha un certificato firmato dal server di Natan (dura 4 giorni) e una sua chiave: niente impostori.
+const PEERJS=["https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js","https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"];
+let PEERLIB=null;
+async function peerLib(){
+  if(window.NATAN_FAKE_PEER)return window.NATAN_FAKE_PEER;
+  if(PEERLIB)return PEERLIB;
+  for(const u of PEERJS){try{await new Promise((ok,bad)=>{const s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=bad;document.head.append(s)});if(window.Peer){PEERLIB=window.Peer;return PEERLIB}}catch(e){}}
+  throw new Error("Non riesco a collegarmi alla rete dei volontari.")
+}
+function reteInfo(){return LS.get("natan_rete",null)}
+function peerId(info,slot){return "natan-"+info.id+"-"+slot}
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
+const ECDSA={name:"ECDSA",namedCurve:"P-256"},SHA={name:"ECDSA",hash:"SHA-256"};
+async function volKeys(){
+  let k=null;try{k=await DB.get("chiave_volontario")}catch(e){}
+  if(!k){k=await crypto.subtle.generateKey(ECDSA,false,["sign","verify"]);try{await DB.set("chiave_volontario",k)}catch(e){}}
+  return k
+}
+async function volPub(){const k=await volKeys();const j=await crypto.subtle.exportKey("jwk",k.publicKey);return {x:j.x,y:j.y}}
+async function checkVolunteer(info,slot,m,nonce){
+  // 1) il certificato è firmato dal server di Natan?  2) è per questo posto e non è scaduto?  3) la prova è firmata dal volontario?
+  try{
+    const kev=await crypto.subtle.importKey("jwk",{...info.chiave,ext:true},ECDSA,false,["verify"]);
+    if(!await crypto.subtle.verify(SHA,kev,unb64u(m.firma),new TextEncoder().encode(m.cert)))return false;
+    const c=JSON.parse(m.cert);if(c.s!==slot||c.scad*1000<Date.now()||(info.revocati||[]).includes(slot))return false;
+    const vk=await crypto.subtle.importKey("jwk",{kty:"EC",crv:"P-256",x:c.k.x,y:c.k.y,ext:true},ECDSA,false,["verify"]);
+    return await crypto.subtle.verify(SHA,vk,unb64u(m.prova),new TextEncoder().encode(nonce))
+  }catch(e){return false}
+}
+// --- lato telefono: trovo un volontario e gli faccio la domanda
+const CLI={peer:null,conn:null,slot:0,wait:{}};
+async function clientPeer(){
+  if(CLI.peer&&!CLI.peer.destroyed&&CLI.peer.open)return CLI.peer;
+  const P=await peerLib();const p=new P();CLI.peer=p;
+  await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(new Error("rete")),9000);p.on("open",()=>{clearTimeout(t);ok()});p.on("error",e=>{if(!p.open){clearTimeout(t);bad(e)}})});
+  return p
+}
+async function findVolunteer(){
+  if(CLI.conn&&CLI.conn.open)return CLI.conn;
+  await findBase(true);const info=reteInfo();if(!info||!info.posti||!info.chiave)throw new Error("nessun volontario");
+  const p=await clientPeer();
+  const slots=[...Array(info.posti).keys()].map(i=>i+1).filter(s=>!(info.revocati||[]).includes(s)).sort(()=>Math.random()-.5);
+  return await new Promise((ok,bad)=>{
+    let left=slots.length,done=false;if(!left)return bad(new Error("nessun volontario"));
+    const fail=()=>{if(--left<=0&&!done)bad(new Error("nessun volontario"))};
+    for(const slot of slots){
+      let c;try{c=p.connect(peerId(info,slot),{reliable:true})}catch(e){fail();continue}
+      const nonce=b64u(crypto.getRandomValues(new Uint8Array(18)));let answered=false;
+      const t=setTimeout(()=>{if(!answered){answered=true;try{c.close()}catch(e){}fail()}},7000);
+      c.on("open",()=>c.send({t:"ciao",nonce}));
+      c.on("data",async m=>{
+        if(m&&m.t==="cert"&&!answered){answered=true;clearTimeout(t);
+          if(!done&&await checkVolunteer(info,slot,m,nonce)){done=true;CLI.conn=c;CLI.slot=slot;c.on("data",clientData);c.on("close",()=>{if(CLI.conn===c)CLI.conn=null});ok(c)}
+          else{try{c.close()}catch(e){}fail()}}
+      });
+      c.on("error",()=>{if(!answered){answered=true;clearTimeout(t);fail()}});
+    }
+  })
+}
+function clientData(m){const w=m&&CLI.wait[m.id];if(!w)return;if(m.t==="pezzo")w.onText(m.testo);if(m.t==="file"&&w.files&&m.f&&w.files.length<6){w.files.push(m.f);w.onText("📥 Ricevo i file…")}if(m.t==="fine"){delete CLI.wait[m.id];w.ok(m.testo)}if(m.t==="no"){delete CLI.wait[m.id];w.bad(new Error(m.motivo||"occupato"))}}
+async function askNet(messages,think,onText,crea){
+  const c=await findVolunteer();const id=rid("d");
+  return await new Promise((ok,bad)=>{
+    let last=Date.now();const files=[];
+    const w={files,onText:t=>{last=Date.now();onText(t)},ok:t=>{clearInterval(iv);ok(crea?{testo:t,files}:t)},bad:e=>{clearInterval(iv);bad(e)}};CLI.wait[id]=w;
+    const iv=setInterval(()=>{if(Date.now()-last>90000||!c.open){delete CLI.wait[id];clearInterval(iv);CLI.conn=null;bad(new Error("il volontario non risponde"))}},2000);
+    c.send({t:"domanda",id,messages,think:!!think,max:900,crea:crea||undefined})
+  })
+}
+// --- lato volontario: quando il Mac è spento rispondo io ai telefoni che si collegano
+const NET={peer:null,conns:new Map(),active:0,queue:[],served:0,slot:0};
+function netLog(t){HELP.log.unshift({t:Date.now(),x:t});HELP.log=HELP.log.slice(0,30);LS.set("natan_vol_log",HELP.log.slice(0,30));if(VIEW==="aiuta")renderHelpStatus()}
+async function netHost(){
+  const cert=LS.get("natan_cert",null);const info=reteInfo();
+  if(!HELP.on||!cert||!info||NET.peer)return;
+  try{if(JSON.parse(cert.cert).scad*1000<Date.now())return}catch(e){return}
+  let P;try{P=await peerLib()}catch(e){netLog("Rete senza server non disponibile: "+e.message);return}
+  const p=new P(peerId(info,cert.posto));NET.peer=p;NET.slot=cert.posto;
+  p.on("open",()=>{netLog("Sei nella rete senza server (posto "+cert.posto+"): se il server di Natan si spegne, i telefoni arrivano a te");renderHelpStatus()});
+  p.on("error",e=>{if(e&&e.type==="unavailable-id")netLog("Il tuo posto nella rete è già aperto in un'altra finestra");});
+  p.on("disconnected",()=>{try{if(HELP.on)p.reconnect()}catch(e){}});
+  p.on("connection",c=>{
+    c.on("data",m=>hostData(c,m,cert));
+    c.on("open",()=>{NET.conns.set(c.peer,Date.now());netLog("Un dispositivo si è collegato a te");renderHelpStatus()});
+    c.on("close",()=>{NET.conns.delete(c.peer);renderHelpStatus()});
+  });
+}
+function netStop(){try{NET.peer&&NET.peer.destroy()}catch(e){}NET.peer=null;NET.conns.clear();NET.queue=[]}
+async function hostData(c,m,cert){
+  if(!m||!HELP.on)return;
+  if(m.t==="ciao"){const k=await volKeys();const prova=b64u(await crypto.subtle.sign(SHA,k.privateKey,new TextEncoder().encode(String(m.nonce||""))));c.send({t:"cert",cert:cert.cert,firma:cert.firma,prova});return}
+  if(m.t==="domanda"){if(HELP.mac!=="spento"){HELP.mac="spento"}NET.queue.push({c,m});NET.conns.set(c.peer,Date.now());renderHelpStatus();if(NET.queue.length===1)hostWork()}
+}
+async function hostWork(){
+  while(NET.queue.length&&HELP.on){
+    const {c,m}=NET.queue[0];NET.active=1;HELP.job=true;renderHelpStatus();renderHelpBadge();const t0=Date.now();let last=0;
+    if(m.crea&&m.crea.kind){                             // un telefono chiede un documento o una presentazione
+      try{const res=await browserCreate(String(m.crea.kind),String(m.crea.arg||"").slice(0,200),HELP.test.livello,t=>{try{c.send({t:"pezzo",id:m.id,testo:t})}catch(e){}});
+        for(const f of res.files)c.send({t:"file",id:m.id,f});c.send({t:"fine",id:m.id,testo:res.testo});
+        NET.served++;HELP.aiutati++;netLog("Hai creato un file per un dispositivo ("+Math.round((Date.now()-t0)/1000)+" s)")}
+      catch(e){try{c.send({t:"no",id:m.id,motivo:e.crea?e.message:"errore"})}catch(er){}}
+      NET.queue.shift();NET.active=0;HELP.job=false;renderHelpStatus();renderHelpBadge();await sleep((Date.now()-t0)/3);continue}
+    try{
+      const r=await gen(HELP.test.livello,await conBiblioteca(trimMsgs(m.messages||[])),{maxTokens:Math.min(m.max||900,1200),think:!!m.think,
+        onText:t=>{if(Date.now()-last>700){last=Date.now();try{c.send({t:"pezzo",id:m.id,testo:t})}catch(e){}}}});
+      try{c.send({t:"fine",id:m.id,testo:r.text})}catch(e){}
+      NET.served++;HELP.aiutati++;netLog("Hai risposto a un dispositivo senza il server ("+Math.round((Date.now()-t0)/1000)+" s)")
+    }catch(e){try{c.send({t:"no",id:m.id,motivo:"errore"})}catch(er){}}
+    NET.queue.shift();NET.active=0;HELP.job=false;renderHelpStatus();renderHelpBadge();
+    await sleep((Date.now()-t0)/3)                       // lavoro al massimo 3/4 del tempo
+  }
+}
+
+
+// =====================================================================================================
+// APP PER COMPUTER (Windows, Mac, Linux): l'aiutante resta acceso anche a finestra chiusa e la biblioteca resta aggiornata
+const DESK=window.natanDesktop||null;
+const DESKST={auto:true,pausa:false,lib:0};
+function deskStato(){if(!DESK)return;try{DESK.stato({on:HELP.on,aiutati:HELP.aiutati||0,job:!!HELP.job,test:!!(HELP.test&&HELP.test.ok),pausa:DESKST.pausa,biblioteca:DESKST.lib})}catch(e){}}
+async function deskAiuto(){
+  if(!DESK||!DESKST.auto||DESKST.pausa||HELP.on||HELP.testing||!TOKEN||!HELP.test||!HELP.test.ok)return;
+  try{await helpOn()}catch(e){}
+}
+const SCUOLA_M=new Set(["Matematica","Fisica","Chimica","Biologia","Fisiologia","Informatica","Coding","Storia","Latino","Italiano","Inglese","Filosofia","Economia","Arte","Musica","Geografia"]);
+async function deskLib(){            // una volta al giorno: la biblioteca di Kevin, prima le materie di scuola, al massimo ~150 MB
+  if(!DESK||!navigator.onLine)return;
+  try{
+    const idx=await (await fetch(LIBURL+"indice.json?t="+Date.now(),{cache:"no-store"})).json();
+    const ord=idx.materie.slice().sort((a,b)=>(SCUOLA_M.has(b.m)-SCUOLA_M.has(a.m))||((b.n||0)-(a.n||0)));
+    let kb=0;const want=[];for(const m of ord){if(kb+(m.kb||0)>150000)continue;kb+=(m.kb||0);want.push(m)}
+    const meta=libMeta();
+    for(const m of want){if(meta[m.m]&&meta[m.m].max===m.max)continue;await downloadLib([m.m]);await sleep(1500)}
+    DESKST.lib=Object.values(libMeta()).reduce((a,x)=>a+(x.n||0),0);LS.set("natan_desk_lib",Date.now());deskStato()
+  }catch(e){}
+}
+async function conBiblioteca(msgs){  // il PC che aiuta aggiunge i suoi appunti (la biblioteca di Kevin) alla domanda del telefono
+  try{
+    const sys=msgs.find(m=>m.role==="system");const u=[...msgs].reverse().find(m=>m.role==="user");
+    if(!sys||!u||/Appunti della biblioteca di Natan/.test(sys.content))return msgs;
+    const notes=await searchLib(String(u.content).slice(0,300),3);if(!notes.length)return msgs;
+    sys.content+="\n\nAppunti della biblioteca di Natan (sono affidabili, usali):\n"+notes.map(n=>"["+n.m+"] "+n.t+": "+n.x.slice(0,600)).join("\n---\n");
+  }catch(e){}
+  return msgs
+}
+if(DESK){
+  DESK.onComando(c=>{
+    if(c==="aiuto-off"){DESKST.auto=false;LS.set("natan_help_off",true);if(HELP.on)helpOff()}
+    else if(c==="aiuto-on"){DESKST.auto=true;LS.set("natan_help_off",false);deskAiuto()}
+    else if(c==="aiuto-auto"){DESKST.auto=true;setTimeout(deskAiuto,4000)}
+    else if(c==="pausa"){DESKST.pausa=true;if(HELP.on){HELP.on=false;netStop();api("/rete/volontario",{attivo:false}).catch(()=>{});netLog("Il computer va a batteria: «Aiuta Natan» in pausa")}deskStato()}
+    else if(c==="riprendi"){DESKST.pausa=false;deskAiuto()}
+  });
+  setInterval(deskStato,5000);setInterval(deskAiuto,10*60000);
+  setTimeout(deskLib,60000);setInterval(deskLib,6*3600000);
+}
+
+// =====================================================================================================
+// AVVIO E PRIMO AVVIO
+function checkCrash(){
+  const c=LS.get("natan_carico",null);if(!c)return;try{localStorage.removeItem("natan_carico")}catch(e){}
+  if(Date.now()-c.ts>20*60000||!(c.fine||c.gia))return;  // chiusa durante il primo scaricamento: riprendo, non è un problema di memoria
+  const cr=LS.get("natan_crash",{});cr[c.id]=Date.now();LS.set("natan_crash",cr);
+  const d=downloaded();delete d[c.lvl];LS.set("natan_scaricato",d);
+  const recent=Object.values(cr).filter(t=>Date.now()-t<3600000).length;
+  if(recent>=2||!LEVELS[c.lvl]||LEVELS[c.lvl].ids.every(id=>cr[id]||cr[id.replace("q4f16","q4f32")])){
+    LS.set("natan_impegno","kevin");                    // basta tentativi: uso il server di Natan
+    setTimeout(()=>toast("Natan sul dispositivo è troppo pesante per questo telefono: uso Altissimo (server di Natan)."),2400)
+  }else setTimeout(()=>toast("L'ultima volta Natan "+(LEVELS[c.lvl]?.name||"")+" era troppo pesante e l'app si è chiusa: ora uso una versione più leggera."),2400)
+}
+function start(){
+  checkCrash();
+  if(NO_DEVICE&&LS.get("natan_impegno","")&&LS.get("natan_impegno","")!=="kevin"){
+    LS.set("natan_impegno","kevin");setTimeout(()=>toast("Su iPhone Natan risponde con Altissimo (server di Natan o PC dei volontari)."),2400)}
+  const sp=$("splash");setTimeout(()=>{sp.classList.add("out");setTimeout(()=>sp.classList.add("hide"),500)},1900);
+  if(!LS.get("natan_consenso",false))onbWelcome();
+  else if(!prof||!TOKEN)onbProfile();
+  else if(!LS.get("natan_impegno",""))onbModel();
+  else{enterApp();if(WANT_HELP)openPage("aiuta");else if(WANT_GAMES)openPage("giochi")}
+  ping();setInterval(ping,20000);addEventListener("online",ping);
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("../sw.js").catch(()=>{});
+}
+function onbShow(step){$("app").classList.add("hide");$("onb").classList.remove("hide");const c=$("onbCard");c.innerHTML="";
+  if(step){const s=el("div","steps");for(let i=1;i<=3;i++)s.append(el("i",i<=step?"on":""));c.append(s)}return c}
+function onbWelcome(){
+  const c=onbShow(1);c.append(el("span","mark","N"));
+  c.append(el("h1","","Ciao, io sono Natan"),el("p","lead","Sono un tutor AI. Spiego le materie, risolvo gli esercizi passo per passo e leggo le foto dei compiti."));
+  const b=el("div","consent");b.append(el("strong","","Prima di iniziare"),el("span","","Le tue chat, i voti che dai alle risposte e il tuo profilo vengono inviati a chi gestisce Natan, che può leggerli per migliorarlo. Anche le chat fatte senza Internet arrivano appena il server di Natan è acceso."),el("span","","Sui computer «Aiuta Natan» è attivo di serie: quando non lo usi, il tuo computer può rispondere alle domande dei compagni (loro non sanno chi sei e tu non vedi chi sono). Usa al massimo 3/4 della memoria e puoi metterlo in pausa quando vuoi dalle Impostazioni. Sui computer Natan scarica anche tutta la biblioteca degli appunti."),el("span","small","Se hai meno di 14 anni, chiedi prima il permesso a un genitore."));
+  const lab=el("label","check");const cb=el("input");cb.type="checkbox";cb.id="ok1";lab.append(cb,document.createTextNode("Ho capito e accetto"));b.append(lab);c.append(b);
+  const go=el("button","btn","Continua");go.id="go1";go.disabled=true;cb.onchange=()=>go.disabled=!cb.checked;
+  go.onclick=()=>{LS.set("natan_consenso",{ts:Date.now(),v:2});onbProfile()};c.append(go)
+}
+// --- Materie: sono centinaia, quindi si cercano (anche con parole normali: «formiche» trova Mirmecologia) o si sfogliano per area
+function subjFind(q){
+  const t=norm(q.trim());if(!t)return [];const out=[];
+  for(const [k,v] of Object.entries(ALIAS))if(norm(k).startsWith(t)||t.startsWith(norm(k))&&t.length>=k.length)out.push(v);
+  for(const [a,l] of Object.entries(AREE))if(norm(a).includes(t))out.push(...l);
+  SUBJ.forEach(s=>{if(norm(s).includes(t))out.push(s)});
+  return [...new Set(out)]
+}
+function areaOf(m){for(const [a,l] of Object.entries(AREE))if(l.includes(m))return a;return "Altro"}
+function subjPicker(sel){
+  const w=el("div","subjpick");
+  const r=el("div","row");const q=el("input","field");q.id="subjq";q.placeholder="Cerca tra "+SUBJ.length+" materie…";q.style.flex="1 1 220px";
+  const ar=el("select","field");ar.id="subjarea";ar.style.flex="0 1 230px";ar.setAttribute("aria-label","Area");
+  Object.keys(AREE).forEach(a=>{const o=el("option","",a+" ("+AREE[a].length+")");o.value=a;ar.append(o)});r.append(q,ar);
+  const g=el("div","chips");g.id="subj";const info=el("span","small");info.id="subjinfo";
+  const chip=s=>{const ch=el("button","chip"+(sel.has(s)?" on":""),s);ch.type="button";ch.onclick=()=>{sel.has(s)?sel.delete(s):sel.add(s);ch.classList.toggle("on");tell()};return ch};
+  const tell=()=>{info.textContent=sel.size?"Hai scelto: "+[...sel].join(", "):"Tocca le materie che ti interessano. Sono "+SUBJ.length+": cercale qui sopra (anche con parole normali, come «formiche» o «cuore») o cambia area."};
+  const draw=()=>{g.innerHTML="";const t=q.value.trim();
+    let list=t?subjFind(t):AREE[ar.value]||[];ar.disabled=!!t;
+    if(t&&!list.length)g.append(el("span","small","Non trovo «"+t+"». Prova con un'altra parola."));
+    list.slice(0,80).forEach(s=>g.append(chip(s)));
+    if(list.length>80)g.append(el("span","small","…e altre "+(list.length-80)+": scrivi qualcosa di più preciso."))};
+  q.oninput=draw;ar.onchange=draw;draw();tell();
+  w.append(r,g,info);w.chosen=sel;return w
+}
+function subjSelect(extra){
+  const sel=el("select","field");(extra||[]).forEach(x=>{const o=el("option","",x);o.value=x;sel.append(o)});
+  for(const [a,l] of Object.entries(AREE)){const gr=document.createElement("optgroup");gr.label=a;l.forEach(x=>{const o=el("option","",x);o.value=x;gr.append(o)});sel.append(gr)}
+  return sel
+}
+function profileForm(c,edit,after){
+  const code=el("input","field");code.placeholder="Codice della scuola (te lo dà chi ti ha invitato)";code.autocapitalize="characters";code.autocomplete="off";code.id="code";
+  const name=el("input","field");name.placeholder="Il tuo nome";name.autocomplete="given-name";name.id="pname";name.value=prof?.name||"";
+  const age=el("input","field");age.placeholder="Età";age.inputMode="numeric";age.id="page";age.value=prof?.age||"";
+  const goal=el("textarea","field");goal.rows=2;goal.placeholder="Per cosa userai Natan? (facoltativo)";goal.value=prof?.goal||"";
+  const sel=new Set(prof?.interests||[]);const g=subjPicker(sel);
+  if(!TOKEN)c.append(code);c.append(name,age,el("strong","","Cosa ti interessa?"),g,goal);
+  const err=el("div","err");err.id="perr";const go=el("button","btn",edit?"Salva":"Continua");go.id="go2";c.append(err,go);
+  go.onclick=async()=>{
+    err.textContent="";const n=name.value.trim(),a=parseInt(age.value,10);
+    if(n.length<2){err.textContent="Scrivi il tuo nome";return}
+    if(!(a>=6)){err.textContent="Scrivi l'età in numeri";return}
+    if(!sel.size){err.textContent="Scegli almeno una materia";return}
+    const p={name:n,age:Math.min(a,101),interests:[...sel],goal:goal.value.trim(),app_version:"app "+VERSION+(PC?" pc":" tel")};
+    go.disabled=true;
+    try{
+      if(!TOKEN){const cd=code.value.trim();if(!cd){err.textContent="Scrivi il codice della scuola";return}
+        const d=await api("/register",{codice:cd,consenso:true,...p});TOKEN=d.token;LS.set("natan_codice",TOKEN)}
+      const d=await api("/sync",{profile:p,events:[]});
+      if(d.name_banned){err.textContent="Questo nome non è permesso: scegline un altro";return}
+      prof=p;LS.set("natan_profilo",p);toast("Profilo salvato");after()
+    }catch(e){
+      err.textContent=e.code===403&&e.data?.error==="nome_bannato"?"Questo nome non è permesso: scegline un altro":
+        e.code===0?"Il server di Natan è spento: per iscriverti deve essere acceso. Riprova più tardi.":e.code===401?"Il tuo invito non vale più: chiedi un nuovo invito.":e.message
+    }finally{go.disabled=false}
+  }
+}
+function onbProfile(){const c=onbShow(2);c.append(el("h1","","Chi sei?"),el("p","lead","Così Natan ti spiega le cose al livello giusto."));profileForm(c,false,()=>LS.get("natan_impegno","")?enterApp():onbModel())}
+async function onbModel(){
+  const c=onbShow(3);c.append(el("h1","","Scegli il modello"),el("p","lead","Basico, Medio e Alto si scaricano sul tuo dispositivo e funzionano anche senza Internet. Altissimo è il Natan più forte, sul server di Natan. Lo cambi quando vuoi dal menu in alto."));
+  const adv=await deviceAdvice();let pick=defaultLevel(adv);
+  const box=el("div","list");box.id="opts";c.append(box);
+  const draw=()=>{box.innerHTML="";for(const it of modelItems(adv)){const b=modelRow(it,pick);b.onclick=()=>{if(it.lock){toast(it.why);return}pick=it.k;draw()};box.append(b)}};draw();
+  c.append(el("p","small",adv.summary));
+  const go=el("button","btn","Inizia");go.id="go3";c.append(go);
+  go.onclick=()=>{LS.set("natan_impegno",pick);enterApp();if(pick!=="kevin")prepareDevice(pick)}
+}
+function enterApp(){if(libGateServe()){libGate(realEnter);return}realEnter()}
+let SUGG_VISTA=0;setInterval(()=>{const sl=SUGG_SLOT();if(sl!==SUGG_VISTA){if(SUGG_VISTA&&typeof hist!=="undefined"&&!hist.length&&VIEW==="chat")render();SUGG_VISTA=sl}},30000);
+function realEnter(){$("onb").classList.add("hide");$("app").classList.remove("hide");renderSide();renderModel();if(!chat)newChat();else openChat(chat);libTimers();setTimeout(autoAiuta,5000)}
+// =====================================================================================================
+// BIBLIOTECA SEMPRE AGGIORNATA + «AIUTA NATAN» DI SERIE (sui computer)
+// Sui computer, prima di entrare, si scarica tutta la biblioteca. Poi, finché Natan è aperto: ogni 30 minuti la rimette in pari
+// e ogni 3 minuti guarda se gli appunti sono aumentati (se sì, scarica subito le materie cambiate). Sui telefoni si aggiornano le materie già scelte.
+const LIBCAP=8000000;                                   // kb: tetto per la biblioteca intera su un computer (~8 GB: a un computer arriva tutto)
+const LIBAUTO={busy:false,tot:LS.get("natan_lib_tot",0),t30:0,t3:0};
+function libGateServe(){return !IS_MOBILE&&!LS.get("natan_lib_ok",false)}
+function mobWifi(){const c=navigator.connection;return !!c&&["wifi","ethernet"].includes(c.type)&&!c.saveData}
+async function mobCap(){try{const e=await navigator.storage.estimate();const free=(e.quota||0)-(e.usage||0);return Math.max(0,Math.min(1500000,Math.floor(((e.usage||0)+free*0.4)/1024)))}catch(x){return 500000}}   // kb: al massimo 1,5 GB e mai più del 40% dello spazio libero
+async function libSync(onp){
+  if(LIBAUTO.busy||!navigator.onLine)return null;LIBAUTO.busy=true;
+  try{
+    const idx=await (await fetch(LIBURL+"indice.json?t="+Date.now(),{cache:"no-store"})).json();
+    const meta=libMeta();const ord=idx.materie.slice().sort((a,b)=>(SCUOLA_M.has(b.m)-SCUOLA_M.has(a.m))||((b.n||0)-(a.n||0)));
+    let kb=0;const want=[];
+    const mobAuto=IS_MOBILE&&mobWifi()&&LS.get("natan_lib_mob",true)!==false;       // telefono: scarico tutto da solo, ma solo con il Wi-Fi
+    const mcap=mobAuto?await mobCap():0;
+    for(const m of ord){const have=meta[m.m]&&meta[m.m].max===m.max;
+      if(IS_MOBILE){
+        if(have){kb+=m.kb||0;continue}
+        if(meta[m.m]){want.push(m);continue}                                         // già scaricata ma cambiata: la aggiorno
+        if(mobAuto&&kb+(m.kb||0)<=mcap){kb+=m.kb||0;want.push(m)}
+        continue}
+      if(have){kb+=m.kb||0;continue}if(kb+(m.kb||0)>LIBCAP)continue;kb+=m.kb||0;want.push(m)}
+    let i=0;for(const m of want){onp&&onp(m.m,i,want.length);await downloadLib([m.m]);i++;await sleep(200)}
+    onp&&onp("",want.length,want.length);
+    LS.set("natan_lib_ts",Date.now());LS.set("natan_lib_tot",idx.totale||0);LIBAUTO.tot=idx.totale||0;
+    DESKST.lib=Object.values(libMeta()).reduce((a,x)=>a+(x.n||0),0);try{deskStato()}catch(e){}
+    return {scaricate:want.length,tot:idx.totale||0}
+  }catch(e){return null}finally{LIBAUTO.busy=false}
+}
+function libGate(done){
+  const c=onbShow(0);c.append(el("span","mark","N"),el("h1","","Preparo la biblioteca"),
+    el("p","lead","Prima di entrare Natan scarica tutti gli appunti sul tuo computer: così risponde bene anche senza Internet. Dopo, resta aggiornata da sola."));
+  const bar=el("div","bar");const i=el("i");i.style.width="2%";bar.append(i);const st=el("span","small","Mi collego…");const sub=el("span","small","");c.append(bar,st,sub);
+  const go=async()=>{
+    const r=await libSync((m,k,n)=>{i.style.width=Math.max(2,Math.round(k*100/Math.max(1,n)))+"%";st.textContent=m?"Scarico «"+m+"» ("+(k+1)+" di "+n+")":"Fatto!"});
+    if(r){LS.set("natan_lib_ok",true);i.style.width="100%";st.textContent="Biblioteca pronta: "+num(r.tot)+" appunti.";setTimeout(done,600);return}
+    st.textContent=navigator.onLine?"Non riesco a scaricare la biblioteca adesso (il server di Natan potrebbe essere spento).":"Sei offline: la biblioteca si scarica appena torna la connessione.";
+    const row=el("div","row");const b1=el("button","btn","Riprova");b1.onclick=()=>{row.remove();st.textContent="Mi collego…";go()};
+    const b2=el("button","btn ghost","Entra intanto (la scarico dopo)");b2.onclick=()=>{done()};row.append(b1,b2);c.append(row)};
+  go()}
+function libTimers(){
+  if(LIBAUTO.on)return;LIBAUTO.on=true;
+  const ogni30=async()=>{const r=await libSync();if(r&&r.scaricate)toast("Biblioteca aggiornata: "+r.scaricate+(r.scaricate===1?" materia nuova o cambiata":" materie nuove o cambiate"))};
+  setInterval(()=>{if(document.visibilityState!=="hidden"||DESK)ogni30()},30*60000);
+  setInterval(async()=>{                                   // ogni 3 minuti: gli appunti sono aumentati? scarico subito
+    if(LIBAUTO.busy||!navigator.onLine)return;
+    try{const idx=await (await fetch(LIBURL+"indice.json?t="+Date.now(),{cache:"no-store"})).json();
+      if((idx.totale||0)>LIBAUTO.tot){const r=await libSync();if(r&&r.scaricate)toast("Nuovi appunti scaricati automaticamente ("+r.scaricate+" materie)")}}catch(e){}},3*60000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-LS.get("natan_lib_ts",0)>30*60000)ogni30()});
+  if(Date.now()-LS.get("natan_lib_ts",0)>30*60000)ogni30()
+}
+// «Aiuta Natan» è di serie sui computer: parte da solo (test del PC una volta sola) e non chiede niente. In Impostazioni c'è un piccolo interruttore per metterlo in pausa.
+async function autoAiuta(){
+  if(IS_MOBILE||DESKST.pausa||HELP.on||HELP.testing||LS.get("natan_help_off",false)||!TOKEN)return;
+  try{
+    if(!HELP.test||!HELP.test.ok){if(HELP.test&&HELP.test.ts&&Date.now()-HELP.test.ts<7*864e5)return;const hw=HELP.hw||(HELP.hw=await hwInfo());if(!hw.lvl)return;await pcTest()}
+    if(HELP.test&&HELP.test.ok&&!HELP.on)await helpOn()
+  }catch(e){}
+}
+
+// =====================================================================================================
+// MODELLI: menu in alto (come nelle app di chat)
+function memGB(){const m=LS.get("natan_ram",0);return m||navigator.deviceMemory||(IS_IOS?0:IS_MOBILE?4:8)}
+function kevinAllowed(){return !PC||PRO||!hasWebGPU()}
+async function deviceAdvice(){
+  const g=await gpuInfo();const mem=memGB();const out={};
+  for(const k of ORDER){const L=LEVELS[k];
+    if(!g.ok)out[k]={tag:"no",t:"non va qui"};
+    else if(!mem)out[k]=k==="veloce"?{tag:"",t:"consigliato"}:k==="medio"?{tag:"warn",t:"iPhone 15 Pro o più recenti"}:{tag:"no",t:"troppo pesante"};
+    else if(L.ram<=mem*0.75)out[k]={tag:"",t:"va bene"};
+    else if(L.ram<=mem)out[k]={tag:"warn",t:"al limite"};
+    else out[k]={tag:"no",t:"troppo pesante"}}
+  const summary=!g.ok?"Questo browser non ha WebGPU: Natan non può girare sul dispositivo. Su iPhone serve iOS 26, su Android e PC Chrome o Edge aggiornati.":
+    mem?"Memoria: circa "+mem+" GB"+(navigator.deviceMemory&&!LS.get("natan_ram",0)&&navigator.deviceMemory>=8?" o più":"")+". Il test del PC in «Aiuta Natan» controlla meglio processore e scheda video.":"Su iPhone parti da Basico: se va bene prova Medio.";
+  return {g,mem,out,summary}
+}
+function defaultLevel(adv){if(!PC)return "kevin";if(!adv.g.ok)return "kevin";let best="";for(const k of ORDER)if(adv.out[k].tag==="")best=k;return best||"veloce"}
+// Su iPhone Safari chiude la pagina quando Natan prova a caricarsi dentro il telefono (troppa memoria):
+// per ora lì i livelli sul dispositivo sono spenti e risponde Altissimo (server di Natan o volontari).
+const NO_DEVICE=IS_IOS&&!window.NATAN_FAKE_IOS_OK;
+function modelItems(adv){
+  const got=downloaded();
+  const items=ORDER.map(k=>({k,name:LEVELS[k].name,desc:LEVELS[k].params+" di parametri · sul tuo dispositivo · "+(got[k]?"già scaricato":"~"+String(LEVELS[k].gb).replace(".",",")+" GB"),tag:adv?adv.out[k]:null,
+    lock:NO_DEVICE,why:"Su iPhone, per ora, Safari non ha abbastanza memoria per Natan dentro il telefono: usa Altissimo"}));
+  if(NO_DEVICE)items.forEach(it=>{it.tag={tag:"no",t:"non su iPhone, per ora"};it.desc=LEVELS[it.k].params+" di parametri · sul dispositivo"});
+  const lock=!kevinAllowed();
+  items.push({k:"kevin",name:PRO?"Altissimo · Pro":"Altissimo",desc:"14 miliardi di parametri · sul server di Natan e sui PC dei volontari · legge anche le foto"+(PRO?" · ragiona più a lungo":""),lock,why:"Altissimo sul PC è il premio per i volontari: vai in «Aiuta Natan»",tag:lock?{tag:"no",t:"premio volontari"}:null});
+  return items
+}
+function modelRow(it,cur){
+  const b=el("button","mi"+(it.k===cur?" on":"")+(it.lock?" lock":""));b.dataset.k=it.k;b.setAttribute("role","menuitem");
+  const t=el("span","");const s=el("strong","",it.name);if(it.tag){const tg=el("span","tag"+(it.tag.tag?" "+it.tag.tag:""),it.tag.t);s.append(tg)}
+  t.append(s,el("small","",it.desc));b.append(t);if(it.lock)b.append(svg(IC.lock,16));const tick=el("span","tick","✓");b.append(tick);return b
+}
+async function renderModel(){
+  const l=level();$("modelName").textContent=l==="kevin"?(PRO?"Altissimo · Pro":"Altissimo"):LEVELS[l]?.name||"";
+  const m=$("modelMenu");if(m.classList.contains("hide"))return;
+  const adv=await deviceAdvice();m.innerHTML="";
+  for(const it of modelItems(adv)){const b=modelRow(it,level());b.onclick=()=>pickModel(it);m.append(b)}
+  m.append(el("div","foot",adv.summary))
+}
+function pickModel(it){
+  closeMenu();if(it.lock){toast(it.why);return}
+  if(busy)return;LS.set("natan_impegno",it.k);renderModel();updateStatus();
+  if(it.k!=="kevin")prepareDevice(it.k);else toast(PRO?"Natan Pro: risponde il modello più forte del server di Natan":"Risponde il server di Natan")
+}
+function prepareDevice(k){toast("Preparo Natan "+LEVELS[k].name+" sul dispositivo: la prima volta ci vuole un po', meglio con il Wi-Fi");
+  loadEngine(k).then(()=>toast("Natan "+LEVELS[k].name+" è pronto ✓")).catch(e=>toast(e.message));autoLib()}
+function closeMenu(){$("modelMenu").classList.add("hide");$("modelBtn").setAttribute("aria-expanded","false")}
+$("modelBtn").onclick=e=>{e.stopPropagation();const m=$("modelMenu");const open=m.classList.contains("hide");m.classList.toggle("hide",!open);$("modelBtn").setAttribute("aria-expanded",String(open));if(open)renderModel()};
+document.addEventListener("click",e=>{if(!$("modelMenu").contains(e.target))closeMenu()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();$("app").classList.remove("open")}});
+
+function updateStatus(){
+  const s=$("status"),i=s.querySelector("i"),t=s.querySelector("span");
+  let cls="",txt="";
+  if(busy){cls="busy";txt="Sta pensando"}
+  else if(STUDY.on){cls="dev";txt="Sta studiando"}
+  else if(level()!=="kevin"){cls="dev";txt="Sul dispositivo"}
+  else if(online){cls="on";txt="server di Natan acceso"}
+  else if(reteInfo()?.posti){cls="net";txt="Server spento · rete dei volontari"}
+  else if(deviceLevel()){cls="dev";txt="Server spento · sul dispositivo"}
+  else txt="server di Natan spento";
+  i.className=cls;t.textContent=txt;s.title=txt
+}
+function updateNotice(){
+  const b=$("notice");b.innerHTML="";let show=false;
+  if(ENG.prog){show=true;const pc=Math.round((ENG.prog.p||0)*100);b.append(el("span","",downloaded()[ENG.lvl]?"Carico Natan "+(LEVELS[ENG.lvl]?.name||"")+" in memoria: "+pc+"% (è già scaricato, ci vuole qualche secondo).":"Scarico Natan "+(LEVELS[ENG.lvl]?.name||"")+" sul dispositivo: "+pc+"%. Solo la prima volta."));const bar=el("div","bar");const i=el("i");i.style.width=pc+"%";bar.append(i);b.append(bar)}
+  else if(!online&&level()==="kevin"&&TOKEN){show=true;b.append(el("span","",reteInfo()?.posti?"Il server di Natan è spento: provo con i PC dei volontari"+(deviceLevel()?", altrimenti rispondo dal tuo dispositivo":"")+". Le chat gli arrivano dopo.":deviceLevel()?"Il server di Natan è spento: rispondo dal tuo dispositivo. Le chat gli arrivano quando si riaccende.":"Il server di Natan è spento. Scegli Basico, Medio o Alto dal menu in alto per usare Natan anche così."))}
+  b.classList.toggle("hide",!show);updateStatus()
+}
+
+// =====================================================================================================
+// BARRA LATERALE E CHAT
+function sortChats(){chats.sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||(b.ts-a.ts))}
+function renderSide(){
+  const l=$("chatList");l.innerHTML="";sortChats();
+  chats.forEach(c=>{const row=el("div","crow"+(VIEW==="chat"&&c.id===chat?" on":""));
+    const b=el("button","sbtn");if(c.pin)b.append(el("span","pin","📌"));b.append(el("span","",c.title||"Chat"));b.title=c.title||"Chat";b.onclick=()=>{if(busy)return;openChat(c.id);closeSide()};
+    const m=el("button","more","⋯");m.setAttribute("aria-label","Opzioni della chat");m.onclick=e=>{e.stopPropagation();chatMenu(c,m)};
+    row.append(b,m);l.append(row)});
+  if(!chats.length)l.append(el("span","small","Le tue chat appariranno qui"));
+  document.querySelectorAll("#side [data-p]").forEach(b=>b.classList.toggle("on",VIEW===b.dataset.p));
+  $("meAv").textContent=(prof?.name||"?")[0].toUpperCase();$("meName").textContent=prof?.name||"";
+  renderHelpBadge()
+}
+function renderHelpBadge(){deskStato();const b=$("helpBadge");b.classList.toggle("hide",!HELP.on);b.textContent=HELP.job?"al lavoro":HELP.on?"attivo":""}
+function closeSide(){$("app").classList.remove("open")}
+function chatMenu(c,anchor){
+  document.querySelectorAll(".cmenu").forEach(x=>x.remove());
+  const m=el("div","cmenu");const r=anchor.getBoundingClientRect();m.style.top=Math.min(innerHeight-160,r.bottom+4)+"px";m.style.left=Math.min(innerWidth-190,r.left-130)+"px";
+  const item=(t,f,cls)=>{const b=el("button",cls||"",t);b.onclick=()=>{m.remove();f()};m.append(b)};
+  item(c.pin?"📌 Togli da fissate":"📌 Fissa in alto",()=>{c.pin=!c.pin;LS.set("natan_chats",chats);renderSide();toast(c.pin?"Chat fissata in alto":"Chat non più fissata")});
+  item("✏️ Rinomina",()=>{const t=prompt("Nuovo nome della chat",c.title||"");if(t&&t.trim()){c.title=t.trim().slice(0,60);c.named=true;LS.set("natan_chats",chats);renderSide()}});
+  item("🗑 Elimina",()=>{if(!confirm("Eliminare la chat «"+(c.title||"Chat")+"»?"))return;
+    chats=chats.filter(x=>x.id!==c.id);LS.set("natan_chats",chats);try{localStorage.removeItem("natan_hist_"+c.id)}catch(e){}
+    if(c.id===chat){hist=[];newChat()}else renderSide();toast("Chat eliminata")},"red");
+  document.body.append(m);setTimeout(()=>document.addEventListener("click",()=>m.remove(),{once:true}),0)
+}
+$("sideOpen").onclick=()=>{if(innerWidth>=900){$("app").classList.remove("closed");LS.set("natan_side",true)}else $("app").classList.add("open")};
+$("sideClose").onclick=()=>{if(innerWidth>=900){$("app").classList.add("closed");LS.set("natan_side",false)}else closeSide()};
+$("shade").onclick=closeSide;
+if(LS.get("natan_side",true)===false)$("app").classList.add("closed");
+$("newChat").onclick=()=>{if(busy)return;newChat();closeSide()};
+document.querySelectorAll("#side [data-p]").forEach(b=>b.onclick=()=>{openPage(b.dataset.p);closeSide()});
+
+function newChat(){chat="c"+Date.now().toString(36);LS.set("natan_chat",chat);hist=[];showChat();render();renderSide()}
+function openChat(id){chat=id||chat;LS.set("natan_chat",chat);hist=LS.get("natan_hist_"+chat,[]);showChat();render();renderSide()}
+function showChat(){VIEW="chat";$("chatView").classList.remove("hide");$("pageView").classList.add("hide");updateNotice()}
+function saveHist(){
+  LS.set("natan_hist_"+chat,hist.slice(-60));
+  const first=hist.find(x=>x.role==="user");
+  const i=chats.findIndex(c=>c.id===chat);const old=i>=0?chats[i]:{};
+  const item={id:chat,title:old.named?old.title:(first?.content||"Nuova chat").replace(/^🧠 Pensaci meglio: /,"").slice(0,48),ts:Date.now(),pin:!!old.pin,named:!!old.named};
+  if(i>=0)chats[i]=item;else chats.unshift(item);
+  sortChats();const pinned=chats.filter(c=>c.pin),rest=chats.filter(c=>!c.pin).slice(0,Math.max(0,80-pinned.length));chats=[...pinned,...rest];
+  LS.set("natan_chats",chats);renderSide()
+}
+// Idee di domande sulla schermata iniziale: cambiano ogni 30 minuti e sono diverse per ognuno (dipendono dalle materie scelte e dal codice personale)
+const SUGG_T={
+  "Matematica":["Spiegami le equazioni di secondo grado","Come si fa lo studio di una funzione?","Dammi un problema di geometria e correggimi","Spiegami le percentuali con un esempio"],
+  "Fisica":["Spiegami la seconda legge di Newton con un esempio","Che differenza c'è tra velocità e accelerazione?","Dammi un problema di cinematica passo per passo"],
+  "Chimica":["Come si bilanciano le reazioni chimiche?","Spiegami la tavola periodica in modo semplice","Che cos'è una mole?"],
+  "Biologia":["Spiegami la fotosintesi passo per passo","Come funziona la divisione cellulare?","Che differenza c'è tra DNA e RNA?"],
+  "Storia":["Fammi un riassunto della Prima guerra mondiale","Perché è caduto l'Impero romano?","Spiegami la Rivoluzione francese in 10 righe"],
+  "Latino":["Aiutami con una versione di latino","Spiegami l'ablativo assoluto con esempi","Ripassiamo la terza declinazione"],
+  "Italiano":["Fammi l'analisi di una poesia di Leopardi","Come si scrive un buon tema argomentativo?","Spiegami la differenza tra Verismo e Naturalismo"],
+  "Inglese":["Interrogami sul present perfect","Spiegami i condizionali inglesi con esempi","Correggi un mio breve testo in inglese"],
+  "Filosofia":["Spiegami il mito della caverna di Platone","Che cosa dice Kant sull'imperativo categorico?","Confronta Platone e Aristotele"],
+  "Informatica":["Spiegami che cos'è un algoritmo con un esempio","Come funziona un ciclo for?","Che differenza c'è tra RAM e memoria di archiviazione?"],
+  "Economia":["Spiegami domanda e offerta con un esempio","Che cos'è l'inflazione?"],
+  "Geografia":["Interrogami sulle capitali europee","Spiegami come si formano le montagne"],
+  "Arte":["Spiegami le differenze tra Rinascimento e Barocco","Come si riconosce un quadro impressionista?"],
+  "Musica":["Spiegami come funzionano le scale musicali","Che cos'è il ritmo in musica?"]};
+const SUGG_G=[m=>"Spiegami un argomento difficile di "+m+" con un esempio",m=>"Interrogami su "+m+": fammi 3 domande",m=>"Fammi un riassunto veloce di "+m+" per il compito in classe",
+  m=>"Dammi un esercizio di "+m+" e correggimi",m=>"Qual è l'errore più comune che si fa in "+m+"?",m=>"Fammi un quiz di 5 domande su "+m,m=>"Come studio "+m+" in 20 minuti?",m=>"Collega "+m+" a una cosa di tutti i giorni"];
+function sHash(s){let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function sRnd(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const SUGG_SLOT=()=>Math.floor(Date.now()/(30*60000));
+function suggerimenti(){
+  const R=sRnd(sHash((TOKEN||"anon")+":"+SUGG_SLOT()));
+  const mat=(prof?.interests||[]).filter(Boolean).slice(0,12);const mats=mat.length?mat:["Matematica","Italiano","Storia","Inglese","Fisica","Biologia"];
+  const mesc=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const per=mesc(mats).map(m=>({m,t:mesc([...(SUGG_T[m]||[]),...SUGG_G.map(f=>f(m))])}));
+  const out=[];let k=0;while(out.length<4&&per.some(p=>p.t.length)){const p=per[k++%per.length];if(p.t.length)out.push(p.t.shift())}
+  return out}
+function render(){
+  const th=$("thread");th.innerHTML="";$("chatView").classList.toggle("empty",!hist.length);
+  if(!hist.length){const h=el("div","hello");const m=el("span","mark","N");m.style.cssText="width:44px;height:44px;font-size:22px;border-radius:12px";h.append(m,el("h2","","Ciao "+(prof?.name||"")+", cosa studiamo oggi?"));
+    const s=el("div","sugg");suggerimenti().forEach(t=>{const b=el("button","",t);b.onclick=()=>{$("inp").value=t;grow();$("inp").focus()};s.append(b)});h.append(s);th.append(h)}
+  hist.forEach(x=>bubble(x));
+  const last=hist[hist.length-1];
+  if(last&&last.role==="user"&&!busy){                   // la risposta si era interrotta (app chiusa o errore)
+    const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");body.append(el("div","txt wait","La risposta a questo messaggio si è interrotta."));
+    const a=el("div","acts");const r=el("button","tb","↻ Riprova");r.onclick=()=>{hist.pop();saveHist();render();send(last.content.replace(/^🧠 Pensaci meglio: /,"").replace(/\n\[\d+ foto\]$/,""))};a.append(r);body.append(a);m.append(body);th.append(m)}
+  scrollEnd()
+}
+function scrollEnd(){const s=$("scroll");s.scrollTop=s.scrollHeight}
+function bubble(x){
+  const th=$("thread");
+  if(x.role==="user"){const m=el("div","msg u");const w=el("div","");if(x.thumbs&&x.thumbs.length){const t=el("div","th");x.thumbs.forEach(d=>{const i=el("img");i.src=d;i.alt="foto";t.append(i)});w.append(t)}
+    const b=el("div","bub",x.content);w.append(b);m.append(w);th.append(m);return b}
+  const m=el("div","msg a");m.append(el("span","mark","N"));const body=el("div","body");const t=setAnswer(el("div","txt"),x.content);body.append(t);m.append(body);
+  if(x.uid){
+    const a=el("div","acts");
+    const cp=el("button","ib");cp.append(svg(IC.copy,16));cp.setAttribute("aria-label","Copia");cp.title="Copia";cp.onclick=()=>{navigator.clipboard?.writeText(mathPlain(x.content.replace(FILE_RX,"").replace(LOC_RX,"")).trim());toast("Copiato")};
+    const up=el("button","ib"+(x.rating===1?" up":""));up.append(svg(IC.up,17));up.setAttribute("aria-label","Risposta giusta");up.title="Risposta giusta";
+    const dn=el("button","ib"+(x.rating===-1?" dn":""));dn.append(svg(IC.dn,16));dn.setAttribute("aria-label","Risposta sbagliata");dn.title="Risposta sbagliata";
+    const sp=el("button","ib");sp.append(svg(IC.spk,17));sp.setAttribute("aria-label","Leggi ad alta voce");sp.title="Leggi ad alta voce";sp.onclick=()=>SPK.say(x.content);
+    const why=el("div","why hide");
+    REASONS.forEach(r=>{const c=el("button","chip",r);c.onclick=()=>{vote(x,-1,r);why.classList.add("hide");toast("Grazie, Natan lo terrà a mente")};why.append(c)});
+    up.onclick=()=>{vote(x,x.rating===1?0:1);up.className="ib"+(x.rating===1?" up":"");dn.className="ib";why.classList.add("hide")};
+    dn.onclick=()=>{vote(x,x.rating===-1?0:-1);dn.className="ib"+(x.rating===-1?" dn":"");up.className="ib";why.classList.toggle("hide",x.rating!==-1)};
+    a.append(cp,up,dn,sp);
+    if(x.cut){const p=el("button","tb","Parte due");p.onclick=()=>send("parte due");a.append(p)}
+    if(x.q&&(PRO||x.local)&&!x.deep){const p=el("button","tb","🧠 Pensaci meglio");p.onclick=()=>send(x.q,{deep:true});a.append(p)}
+    const info=[x.tier,x.secs!==undefined?x.secs+" s":""].filter(Boolean).join(" · ");
+    if(info)a.append(el("span","meta",info));
+    body.append(a,why)
+  }
+  th.append(m);return t
+}
+async function vote(x,r,reason){x.rating=r;saveHist();
+  if(x.local){queue({uid:x.uid,chat,role:"assistant",content:x.content,rating:r,reason:reason||"",tier:x.tierCode||"tel",ts:x.ts||Date.now()/1000});flushQueue();return}
+  try{await api("/vote",{uid:x.uid,rating:r,reason:reason||""})}catch(e){}}
+
+async function send(forced,opts={}){
+  const t=(forced||$("inp").value).trim();const ph=forced?[]:photos;
+  if((!t&&!ph.length)||busy)return;
+  if(!forced){$("inp").value="";grow()}
+  if(VIEW!=="chat")showChat();
+  if(!hist.length)$("thread").innerHTML="";$("chatView").classList.remove("empty");photos=[];showPics();
+  const shown=opts.deep?"🧠 Pensaci meglio: "+t:(t||(ph.length>1?"Spiegami queste foto":"Spiegami questa foto"));
+  const um={role:"user",content:shown+(ph.length?"\n["+ph.length+" foto]":""),uid:rid("q"),ts:Date.now()/1000};
+  hist.push(um);saveHist();
+  bubble({role:"user",content:shown,thumbs:ph.slice(0,6)});
+  const wait=bubble({role:"assistant",content:"Sto pensando…"});wait.classList.add("wait");scrollEnd();
+  busy=true;updateStatus();sendBtn();const t0=Date.now();const st={est:0,text:false};SPK.begin();
+  const tick=setInterval(()=>{const s=Math.round((Date.now()-t0)/1000);if(!st.text)wait.textContent="Sto pensando"+".".repeat(s%4)+(st.est?"  ·  circa "+st.est+" s":"")},500);
+  const show=x=>{st.text=true;wait.classList.remove("wait");setAnswer(wait,x);SPK.feed(x,false);scrollEnd()};
+  const done=x=>{wait.closest(".msg").remove();hist.push(x);saveHist();bubble(x);scrollEnd();SPK.feed(x.content,true);
+    if(document.hidden&&"Notification" in window&&Notification.permission==="granted")new Notification("Natan ha risposto",{body:x.content.slice(0,100)})};
+  try{
+    const lvl=level();const crea=CREA_RX.test(t);
+    if(ph.length||lvl==="kevin"||crea){
+      try{await askKevin(t,ph,opts,wait,st,t0,done,show)}
+      catch(e){if(e.code!==0||ph.length)throw e;
+        if(crea){await askCreaSenzaMac(t,show,t0,done,um);return}
+        try{await askVolunteer(t,opts,show,t0,done,um)}
+        catch(e2){if(!deviceLevel())throw Object.assign(new Error("spento"),{code:0});await askDevice(deviceLevel(),t,opts,show,t0,done,um)}}
+    }else await askDevice(lvl,t,opts,show,t0,done,um)
+  }catch(e){st.text=true;wait.classList.remove("wait");SPK.cancel();
+    if(e.code===403&&e.data?.error==="nome_bannato"){toast("Ti chiediamo di cambiare nome");openPage("impostazioni")}
+    else if(e.code===401)wait.textContent="Il tuo invito non vale più: chiedi un nuovo invito.";
+    else if(e.code===-1)wait.textContent=e.message;
+    else if(e.code===0&&CREA_RX.test(t))wait.textContent=/immagin|disegn|illustraz|foto|figura|video|filmato/i.test(t)?"Immagini e video li crea solo il server di Natan (ha il controllo che blocca i disegni non adatti), che adesso è spento. Riprova più tardi.":"Il server di Natan è spento e nessun volontario è collegato per preparare il file. Riprova più tardi, oppure scegli Basico, Medio o Alto per crearlo sul tuo computer.";
+    else if(e.code===0)wait.textContent=ph.length?"Le foto le legge solo il server di Natan, che adesso è spento. Riprova più tardi.":"Il server di Natan è spento e nessun volontario è collegato. Scegli Basico, Medio o Alto dal menu in alto per usare Natan sul tuo dispositivo.";
+    else wait.textContent="Errore: "+e.message}
+  finally{clearInterval(tick);busy=false;updateStatus();sendBtn();ping();CALL.afterAnswer()}
+}
+async function askKevin(t,ph,opts,wait,st,t0,done,show){
+  const j=await api("/chat",{chat,text:t,photos:ph,biblioteca:$("tLib").classList.contains("on"),internet:$("tNet").classList.contains("on"),pensaci:!!opts.deep});st.est=j.estimate||0;
+  if(opts.deep)show("Ci ripenso con calma…");
+  for(let k=0;;k++){await sleep(k<60?300:1000);const s=await api("/job?id="+encodeURIComponent(j.job));     // all'inizio controllo spesso: le prime parole arrivano subito
+    if(s.text)show(s.text);
+    if(s.done){if(s.error)throw new Error(s.error);
+      done({role:"assistant",content:s.text,uid:s.uid,rating:0,cut:s.cut,secs:Math.round((Date.now()-t0)/1000),q:t,deep:!!opts.deep,tier:PRO?"Natan Pro":"Altissimo"});return}}
+}
+// =====================================================================================================
+// CALCOLATRICE: i modelli sbagliano i conti («2 alla 67»): li faccio io, esatti, e li passo al modello già risolti
+const CALC_W=[[/\belevat[oa]\s+(?:all[ae']?|a)\s*/g,"^"],[/\ball[ae']\s*(?=[\d(])/g,"^"],[/\*\*/g,"^"],[/\bper\b|×|\bx\b(?=\s*[\d(])/g,"*"],
+  [/\bdiviso\b|÷|:(?=\s*[\d(])/g,"/"],[/\bpi[uù](?![a-zà-ù])/g,"+"],[/\bmeno\b|−/g,"-"],[/(\d),(\d)/g,"$1.$2"],[/\bradice\s+(?:quadrata\s+)?di\s*/g,"√"],[/\bfattoriale\s+di\s*/g,"fatt"]];
+function calcEval(src){                 // piccolo parser: + - * / ^ ( ) S(...) F(...); interi esatti con BigInt
+  let i=0;const peek=()=>src[i],eat=c=>src[i]===c?(i++,true):false;
+  const num=v=>typeof v==="bigint"?Number(v):v;
+  const bin=(a,b,op)=>{
+    if(typeof a==="bigint"&&typeof b==="bigint"){
+      if(op==="+")return a+b;if(op==="-")return a-b;if(op==="*")return a*b;
+      if(op==="/"){if(b===0n)throw 0;return a%b===0n?a/b:Number(a)/Number(b)}
+      if(op==="^"){if(b<0n)return Math.pow(Number(a),Number(b));if(b>5000n||(a>1n||a<-1n)&&Number(b)*Math.log10(Math.abs(Number(a)))>400)throw "big";return a**b}}
+    a=num(a);b=num(b);const r=op==="+"?a+b:op==="-"?a-b:op==="*"?a*b:op==="/"?a/b:Math.pow(a,b);if(!isFinite(r))throw 0;return r};
+  const atom=()=>{
+    if(eat("-"))return bin(0n,atom(),"-");
+    if(eat("(")){const v=expr();if(!eat(")"))throw 0;return v}
+    if(src[i]==="S"||src[i]==="F"){const f=src[i++];if(!eat("("))throw 0;const v=expr();if(!eat(")"))throw 0;
+      if(f==="S"){if(typeof v==="bigint"&&v>=0n){let r=BigInt(Math.round(Math.sqrt(Number(v))));for(const d of [-1n,0n,1n])if((r+d)*(r+d)===v)return r+d}return Math.sqrt(num(v))}
+      if(typeof v!=="bigint"||v<0n||v>300n)throw 0;let r=1n;for(let k=2n;k<=v;k++)r*=k;return r}
+    const m=/^\d+(\.\d+)?/.exec(src.slice(i));if(!m)throw 0;i+=m[0].length;return m[1]?parseFloat(m[0]):BigInt(m[0])};
+  const pow=()=>{const a=atom();if(eat("^"))return bin(a,pow(),"^");return a};
+  const term=()=>{let a=pow();for(;;){if(eat("*"))a=bin(a,pow(),"*");else if(eat("/"))a=bin(a,pow(),"/");else return a}};
+  const expr=()=>{let a=term();for(;;){if(eat("+"))a=bin(a,term(),"+");else if(eat("-"))a=bin(a,term(),"-");else return a}};
+  const v=expr();if(i!==src.length)throw 0;return v
+}
+function calcFmt(v){if(typeof v==="bigint")return v.toString();if(Number.isInteger(v)&&Math.abs(v)<1e15)return String(v);
+  return v.toPrecision(10).replace(/\.?0+(e|$)/,"$1").replace("e+"," × 10^").replace("e-"," × 10^-")}
+function calcFind(text,limit=4){
+  let s=" "+String(text||"").toLowerCase().replace(/s\(/g,"s (").replace(/f\(/g,"f (")+" ";
+  for(const [rx,r] of CALC_W)s=s.replace(rx,r);
+  s=s.replace(/√\s*(\d+(?:\.\d+)?|\([^()]*\))/g,"S($1)").replace(/fatt\s*(\d+)|(\d+)\s*!/g,(m,a,b)=>"F("+(a||b)+")").replace(/(\d+(?:\.\d+)?)\s*%\s*di\s*(\d+(?:\.\d+)?)/g,"($1*$2/100)");
+  const out=[],seen=new Set();
+  for(const m of s.matchAll(/[\dSF(][\d\s.+\-*/^()SF]*[\d)]/g)){
+    const b=s[m.index-1]||"",a=s[m.index+m[0].length]||"";
+    if(b&&(/[a-zà-ù]/i.test(b)||"*^=".includes(b))||a&&(/[a-zà-ù]/i.test(a)||a==="="))continue;
+    if(/^(\d{1,2}\/\d{1,2}(\/\d{2,4})?|\d{3,4}\s*-\s*\d{2,4})$/.test(m[0]))continue;
+    if(/^\d+-\d+$/.test(m[0])&&!/quant|calcol|meno|risult|=|\bfa\b/.test(s))continue;
+    const e=m[0].replace(/\s+/g,"").replace(/^[+\-*/]+|[+\-*/]+$/g,"");
+    if(!/\d/.test(e)||!/[+\-*/^]|S\(|F\(/.test(e)||/^\d+(\.\d+)?$/.test(e))continue;
+    let res;try{res=calcFmt(calcEval(e))}catch(x){if(x==="big")res="troppo grande per scriverlo tutto";else continue}
+    const show=e.replace(/\*/g,"×").replace(/S\(/g,"√(").replace(/F\(/g,"fattoriale(");
+    if(!seen.has(show)){seen.add(show);out.push([show,res])}if(out.length>=limit)break}
+  return out
+}
+function calcNote(text){const f=calcFind(text);return f.length?"\n\nCalcoli già fatti con la calcolatrice (sono esatti: usa questi risultati, non rifare i conti a mente e non cambiarli):\n"+f.map(([a,b])=>"- "+a+" = "+b).join("\n"):""}
+function chiaro(t){            // Chiarificatore: «il pianeta» vuol dire la Terra (cerco e rispondo su quella, non su Saturno)
+  if(/\b(mercurio|venere|marte|giove|saturno|urano|nettuno|plutone|esopianet\w*|pianeti)\b/i.test(t))return{q:t,nota:""};
+  const A={il:"la Terra",questo:"la Terra",nostro:"la Terra",sul:"sulla Terra",sullo:"sulla Terra",del:"della Terra",dal:"dalla Terra",nel:"nella Terra",al:"alla Terra",su:"sulla Terra",di:"della Terra",per:"per la Terra"};
+  const r=/\b(il|questo|nostro|sul|sullo|del|dal|nel|al|su|di|per)\s+(?:(?:nostro|questo)\s+)?pianeta\b(?!\s+(?:terra|luna|sole|nano|rosso|gassoso|roccioso|extrasolare))/i;
+  const m=t.match(r);
+  return m?{q:t.replace(r,A[m[1].toLowerCase()]||"la Terra"),nota:"Nella domanda «il pianeta» vuol dire la Terra: rispondi sulla Terra, non su altri pianeti."}:{q:t,nota:""}
+}
+async function buildLocal(t,um,anon){
+  const useLib=$("tLib").classList.contains("on");
+  const small=IS_IOS&&!anon;                              // su iPhone la memoria è poca: prompt più corto
+  const cq=chiaro(t);
+  let [notes,wk]=await Promise.all([useLib?searchLib(cq.q,small?2:3).catch(()=>[]):[],wikiContext(cq.q)]);if(small)wk=wk.slice(0,1);
+  const past=hist.filter(x=>x!==um).slice(small?-4:-6).map(x=>({role:x.role==="user"?"user":"assistant",content:String(x.content).slice(0,small?500:1200)}));
+  return [{role:"system",content:sysLocal(notes,wk,anon)+(cq.nota?"\n\n"+cq.nota:"")+calcNote(t)},...past,{role:"user",content:t}]
+}
+const HARD=/risolv|calcola|equazion|derivat|integral|dimostr|\d\s*[\+\-×x\*\/\^=]\s*\d/i;
+async function askDevice(lvl,t,opts,show,t0,done,um){
+  queue({uid:um.uid,chat,role:"user",content:um.content,ts:um.ts});
+  show(ENG.e?"Cerco negli appunti…":"Preparo Natan sul dispositivo…");
+  const msgs=await buildLocal(t,um,false);
+  const r=await gen(lvl,msgs,{maxTokens:IS_IOS?600:900,think:!IS_IOS&&(!!opts.deep||HARD.test(t)),onText:x=>show(x||"…")});
+  const x={role:"assistant",content:r.text||"Non sono riuscito a rispondere: riprova.",uid:rid("t"),rating:0,secs:Math.round((Date.now()-t0)/1000),
+    tier:LEVELS[lvl].name+" · sul dispositivo",tierCode:"tel-"+lvl,local:true,q:t,deep:!!opts.deep,ts:Date.now()/1000};
+  queue({uid:x.uid,chat,role:"assistant",content:x.content,tier:x.tierCode,ts:x.ts});
+  done(x);if(online)flushQueue()
+}
+async function askCreaSenzaMac(t,show,t0,done,um){
+  const k=crKind(t);
+  if(!k||k.kind==="image"||k.kind==="video")throw Object.assign(new Error("crea"),{code:0});
+  queue({uid:um.uid,chat,role:"user",content:um.content,ts:um.ts});
+  let res=null,tier="Volontario",code="volontario-diretto";
+  try{show("Il server di Natan è spento: cerco un volontario che prepari il file…");res=await askNet([],false,x=>show(x||"…"),k)}
+  catch(e){if(e.message&&/server di Natan/.test(e.message))throw Object.assign(new Error(e.message),{code:-1});
+    const lv=deviceLevel();if(!lv||IS_IOS)throw Object.assign(new Error("crea"),{code:0});
+    res=await browserCreate(k.kind,k.arg,lv,x=>show(x));tier=LEVELS[lv].name+" · sul dispositivo";code="tel-"+lv}
+  if(!res||!res.files||!res.files.length)throw new Error(typeof res==="string"?res:"il file non è arrivato");
+  const x={role:"assistant",content:await keepFiles(res),uid:rid("v"),rating:0,secs:Math.round((Date.now()-t0)/1000),tier,tierCode:code,local:true,q:t,ts:Date.now()/1000};
+  queue({uid:x.uid,chat,role:"assistant",content:res.testo+" [file creato]",tier:code,ts:x.ts});done(x)
+}
+async function askVolunteer(t,opts,show,t0,done,um){
+  show("Il server di Natan è spento: cerco un volontario…");
+  await findVolunteer();
+  queue({uid:um.uid,chat,role:"user",content:um.content,ts:um.ts});
+  const msgs=await buildLocal(t,um,true);                    // il volontario non sa chi sei
+  show("Risponde un volontario…");
+  const text=await askNet(msgs,!!opts.deep||HARD.test(t),x=>show(x||"…"));
+  const x={role:"assistant",content:text||"Non sono riuscito a rispondere: riprova.",uid:rid("v"),rating:0,secs:Math.round((Date.now()-t0)/1000),
+    tier:"Volontario",tierCode:"volontario-diretto",local:true,q:t,deep:!!opts.deep,ts:Date.now()/1000};
+  queue({uid:x.uid,chat,role:"assistant",content:x.content,tier:x.tierCode,ts:x.ts});done(x)
+}
+function sysLocal(notes,wk,anon){
+  let s="Ti chiami Natan e sei un tutor AI. Se ti chiedono chi ti ha creato o dove sei stato progettato, rispondi che sei un progetto indipendente e che preferisci non dare dettagli: non fare nomi di persone, scuole o luoghi. Non dire mai di essere ChatGPT, Claude, Gemini o Qwen.";
+  s+=anon?" Stai aiutando uno studente: non chiedergli mai nome, età o dati personali.":" Stai aiutando "+(prof?.name||"uno studente")+(prof?.age?" ("+prof.age+" anni)":"")+".";
+  s+="\n\nCome scrivi: italiano corretto e naturale; prima la risposta, poi la spiegazione; esempi concreti; per gli esercizi mostra tutti i passaggi e il risultato; le formule scrivile sempre tra due $ (per esempio $x^2+5x+6=0$, $\\frac{3}{4}$), così si vedono come formule vere; niente asterischi o cancelletti. Se non sei sicuro, dillo invece di inventare.";
+  if(notes.length)s+="\n\nAppunti della biblioteca di Natan (sono affidabili, usali):\n"+notes.map(n=>"["+n.m+"] "+n.t+": "+n.x.slice(0,IS_IOS?420:650)).join("\n---\n");
+  if(wk.length)s+="\n\nDa Wikipedia:\n"+wk.map(w=>w.t+": "+w.x.slice(0,IS_IOS?500:900)).join("\n---\n");
+  return s
+}
+function grow(){const i=$("inp");i.style.height="auto";i.style.height=Math.min(200,i.scrollHeight)+"px";sendBtn()}
+function sendBtn(){$("send").disabled=busy||(!$("inp").value.trim()&&!photos.length)}
+$("inp").addEventListener("input",grow);
+$("inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!IS_MOBILE){e.preventDefault();send()}});
+$("send").onclick=()=>send();
+["tNet","tLib","tVoice"].forEach(id=>{const b=$(id);const def=id!=="tVoice";
+  b.onclick=()=>{b.classList.toggle("on");const on=b.classList.contains("on");b.setAttribute("aria-pressed",String(on));LS.set("natan_"+id,on);if(id==="tVoice"&&!on)SPK.cancel();
+    toast({tNet:on?"Cerco anche su Wikipedia":"Wikipedia spenta",tLib:on?"Uso la biblioteca di Natan":"Biblioteca spenta",tVoice:on?"Natan leggerà le risposte ad alta voce":"Voce spenta"}[id])};
+  const v=LS.get("natan_"+id,def);b.classList.toggle("on",!!v);b.setAttribute("aria-pressed",String(!!v))});
+
+// --- foto (massimo 30), rimpicciolite prima di inviarle
+function shrinkPhoto(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file);const im=new Image();
+  im.onload=()=>{const s=Math.min(1,1280/Math.max(im.width,im.height));const c=document.createElement("canvas");
+    c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",0.82))};
+  im.onerror=()=>{URL.revokeObjectURL(u);bad(new Error("foto"))};im.src=u})}
+function showPics(){const p=$("pics");p.innerHTML="";p.classList.toggle("hide",!photos.length);sendBtn();if(!photos.length)return;
+  photos.slice(0,8).forEach(d=>{const i=el("img");i.src=d;i.alt="foto";p.append(i)});p.append(el("span","small",photos.length+"/"+MAXP+" foto"));
+  const x=el("button","ib");x.append(svg(IC.dn,16));x.setAttribute("aria-label","Togli le foto");x.onclick=()=>{photos=[];showPics()};p.append(x)}
+$("attach").onclick=()=>{if(!busy)$("file").click()};
+$("file").onchange=async e=>{const fs=[...e.target.files];e.target.value="";
+  if(photos.length+fs.length>MAXP)toast("Massimo "+MAXP+" foto: tengo le prime "+MAXP);
+  for(const f of fs.slice(0,MAXP-photos.length)){try{photos.push(await shrinkPhoto(f));showPics()}catch(er){toast("Una foto non si legge, la salto")}}
+  if(photos.length&&level()!=="kevin")toast("Le foto le legge il server di Natan (Altissimo)")};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){const mic=$("mic");mic.classList.remove("hide");let rec=null;
+  mic.onclick=()=>{if(rec){rec.stop();return}rec=new SR();rec.lang="it-IT";rec.interimResults=true;mic.classList.add("rec");
+    rec.onresult=ev=>{$("inp").value=[...ev.results].map(r=>r[0].transcript).join(" ");grow()};
+    rec.onend=()=>{mic.classList.remove("rec");rec=null;if($("inp").value.trim())send()};rec.onerror=()=>{mic.classList.remove("rec");rec=null};rec.start()}}
+
+// =====================================================================================================
+// VOCE: la più naturale che c'è sul dispositivo, e Natan inizia a parlare mentre sta ancora scrivendo
+// =====================================================================================================
+// CREAZIONI NEI BROWSER (PC dei volontari e PC con Natan sul dispositivo): documenti Word + PDF e presentazioni.
+// Le immagini e i video restano al Mac: lì c'è il controllo che blocca i disegni non adatti ai ragazzi.
+const LIBS={docx:"https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js",pdf:"https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js",
+  pptx:"https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"};
+const LOADED={};
+function loadLib(k){return LOADED[k]||(LOADED[k]=new Promise((ok,bad)=>{const sc=document.createElement("script");sc.src=LIBS[k];sc.async=true;
+  sc.onload=()=>ok();sc.onerror=()=>{delete LOADED[k];bad(new Error("non riesco a caricare gli strumenti per i file"))};document.head.append(sc)}))}
+const TOPIC_PREP="(?:(?:sullo|sulla|sulle|sugli|sul|sui|su|dello|della|delle|degli|dei|del|di|riguardo a|per)\\s+)?";
+function crKind(t){
+  const s=String(t||"").trim();let m;
+  const V="(?:crea|creami|fai|fammi|genera|prepara|scrivi|scrivimi|realizza)\\s+(?:un\\s+|il\\s+|una\\s+|l')?";
+  if((m=new RegExp("^"+V+"presentazion\\w*\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"presentation",arg:m[1].trim()};
+  if((m=new RegExp("^"+V+"pdf\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"pdf",arg:m[1].trim()};
+  if((m=new RegExp("^"+V+"(?:documento|doc|file|word|relazione|tesina)(?:\\s+(?:di\\s+|su\\s+|per\\s+|in\\s+)?(?:google(?:\\s+(?:documenti|docs?|drive))?|word|pdf))?\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"document",arg:m[1].trim()};
+  if((m=new RegExp("^"+V+"(?:breve\\s+)?(?:video[\\s-]?lezione|video|filmato)\\s+"+TOPIC_PREP+"(.+)$","is").exec(s)))return {kind:"video",arg:m[1].trim()};
+  if(/^\s*(crea|creami|fai|fammi|genera|generami|disegna|disegnami|mostrami|voglio)\b.{0,12}\b(immagin\w*|disegn\w*|illustrazion\w*|foto|figura)\b|^\s*disegna(mi)?\s/i.test(s))return {kind:"image",arg:s};
+  return null
+}
+const DOC_P='Scrivi un documento in italiano su: "{t}".\nUsa questo formato: la prima riga è "# Titolo", poi sezioni che iniziano con "## " seguite da paragrafi normali; per gli elenchi usa righe che iniziano con "- ". Da 4 a 7 sezioni, testo chiaro e corretto, niente LaTeX, niente asterischi.';
+const PRES_P='Crea una presentazione in italiano su: "{t}".\nRispondi SOLO con un JSON valido: {"titolo": "...", "sottotitolo": "...", "slide": [{"titolo": "...", "punti": ["...", "..."]}]}\nDa 6 a 10 slide, da 3 a 5 punti brevi per slide (massimo 18 parole ciascuno). Niente LaTeX.';
+function safeName(t){return (String(t).replace(/[^\wàèéìòù \-]/gi,"").trim().slice(0,50)||"senza titolo")}
+function b64(buf){const u=new Uint8Array(buf);let s="";for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)}
+function docLines(raw,topic){const L=String(raw).replace(/\*\*/g,"").split(/\n+/).map(x=>x.trim()).filter(Boolean);if(!L.length||!L[0].startsWith("# "))L.unshift("# "+topic[0].toUpperCase()+topic.slice(1));return L}
+async function makeDocx(L){
+  await loadLib("docx");const D=window.docx;const ch=[];
+  for(const t of L){
+    if(t.startsWith("# "))ch.push(new D.Paragraph({text:t.slice(2),heading:D.HeadingLevel.TITLE}));
+    else if(t.startsWith("## "))ch.push(new D.Paragraph({text:t.slice(3),heading:D.HeadingLevel.HEADING_1}));
+    else if(t.startsWith("### "))ch.push(new D.Paragraph({text:t.slice(4),heading:D.HeadingLevel.HEADING_2}));
+    else if(/^[-•*] /.test(t))ch.push(new D.Paragraph({text:t.slice(2),bullet:{level:0}}));
+    else ch.push(new D.Paragraph({children:[new D.TextRun({text:t,size:24})],spacing:{after:120}}))}
+  const blob=await D.Packer.toBlob(new D.Document({creator:"Natan",title:L[0].slice(2),sections:[{children:ch}]}));
+  return new Uint8Array(await blob.arrayBuffer())
+}
+function winAnsi(t){return String(t).replace(/[‘’]/g,"'").replace(/[“”«»]/g,'"').replace(/[–—]/g,"-").replace(/•/g,"-").replace(/…/g,"...")
+  .replace(/√/g,"radice di ").replace(/²/g,"^2").replace(/³/g,"^3").replace(/[≤]/g,"<=").replace(/[≥]/g,">=").replace(/≠/g,"!=").replace(/→/g,"->").replace(/π/g,"pi")
+  .replace(/[^\x09\x0a\x20-\x7e\xa0-\xff€]/g,"")}
+async function makePdf(L){
+  await loadLib("pdf");const P=window.PDFLib;const doc=await P.PDFDocument.create();doc.setTitle(L[0].slice(2));doc.setCreator("Natan");
+  const R=await doc.embedFont(P.StandardFonts.Helvetica),B=await doc.embedFont(P.StandardFonts.HelveticaBold);
+  const W=595.28,H=841.89,M=62;let page=doc.addPage([W,H]),y=H-M;
+  const put=(text,font,size,color,before,after,indent=0)=>{
+    y-=before;const words=winAnsi(text).split(/\s+/);let line="";const lines=[];
+    for(const w of words){const tr=line?line+" "+w:w;if(font.widthOfTextAtSize(tr,size)>W-2*M-indent&&line){lines.push(line);line=w}else line=tr}
+    if(line)lines.push(line);
+    for(const l of lines){if(y<M+size){page=doc.addPage([W,H]);y=H-M}page.drawText(l,{x:M+indent,y:y-size,size,font,color});y-=size*1.42}
+    y-=after};
+  const ink=P.rgb(0.13,0.15,0.29),acc=P.rgb(0.29,0.32,0.79),txt=P.rgb(0.1,0.1,0.12);
+  for(const t of L){
+    if(t.startsWith("# "))put(t.slice(2),B,24,ink,0,14);else if(t.startsWith("## "))put(t.slice(3),B,16,acc,10,4);
+    else if(t.startsWith("### "))put(t.slice(4),B,13,ink,6,3);else if(/^[-•*] /.test(t))put("-  "+t.slice(2),R,11.5,txt,0,3,10);else put(t,R,11.5,txt,0,7)}
+  return await doc.save()
+}
+async function makePptx(data,topic){
+  await loadLib("pptx");const p=new window.PptxGenJS();p.layout="LAYOUT_WIDE";const dark="14182E",acc="6C7BFF",light="EEF0FA";
+  let s=p.addSlide();s.background={color:dark};
+  s.addText(String(data.titolo||topic),{x:0.9,y:2.4,w:11.5,h:1.4,fontSize:44,bold:true,color:light});
+  s.addText(String(data.sottotitolo||""),{x:0.9,y:3.9,w:11.5,h:1,fontSize:22,color:acc});
+  for(const sl of (data.slide||[]).slice(0,14)){s=p.addSlide();s.background={color:dark};
+    s.addShape(p.ShapeType?p.ShapeType.rect:"rect",{x:0.6,y:0.55,w:0.12,h:0.9,fill:{color:acc},line:{color:acc}});
+    s.addText(String(sl.titolo||""),{x:0.95,y:0.5,w:11.5,h:1,fontSize:32,bold:true,color:light});
+    const pts=(sl.punti||[]).slice(0,6).map(x=>({text:String(x),options:{bullet:true,breakLine:true}}));
+    if(pts.length)s.addText(pts,{x:0.95,y:1.8,w:11.4,h:5.2,fontSize:22,color:light,valign:"top",paraSpaceAfter:12})}
+  const out=await p.write({outputType:"arraybuffer"});return [new Uint8Array(out),(data.slide||[]).length+1]
+}
+function jsonOf(raw){const t=String(raw);return JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1))}
+// crea i file nel browser: ritorna {testo, files:[{name,mime,data(base64)}]}
+async function browserCreate(kind,arg,lvl,progress=()=>{}){
+  if(kind==="image"||kind==="video")throw Object.assign(new Error("Immagini e video li crea solo il server di Natan (ha il controllo che blocca i disegni non adatti). Riprova quando è acceso."),{crea:true});
+  const name=safeName(arg),files=[];
+  if(kind==="presentation"){progress("📊 Preparo la presentazione…");
+    const r=await gen(lvl,[{role:"user",content:PRES_P.replace("{t}",arg)}],{maxTokens:1400,onText:t=>progress("📊 Preparo la presentazione… ("+t.split(/\s+/).length+" parole)")});
+    const [data,n]=await makePptx(jsonOf(r.text),arg);files.push({name:"Presentazione - "+name+".pptx",mime:"application/vnd.openxmlformats-officedocument.presentationml.presentation",data:b64(data)});
+    return {testo:"Ecco la presentazione su «"+arg+"» ("+n+" slide) 📊",files}}
+  progress("📝 Scrivo il documento…");
+  const r=await gen(lvl,[{role:"user",content:DOC_P.replace("{t}",arg)}],{maxTokens:1400,onText:t=>progress("📝 Scrivo il documento… ("+t.split(/\s+/).length+" parole)")});
+  const L=docLines(r.text,arg);progress("📄 Preparo i file…");
+  if(kind!=="pdf")files.push({name:"Documento - "+name+".docx",mime:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",data:b64(await makeDocx(L))});
+  files.push({name:"Documento - "+name+".pdf",mime:"application/pdf",data:b64(await makePdf(L))});
+  return {testo:"Ecco il documento su «"+arg+"» 📝"+(kind!=="pdf"?"\nPer aprirlo con Google Documenti: scarica il Word, caricalo su Google Drive (o aprilo dall'app Documenti Google) e diventa un documento Google.":""),files}
+}
+// salvo i file sul dispositivo (restano nella chat) e ritorno il testo con i segnaposto [[locale:codice/nome]]
+async function keepFiles(res){
+  let out=res.testo;
+  for(const f of res.files){const fid=rid("f").replace(/[^a-z0-9]/gi,"");await DB.set("f:"+fid,{name:f.name,mime:f.mime,data:f.data,ts:Date.now()});out+="\n[[locale:"+fid+"/"+f.name+"]]"}
+  return out
+}
+// --- Creazioni del Mac (immagini, video, documenti): nella risposta arrivano come [[file:codice/nome]]
+const CREA_RX=/^\s*(crea|creami|fai|fammi|genera|generami|disegna|disegnami|mostrami|prepara|realizza|scrivi|scrivimi|voglio)\b.{0,25}\b(immagin\w*|disegn\w*|illustrazion\w*|foto|figura|video\w*|filmato|pdf|documento|doc|word|relazione|tesina|presentazion\w*)\b|^\s*disegna(mi)?\s/i;
+const FILE_RX=/\[\[file:([0-9a-f]{32})\/([^\]\n]{1,200})\]\]/g;
+function fileUrl(tok,name){return BASE?BASE+"/file/"+tok+"/"+encodeURIComponent(name):""}
+const LOC_RX=/\[\[locale:([a-z0-9]{6,40})\/([^\]\n]{1,200})\]\]/gi;
+function setAnswer(node,text){
+  text=String(text??"");if(!text.includes("[[file:")&&!text.includes("[[locale:"))return setRich(node,text);
+  node.textContent="";const files=[...text.matchAll(FILE_RX)].map(m=>[m[1],m[2],"mac"]).concat([...text.matchAll(LOC_RX)].map(m=>[m[1],m[2],"loc"]));
+  const words=el("div","");setRich(words,text.replace(FILE_RX,"").replace(LOC_RX,"").trim());node.append(words);
+  const box=el("div","creaz");
+  for(const [tok,name,where] of files){
+    if(where==="loc"){const slot=el("div","creaz");box.append(slot);localFile(slot,tok,name);continue}
+    const url=fileUrl(tok,name),ext=(name.split(".").pop()||"").toLowerCase();
+    if(!url){box.append(el("span","small","«"+name+"» è sul server di Natan: riaprilo quando è acceso."));continue}
+    if(ext==="png"||ext==="jpg"){const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";const i=el("img","cimg");i.src=url;i.alt="Immagine creata da Natan";i.loading="lazy";a.append(i);box.append(a)}
+    else if(ext==="mp4"){const v=document.createElement("video");v.className="cvid";v.src=url;v.controls=true;v.playsInline=true;v.preload="metadata";box.append(v)}
+    const lbl={png:"⬇ Scarica l'immagine",jpg:"⬇ Scarica l'immagine",mp4:"⬇ Scarica il video",docx:"⬇ Word (si apre con Google Documenti)",pdf:"⬇ PDF",pptx:"⬇ Presentazione"}[ext]||"⬇ Scarica";
+    const d=document.createElement("a");d.className="btn ghost cdl";d.href=url;d.textContent=lbl;d.setAttribute("download",name);d.target="_blank";d.rel="noopener";box.append(d)}
+  node.append(box);return node
+}
+async function localFile(slot,fid,name){
+  let f=null;try{f=await DB.get("f:"+fid)}catch(e){}
+  if(!f){slot.append(el("span","small","«"+name+"» non è più su questo dispositivo."));return}
+  const bin=atob(f.data),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([u],{type:f.mime}));const ext=(name.split(".").pop()||"").toLowerCase();
+  const lbl={docx:"⬇ Word (si apre con Google Documenti)",pdf:"⬇ PDF",pptx:"⬇ Presentazione"}[ext]||"⬇ Scarica";
+  const d=document.createElement("a");d.className="btn ghost cdl";d.href=url;d.textContent=lbl;d.download=name;slot.append(d)
+}
+// =====================================================================================================
+// FORMULE: «$2x+3=7$» diventa una formula vera (KaTeX). Senza KaTeX (o offline la prima volta): testo semplice, x² √ ±
+const KATEX="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/";
+const MATH={st:0,cache:new Map()};
+const MATH_RX=/\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|\$([^$\n]+?)\$/g;
+function loadKatex(){
+  if(MATH.st||window.NATAN_NO_KATEX)return;MATH.st=1;
+  const l=document.createElement("link");l.rel="stylesheet";l.href=KATEX+"katex.min.css";document.head.append(l);
+  const sc=document.createElement("script");sc.src=KATEX+"katex.min.js";sc.async=true;
+  sc.onload=()=>{MATH.st=window.katex?2:3;if(MATH.st===2)document.querySelectorAll(".math[data-tex]").forEach(paintMath)};
+  sc.onerror=()=>{MATH.st=3};document.head.append(sc)
+}
+function mathParts(text){            // [[testo,false],[formula,true,display]...]
+  const out=[];let last=0;text=String(text);
+  for(const m of text.matchAll(MATH_RX)){
+    const inl=m[4];if(inl!==undefined&&(/^\s|\s$/.test(inl)||!/[0-9a-zA-Z\\^_=+\-*/()]/.test(inl)))continue;   // «5$ e 6$» non è una formula
+    if(m.index>last)out.push([text.slice(last,m.index),false]);
+    out.push([m[1]??m[2]??m[3]??inl,true,m[1]!==undefined||m[2]!==undefined]);last=m.index+m[0].length}
+  if(last<text.length)out.push([text.slice(last),false]);return out
+}
+function setRich(node,text){
+  text=String(text??"");
+  if(!/\$|\\[(\[]/.test(text)){node.textContent=text;return node}
+  const parts=mathParts(text);if(!parts.some(p=>p[1])){node.textContent=text;return node}
+  node.textContent="";
+  for(const [t,isM,disp] of parts){
+    if(!isM){node.append(document.createTextNode(t));continue}
+    const sp=el("span",disp?"math disp":"math");sp.dataset.tex=t;if(disp)sp.dataset.d="1";
+    if(MATH.st===2)paintMath(sp);else sp.textContent=texPlain(t);node.append(sp)}
+  if(!MATH.st)loadKatex();return node
+}
+function paintMath(sp){
+  const tex=sp.dataset.tex,d=!!sp.dataset.d,k=(d?"D":"I")+tex;let h=MATH.cache.get(k);
+  if(h===undefined){try{h=katex.renderToString(tex,{displayMode:d,throwOnError:false,strict:"ignore"})}catch(e){h=null}MATH.cache.set(k,h)}
+  if(h)sp.innerHTML=h;else sp.textContent=texPlain(tex)
+}
+const TEX_SYM={cdot:"·",times:"×",div:"÷",pm:"±",mp:"∓",neq:"≠",ne:"≠",leq:"≤",le:"≤",geq:"≥",ge:"≥",approx:"≈",equiv:"≡",to:"→",rightarrow:"→",
+  Rightarrow:"⇒",Leftrightarrow:"⇔",leftarrow:"←",implies:"⇒",iff:"⇔",infty:"∞",pi:"π",alpha:"α",beta:"β",gamma:"γ",delta:"δ",Delta:"Δ",
+  epsilon:"ε",varepsilon:"ε",theta:"θ",lambda:"λ",mu:"μ",rho:"ρ",sigma:"σ",Sigma:"Σ",tau:"τ",phi:"φ",varphi:"φ",omega:"ω",Omega:"Ω",
+  ldots:"…",dots:"…",cdots:"…",in:"∈",notin:"∉",cup:"∪",cap:"∩",subset:"⊂",subseteq:"⊆",emptyset:"∅",forall:"∀",exists:"∃",
+  sum:"Σ",prod:"Π",int:"∫",partial:"∂",nabla:"∇",degree:"°",circ:"°",angle:"∠",perp:"⊥",parallel:"∥",neg:"¬",land:"∧",lor:"∨",
+  sin:"sin",cos:"cos",tan:"tan",log:"log",ln:"ln",lim:"lim",max:"max",min:"min",quad:" ",qquad:"  "};
+const SUP={"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻","(":"⁽",")":"⁾","n":"ⁿ","i":"ⁱ"};
+const SUB={"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉","+":"₊","-":"₋","(":"₍",")":"₎"};
+function texGroup(s,i){while(s[i]===" ")i++;if(s[i]!=="{")return null;let d=0;for(let j=i;j<s.length;j++){if(s[j]==="{")d++;else if(s[j]==="}"&&--d===0)return [s.slice(i+1,j),j+1]}return null}
+function texPlain(tex){
+  let s=String(tex);
+  s=s.replace(/\\(?:left|right)\s*\.?/g,"").replace(/\\(?:begin|end)\{[^}]*\}/g,"").replace(/\\(?:text|mathrm|mathbf|textbf|mathit|operatorname|mathbb|boxed)\s*\{([^{}]*)\}/g,"$1");
+  for(let guard=0;guard<50;guard++){const m=/\\[dt]?frac/.exec(s);if(!m)break;const a=texGroup(s,m.index+m[0].length),b=a&&texGroup(s,a[1]);
+    if(!a||!b){s=s.slice(0,m.index)+s.slice(m.index+m[0].length);continue}
+    const w=(x,num)=>(num?/^-?[\w.]+$/:/^([\d.]+|[A-Za-z])$/).test(x.trim())?x.trim():"("+x.trim()+")";
+    s=s.slice(0,m.index)+w(a[0],true)+"/"+w(b[0],false)+s.slice(b[1])}
+  for(let guard=0;guard<50;guard++){const m=/\\sqrt\s*(\[[^\]]*\])?/.exec(s);if(!m)break;const g=texGroup(s,m.index+m[0].length);
+    if(!g){s=s.slice(0,m.index)+"√"+s.slice(m.index+m[0].length);continue}
+    const inner=g[0].trim(),pre=m[1]?(m[1].slice(1,-1)==="3"?"∛":"√["+m[1].slice(1,-1)+"]"):"√";
+    s=s.slice(0,m.index)+pre+(/^[\w.]+$/.test(inner)?inner:"("+inner+")")+s.slice(g[1])}
+  s=s.replace(/\\vec\s*\{([^{}]*)\}/g,"$1⃗").replace(/\\(?:overline|bar)\s*\{([^{}]*)\}/g,"$1̅").replace(/\\hat\s*\{([^{}]*)\}/g,"$1̂");
+  s=s.replace(/\\([A-Za-z]+)/g,(m,k)=>k in TEX_SYM?TEX_SYM[k]:m).replace(/\\[,;:! ]/g," ").replace(/\\\\/g,"; ").replace(/\\([{}%&_#$])/g,"$1");
+  s=s.replace(/\^\s*\{([^{}]*)\}/g,(m,x)=>[...x.trim()].every(c=>c in SUP)?[...x.trim()].map(c=>SUP[c]).join(""):"^("+x+")")
+     .replace(/\^\s*(-?\d+|[A-Za-z])/g,(m,x)=>[...x].every(c=>c in SUP)?[...x].map(c=>SUP[c]).join(""):"^"+x)
+     .replace(/_\s*\{([^{}]*)\}/g,(m,x)=>[...x].every(c=>c in SUB)?[...x].map(c=>SUB[c]).join(""):"_"+x)
+     .replace(/_(\d)/g,(m,x)=>SUB[x]);
+  s=s.replace(/\^\s*\\?circ|\^°/g,"°").replace(/[{}]/g,"").replace(/&/g," ").replace(/\s{2,}/g," ").trim();
+  return s
+}
+function mathPlain(text){return mathParts(text).map(([t,isM])=>isM?texPlain(t):t).join("")}
+function mathSpeak(text){
+  const say=t=>" "+texPlain(t).replace(/([a-zA-Z0-9)])²/g,"$1 al quadrato").replace(/([a-zA-Z0-9)])³/g,"$1 al cubo")
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻ⁿ]+/g,m=>" alla "+[...m].map(c=>({"⁻":"meno ","ⁿ":"n"})[c]??"⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)).join(""))
+    .replace(/∛/g," radice cubica di ").replace(/√/g," radice di ").replace(/±/g," più o meno ").replace(/≠/g," diverso da ").replace(/≤/g," minore o uguale a ")
+    .replace(/≥/g," maggiore o uguale a ").replace(/</g," minore di ").replace(/>/g," maggiore di ").replace(/=/g," uguale ").replace(/[×·*]/g," per ")
+    .replace(/[÷/]/g," diviso ").replace(/\+/g," più ").replace(/(\S)\s*[-−]\s*/g,"$1 meno ").replace(/^\s*[-−]/," meno ").replace(/π/g," pi greco ")
+    .replace(/∞/g," infinito ").replace(/[⇒→]/g,", quindi, ").replace(/Δ/g," delta ").replace(/°/g," gradi ").replace(/[₀₁₂₃₄₅₆₇₈₉]/g,c=>" "+"₀₁₂₃₄₅₆₇₈₉".indexOf(c)).replace(/[()\[\]]/g," ")+" ";
+  return mathParts(text).map(([t,isM])=>isM?say(t):t).join("").replace(/\$/g,"").replace(/\s*[⇒→]\s*/g,", quindi, ").replace(/[ \t]{2,}/g," ")
+}
+const SPK={voice:null,spoken:0,said:"",on:false,q:0,
+  pick(){
+    if(!("speechSynthesis" in window))return null;
+    const all=speechSynthesis.getVoices().filter(v=>/^it/i.test(v.lang));if(!all.length)return null;
+    const want=LS.get("natan_voce","");if(want){const w=all.find(v=>v.name===want);if(w)return w}
+    const score=v=>(/neural|natural|online|premium|enhanced|siri/i.test(v.name)?10:0)+(/google/i.test(v.name)?6:0)+(/alice|federica|emma|isabella|elsa|diego|luca|giorgio|paola/i.test(v.name)?3:0)+(v.localService?0:1);
+    return all.sort((a,b)=>score(b)-score(a))[0]},
+  voices(){return "speechSynthesis" in window?speechSynthesis.getVoices().filter(v=>/^it/i.test(v.lang)):[]},
+  active(){return CALL.on||$("tVoice").classList.contains("on")},
+  begin(){this.spoken=0;this.said="";this.on=this.active();if(this.on)this.cancel(true)},
+  feed(text,final){
+    if(!this.on||!("speechSynthesis" in window))return;
+    const clean=String(text).replace(FILE_RX,"").replace(/\[\[locale:[^\]]+\]\]/g,"").replace(/[🧠📷⏳✓✗•🎨🎬📝📊]/g,"");
+    if(/^(Sto pensando|Ci penso|Cerco|Preparo|Risponde un volontario|Il server di Natan è spento: cerco)/.test(clean)||!/[a-zà-ù0-9]/i.test(clean))return;
+    if(this.said&&!clean.startsWith(this.said)){this.spoken=0;this.said=""}       // il testo è cambiato (era un messaggio d'attesa)
+    let upto=-1;const rest=clean.slice(this.spoken);
+    if(final)upto=clean.length;else{const m=[...rest.matchAll(/[.!?…:;\n](\s|$)/g)];if(m.length){const last=m[m.length-1];upto=this.spoken+last.index+1}}
+    if(upto>this.spoken){const part=clean.slice(this.spoken,upto).trim();this.spoken=upto;this.said=clean.slice(0,upto);if(part)this.utter(part)}
+    if(final&&!this.q)CALL.spokeAll()
+  },
+  utter(t){
+    try{t=mathSpeak(t);const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang="it-IT";const v=this.voice||(this.voice=this.pick());try{if(v)u.voice=v}catch(e){}u.rate=1.04;u.pitch=1;
+      this.q++;u.onstart=()=>CALL.setPhase("parla");u.onboundary=()=>CALL.bump();u.onend=u.onerror=()=>{this.q=Math.max(0,this.q-1);if(!this.q)CALL.spokeAll()};
+      speechSynthesis.speak(u)}catch(e){this.q=Math.max(0,this.q-1)}},       // la voce non deve mai bloccare la risposta
+  say(t){this.on=true;this.spoken=0;this.said="";this.cancel(true);this.feed(t,true)},
+  cancel(keep){try{speechSynthesis.cancel()}catch(e){}this.q=0;if(!keep)this.on=false}
+};
+if("speechSynthesis" in window)speechSynthesis.onvoiceschanged=()=>{SPK.voice=null};
+
+// =====================================================================================================
+// CHIAMATA: palla blu quando parli tu, palla viola quando parla Natan
+const CALL={on:false,phase:"",rec:null,stream:null,an:null,level:0,energy:0,muted:false,raf:0,t:0,
+  async open(){
+    if(!SR){toast("Questo browser non sente la voce: usa Chrome, Edge o Safari aggiornati");return}
+    this.on=true;this.muted=false;$("call").classList.remove("hide");$("callMute").classList.remove("off");if(VIEW!=="chat")showChat();
+    try{this.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+      const ac=new (window.AudioContext||window.webkitAudioContext)();const src=ac.createMediaStreamSource(this.stream);const an=ac.createAnalyser();an.fftSize=512;src.connect(an);this.an=an;this.ac=ac}catch(e){this.an=null}
+    this.loop();this.listen()},
+  close(){this.on=false;try{this.rec&&this.rec.abort()}catch(e){}this.rec=null;SPK.cancel();try{this.stream&&this.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{this.ac&&this.ac.close()}catch(e){}
+    cancelAnimationFrame(this.raf);$("call").classList.add("hide")},
+  setPhase(p){this.phase=p;$("callState").textContent={ascolto:"Ti ascolto",pensa:"Natan ci pensa",parla:"Natan parla",pausa:"Microfono spento"}[p]||"";if(p==="ascolto")$("callSub").textContent="Parla pure: quando ti fermi, Natan risponde."},
+  listen(){
+    if(!this.on||busy)return;if(this.muted){this.setPhase("pausa");return}
+    this.setPhase("ascolto");const r=new SR();r.lang="it-IT";r.interimResults=true;r.continuous=false;this.rec=r;let said="";
+    r.onresult=ev=>{said=[...ev.results].map(x=>x[0].transcript).join(" ");$("callSub").textContent=said};
+    r.onend=()=>{this.rec=null;if(!this.on)return;if(said.trim()){this.setPhase("pensa");$("callSub").textContent="«"+said.trim()+"»";send(said.trim())}else setTimeout(()=>this.listen(),250)};
+    r.onerror=e=>{if(e.error==="not-allowed"){toast("Permetti l'uso del microfono per la chiamata");this.close()}};
+    try{r.start()}catch(e){}},
+  afterAnswer(){if(this.on&&!SPK.q)setTimeout(()=>{if(this.on&&!SPK.q&&!busy)this.listen()},600)},
+  spokeAll(){if(this.on&&!busy)setTimeout(()=>{if(this.on&&!SPK.q&&!busy)this.listen()},350)},
+  bump(){this.energy=1},
+  loop(){
+    const cv=$("orb"),g=cv.getContext("2d"),W=cv.width,H=cv.height;
+    const step=()=>{if(!this.on)return;this.t+=1/60;
+      let lvl=0;if(this.an&&this.phase==="ascolto"){const a=new Uint8Array(this.an.fftSize);this.an.getByteTimeDomainData(a);let s=0;for(const v of a){const d=(v-128)/128;s+=d*d}lvl=Math.min(1,Math.sqrt(s/a.length)*5)}
+      this.level+=(lvl-this.level)*.25;this.energy*=.93;
+      const ph=this.phase;
+      const amp=ph==="ascolto"?this.level:ph==="parla"?.35+.4*this.energy+.12*Math.sin(this.t*7):.12+.05*Math.sin(this.t*2);
+      const [c1,c2]=ph==="parla"?["#c69bff","#6a3cf0"]:ph==="pensa"?["#9aa3c7","#3a4060"]:ph==="pausa"?["#5b607a","#2a2d38"]:["#8fd0ff","#1f6fff"];
+      g.clearRect(0,0,W,H);const cx=W/2,cy=H/2,R=W*.27*(1+amp*.28);
+      g.save();g.shadowColor=c2;g.shadowBlur=60+amp*60;
+      g.beginPath();for(let i=0;i<=96;i++){const a=i/96*Math.PI*2;const w=1+(.012+amp*.045)*Math.sin(a*3+this.t*2.2)+(.008+amp*.03)*Math.sin(a*5-this.t*3.1);const x=cx+Math.cos(a)*R*w,y=cy+Math.sin(a)*R*w;i?g.lineTo(x,y):g.moveTo(x,y)}
+      const gr=g.createRadialGradient(cx-R*.35,cy-R*.4,R*.1,cx,cy,R*1.1);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;g.fill();g.restore();
+      this.raf=requestAnimationFrame(step)};
+    step()}
+};
+$("callBtn").onclick=()=>CALL.open();$("callEnd").onclick=()=>CALL.close();
+$("callMute").onclick=()=>{CALL.muted=!CALL.muted;$("callMute").classList.toggle("off",CALL.muted);if(CALL.muted){try{CALL.rec&&CALL.rec.abort()}catch(e){}CALL.setPhase("pausa")}else CALL.listen()};
+$("orb").onclick=()=>{if(CALL.phase==="parla"){SPK.cancel(true);SPK.q=0;CALL.listen()}};
+
+// =====================================================================================================
+// PAGINE
+function openPage(p){
+  VIEW=p;$("chatView").classList.add("hide");$("pageView").classList.remove("hide");const pg=$("page");pg.innerHTML="";$("pageView").scrollTop=0;
+  renderSide();({impara:openImpara,aiuta:openHelp,impostazioni:openSettings,biblioteca:openLib,giochi:openGames,test:openTest}[p]||openImpara)(pg)
+}
+// --- Natan Test (verifiche): file a parte, caricato solo quando serve
+let TEST_P=null;
+async function openTest(pg){
+  pg.append(el("p","small","Carico Natan Test…"));
+  try{if(!window.NATAN_TEST)await (TEST_P||(TEST_P=new Promise((ok,bad)=>{
+      window.natanTestLib={el,LS,api,gen,deviceLevel,toast,cerca:q=>searchLib(q,4).then(r=>r.map(n=>n.x||"")).catch(()=>[])};
+      const sc=document.createElement("script");sc.src="test.js?v="+VERSION;sc.onload=ok;sc.onerror=()=>{TEST_P=null;bad(new Error("non riesco a caricare Natan Test"))};document.head.append(sc)})));
+    if(VIEW==="test"){pg.innerHTML="";window.NATAN_TEST.open(pg)}}
+  catch(e){pg.innerHTML="";pg.append(el("p","",e.message+": controlla la connessione e riprova."))}
+}
+// --- Giochi (in file a parte, caricati solo quando servono)
+let GIOCHI_P=null,SYNC_T=0,SYNC_X=null;
+function giochiSync(all){   // l'esperienza dei bot arriva anche al Mac (sezione «Agenti AI»): al massimo una volta ogni 15 secondi
+  const comp={};for(const k in all){const r=all[k];comp[k]={p:r.p||0,v:r.v||0,s:r.s||0,n:r.n||0,xp:r.xp}}
+  SYNC_X=comp;if(SYNC_T)return;SYNC_T=setTimeout(()=>{SYNC_T=0;const b=SYNC_X;api("/giochi/bot",{bots:b}).catch(()=>{})},15000)
+}
+async function openGames(pg){
+  pg.append(el("p","small","Carico i giochi…"));
+  try{if(!window.GIOCHI||!window.GIOCHI.pronto)await (GIOCHI_P||(GIOCHI_P=(async()=>{
+      const load=f=>new Promise((ok,bad)=>{const sc=document.createElement("script");sc.src=f+"?v="+VERSION;sc.onload=ok;sc.onerror=()=>bad(new Error("non riesco a caricare i giochi"));document.head.append(sc)});
+      try{window.natanPeerLib=peerLib;window.natanGiochiSync=giochiSync;window.natanRelayBase=async()=>{if(!BASE)await findBase();return BASE||""};
+        window.NATAN_VERSIONE=VERSION;if(!window.GIOCHI)await load("giochi.js");for(const f of ["giochi-z.js","giochi-carte.js","giochi-dama.js","giochi-sport.js","giochi-classici.js","giochi-live.js"])await load(f);window.GIOCHI.pronto=true}
+      catch(e){GIOCHI_P=null;throw e}})()));
+    if(VIEW==="giochi"){pg.innerHTML="";window.GIOCHI.open(pg)}}
+  catch(e){pg.innerHTML="";pg.append(el("p","",e.message+": controlla la connessione e riprova."))}
+}
+function backBtn(pg,to){const b=el("button","btn ghost",to==="impara"?"← Torna a Impara":"← Torna alla chat");b.style.alignSelf="flex-start";b.onclick=()=>to==="impara"?openPage("impara"):openChat();pg.append(b)}
+
+// --- Biblioteca
+async function openLib(pg){
+  backBtn(pg,"impara");pg.append(el("h1","","Biblioteca"),el("p","lead","Gli appunti che Natan ha preso su Wikipedia, materia per materia. Scegli quelle che ti servono e scaricale: così Natan risponde bene anche senza Internet."));
+  const st=el("div","small");pg.append(st);
+  const q=el("input","field");q.id="libq";q.placeholder="Cerca una materia (es. formiche)";pg.append(q);
+  const panel=el("div","panel");const list=el("div","list");panel.append(list);pg.append(panel);
+  const meta=libMeta();let idx=null;
+  try{idx=await (await fetch(LIBURL+"indice.json?t="+Date.now(),{cache:"no-store"})).json()}catch(e){st.textContent="Non vedo la biblioteca online: ti mostro quella già scaricata."}
+  const items=idx?idx.materie:Object.entries(meta).filter(([m])=>m!==MINE).map(([m,v])=>({m,n:v.n,kb:v.kb||0,max:v.max}));
+  const pub={};items.forEach(it=>pub[it.m]=it);
+  const areas={};Object.entries(AREE).forEach(([a,l])=>areas[a]=l.slice());
+  items.forEach(it=>{if(!SUBJ.includes(it.m))(areas.Altro=areas.Altro||[]).push(it.m)});
+  const ready=items.length;
+  if(idx)st.textContent=ready+" materie pronte su "+SUBJ.length+" · "+num(idx.totale||0)+" appunti in tutto. Le altre arrivano man mano che Natan le studia.";
+  if(meta[MINE]){const li=el("div","li");const g=el("span","grow");g.append(el("strong","",MINE),el("span","small",num(meta[MINE].n)+" appunti presi con «Impara»"));li.append(g);list.append(li)}
+  const boxes={},rows=[],groups=[];const first=!Object.keys(meta).filter(m=>m!==MINE).length;
+  for(const [a,l] of Object.entries(areas)){
+    const d=document.createElement("details");d.className="libarea";const n=l.filter(m=>pub[m]).length;
+    const sm=document.createElement("summary");sm.append(el("strong","",a),el("span","small"," "+n+" pronte su "+l.length));d.append(sm);
+    const inner=el("div","list");d.append(inner);let open=false;
+    for(const m of l){const it=pub[m];let li;
+      if(it){li=el("label","li");const cb=el("input");cb.type="checkbox";cb.checked=!!meta[m]||(first&&(prof?.interests||[]).some(i=>norm(i)===norm(m)));boxes[m]=cb;if(cb.checked)open=true;
+        const g=el("span","grow");g.append(el("strong","",m),el("span","small",num(it.n)+" appunti, "+mb(it.kb)+(meta[m]?(meta[m].max<it.max?" · da aggiornare":" · sul dispositivo"):"")));li.append(cb,g)}
+      else{li=el("div","li off");const g=el("span","grow");g.append(el("strong","",m),el("span","small","In arrivo: Natan non l'ha ancora studiata"));li.append(g)}
+      li.dataset.m=m;inner.append(li);rows.push(li)}
+    d.open=open||a==="Scuola superiore";d.dataset.open=d.open?"1":"";groups.push(d);list.append(d)}
+  q.oninput=()=>{const t=q.value.trim();const hit=new Set(t?subjFind(t):[]);
+    groups.forEach(d=>{let any=false;d.querySelectorAll(".li").forEach(li=>{const ok=!t||hit.has(li.dataset.m);li.style.display=ok?"":"none";if(ok)any=true});
+      d.style.display=any?"":"none";d.open=t?any:!!d.dataset.open})};
+  if(!idx)return;
+  const go=el("button","btn","Scarica le materie scelte");go.style.alignSelf="flex-start";panel.append(go);
+  go.onclick=async()=>{go.disabled=true;
+    try{const want=Object.keys(boxes).filter(m=>boxes[m].checked);const m2=libMeta();
+      for(const m of Object.keys(m2))if(m!==MINE&&!want.includes(m)){await DB.del("m:"+m);delete m2[m]}setLibMeta(m2);
+      await downloadLib(want,(name,i,n)=>{st.textContent="Scarico "+name+" ("+(i+1)+" di "+n+")…"});toast("Biblioteca aggiornata ✓");openPage("biblioteca")}
+    catch(e){st.textContent="Errore: "+e.message;go.disabled=false}}
+}
+
+// --- Impara: Natan studia da solo + appunti dalla A alla Z + resoconti
+const STUDY={on:false,topic:"",materia:"",cur:"",pages:0,notes:0,sent:0,msg:"",p0:0,n0:0,titles:[],seen:new Set(LS.get("natan_studiati",[]))};
+const SKIP=/^(note|bibliografia|collegamenti esterni|voci correlate|altri progetti|fonti|riferimenti|filmografia|discografia)$/i;
+function chunks(text){
+  const out=[];let cur="";
+  for(let p of text.split(/\n+/)){p=p.trim();if(!p)continue;
+    const h=p.match(/^=+\s*(.*?)\s*=+$/);if(h){if(SKIP.test(h[1]))break;continue}
+    if(cur.length+p.length>800&&cur.length>200){out.push(cur);cur=""}
+    cur+=(cur?"\n":"")+p}
+  if(cur.length>=120)out.push(cur);
+  return out.filter(c=>c.length>=120).map(c=>c.slice(0,1400))
+}
+async function studyLoop(){
+  STUDY.on=true;STUDY.msg="";STUDY.p0=STUDY.pages;STUDY.n0=STUDY.notes;STUDY.titles=[];renderImpTop();updateStatus();let pool=[];let offset=0;const auto=!STUDY.topic;
+  try{
+    while(STUDY.on){
+      if(!pool.length){
+        const ints=prof?.interests||["Storia"];const mat=auto?ints[Math.floor(Math.random()*ints.length)]:STUDY.materia;if(auto)STUDY.materia=mat;
+        const s=await wiki({action:"query",list:"search",srlimit:10,srsearch:auto?mat:STUDY.topic,sroffset:auto?Math.floor(Math.random()*200):offset});
+        offset+=10;pool=((s.query&&s.query.search)||[]).map(x=>x.title).filter(x=>!STUDY.seen.has(x));
+        if(!pool.length){if(!auto){STUDY.msg="Ho finito: non trovo altre pagine nuove su «"+STUDY.topic+"».";break}await sleep(1500);continue}
+      }
+      const title=pool.shift();STUDY.cur=title;renderImpTop();
+      const e=await wiki({action:"query",prop:"extracts",explaintext:1,redirects:1,titles:title});
+      const page=Object.values((e.query&&e.query.pages)||{})[0]||{};const cs=chunks(page.extract||"").slice(0,25);
+      if(cs.length){
+        const url="https://it.wikipedia.org/wiki/"+encodeURIComponent((page.title||title).replace(/ /g,"_"));
+        const rows=(await DB.get("m:"+MINE))||[];const base=Date.now();
+        cs.forEach((c,i)=>rows.push([base+i,"it",page.title||title,c]));await DB.set("m:"+MINE,rows);
+        const meta=libMeta();meta[MINE]={n:rows.length,max:base,kb:0};setLibMeta(meta);
+        const qd=LS.get("natan_appunti_coda",[]);cs.forEach(c=>qd.push({materia:STUDY.materia||"Generale",title:page.title||title,url,text:c}));LS.set("natan_appunti_coda",qd.slice(-3000));
+        STUDY.pages++;STUDY.notes+=cs.length;STUDY.titles.push(page.title||title)
+      }
+      STUDY.seen.add(title);LS.set("natan_studiati",[...STUDY.seen].slice(-3000));
+      if(online)flushNotes();renderImpTop();await sleep(1500)
+    }
+  }catch(e){STUDY.msg="Mi sono fermato: "+(e.name==="AbortError"?"Wikipedia non risponde":e.message)+". Riprova tra poco."}
+  STUDY.on=false;STUDY.cur="";
+  if(STUDY.pages>STUDY.p0){const r=LS.get("natan_resoconti",[]);r.unshift({ts:Date.now(),topic:auto?"Scelto da Natan ("+(STUDY.materia||"varie")+")":STUDY.topic,pages:STUDY.pages-STUDY.p0,notes:STUDY.notes-STUDY.n0,titles:STUDY.titles.slice(-30),msg:STUDY.msg});LS.set("natan_resoconti",r.slice(0,40))}
+  renderImpTop();updateStatus()
+}
+function openImpara(pg){
+  pg.append(el("h1","","Impara"),el("p","lead","Natan legge Wikipedia e prende appunti. Restano sul tuo dispositivo e vengono proposti per la biblioteca di tutti."));
+  const top=el("div","panel");top.id="imptop";pg.append(top);
+  const tabs=el("div","tabs");tabs.id="imptabs";pg.append(tabs);const body=el("div","");body.id="impbody";pg.append(body);
+  renderImpTop();renderImpTabs();renderImpBody()
+}
+function renderImpTop(){
+  const top=$("imptop");if(!top||VIEW!=="impara")return;top.innerHTML="";
+  const r=el("div","row");
+  const inp=el("input","field");inp.placeholder="Cosa devo studiare? Lascia vuoto e scelgo io";inp.value=STUDY.topic;inp.disabled=STUDY.on;inp.style.flex="1 1 280px";inp.id="studyTopic";
+  const sel=subjSelect(["Generale"]);sel.style.flex="0 0 190px";
+  const want=STUDY.materia||(prof?.interests||[])[0]||"Generale";sel.value=want;
+  if(sel.value!==want){const o=el("option","",want);o.value=want;sel.prepend(o);sel.value=want}sel.disabled=STUDY.on;sel.setAttribute("aria-label","Materia degli appunti");
+  const stop=el("button","btn red","Basta");stop.id="studyStop";stop.disabled=!STUDY.on;stop.onclick=()=>{STUDY.on=false;STUDY.msg="Fermato: riparto quando vuoi."};
+  const go=el("button","btn","Studia");go.id="studyGo";go.disabled=STUDY.on;go.onclick=()=>{STUDY.topic=inp.value.trim();STUDY.materia=sel.value;studyLoop()};
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")go.click()});
+  r.append(inp,sel,stop,go);top.append(r);
+  const wait=LS.get("natan_appunti_coda",[]).length;
+  const line=STUDY.on?"In diretta: "+STUDY.notes+" appunti da "+STUDY.pages+" pagine"+(STUDY.cur?", ora leggo «"+STUDY.cur+"»":"")
+    :(STUDY.msg||"Scrivi un argomento e premi «Studia».")+(STUDY.sent||wait?" "+STUDY.sent+" appunti già arrivati al server"+(wait?", "+wait+" in attesa.":"."):"");
+  top.append(el("span","live",line));
+  if(!STUDY.on&&IMP.tab==="az")renderImpBody()
+}
+function renderImpTabs(){const t=$("imptabs");if(!t)return;t.innerHTML="";
+  [["az","Appunti A-Z"],["res","Resoconti"]].forEach(([k,l])=>{const b=el("button",IMP.tab===k?"on":"",l);b.onclick=()=>{IMP.tab=k;renderImpTabs();renderImpBody()};t.append(b)});
+  const g=el("button","","Biblioteca");g.onclick=()=>openPage("biblioteca");t.append(g)}
+async function renderImpBody(){
+  const body=$("impbody");if(!body||VIEW!=="impara")return;body.innerHTML="";
+  if(IMP.tab==="res"){
+    const r=LS.get("natan_resoconti",[]);const l=el("div","list");
+    if(!r.length)l.append(el("span","small","Ancora nessuno studio: scrivi un argomento qui sopra e premi «Studia»."));
+    r.forEach(x=>{const c=el("div","panel");c.append(el("h2","",x.topic),el("span","small",new Date(x.ts).toLocaleString("it-IT")+": "+x.pages+" pagine, "+x.notes+" appunti"));
+      if(x.titles?.length)c.append(el("span","","Ho letto: "+x.titles.join(", ")));if(x.msg)c.append(el("span","small",x.msg));l.append(c)});
+    body.append(l);return}
+  const wrap=el("div","imp");const c1=el("div","col c1"),c2=el("div","col c2"),c3=el("div","c3");wrap.append(c1,c2,c3);body.append(wrap);
+  const meta=libMeta();const mats=Object.keys(meta).sort((a,b)=>a.localeCompare(b,"it"));
+  if(!mats.length){c3.append(el("h2","","La biblioteca è vuota"),el("p","","Scarica le materie da «Biblioteca», oppure fai studiare Natan qui sopra."));return}
+  if(!IMP.mat||!meta[IMP.mat])IMP.mat=mats[0];
+  mats.forEach(m=>{const b=el("button",m===IMP.mat?"on":"",m+" ("+num(meta[m].n)+")");b.onclick=()=>{IMP.mat=m;IMP.title="";renderImpBody()};c1.append(b)});
+  if(!IMP.rows[IMP.mat]){try{IMP.rows[IMP.mat]=(await DB.get("m:"+IMP.mat))||[]}catch(e){IMP.rows[IMP.mat]=[]}}
+  if(!body.contains(wrap))return;
+  const by=new Map();IMP.rows[IMP.mat].forEach(r=>{const t=r[2]||"?";if(!by.has(t))by.set(t,[]);by.get(t).push(r)});
+  const titles=[...by.keys()].sort((a,b)=>a.localeCompare(b,"it"));let letter="";
+  if(!IMP.title||!by.has(IMP.title))IMP.title=titles[0]||"";
+  for(const t of titles){const L=norm(t[0]||"?").toUpperCase();if(L!==letter){letter=L;c2.append(el("strong","",L))}
+    const b=el("button",t===IMP.title?"on":"",t+" ("+by.get(t).length+")");b.onclick=()=>{IMP.title=t;renderImpBody()};c2.append(b)}
+  if(IMP.title){const ns=by.get(IMP.title);c3.append(el("h2","",IMP.title));
+    const a=el("a","","Apri su Wikipedia");a.href="https://"+(ns[0][1]||"it")+".wikipedia.org/wiki/"+encodeURIComponent(IMP.title.replace(/ /g,"_"));a.target="_blank";a.rel="noopener";a.style.fontSize="13px";c3.append(a);
+    ns.forEach(r=>c3.append(el("p","",r[3])))}
+  const on=c2.querySelector(".on");if(on)on.scrollIntoView({block:"nearest"})
+}
+
+// --- Aiuta Natan (volontari)
+const HELP={on:false,stato:LS.get("natan_vol",""),aiuti:0,aiutati:0,job:false,msg:"",test:LS.get("natan_test",null),testing:false,lock:null,hw:null,
+  rete:{utenti_online:0,volontari_online:0,in_attesa:0},mac:"",log:LS.get("natan_vol_log",[])};
+async function hwInfo(){
+  const g=await gpuInfo();const cores=navigator.hardwareConcurrency||4;const ram=memGB()||8;
+  const v=g.vendor||"";const name=v.includes("nvidia")?"NVIDIA":v.includes("amd")||v.includes("ati")?"AMD":v.includes("apple")?"Apple":v.includes("intel")?"Intel":v.includes("qualcomm")?"Qualcomm":v.includes("arm")?"ARM":v?v:"";
+  const strong=name==="NVIDIA"||name==="AMD"||name==="Apple";
+  const gpuTxt=!g.ok?"non adatta (manca WebGPU)":(name||"sconosciuta")+(g.arch?" ("+g.arch+")":"")+(g.desc?" · "+g.desc:"")+(g.maxBuf?" · fino a "+(g.maxBuf/1073741824).toFixed(1).replace(".",",")+" GB per blocco":"");
+  // ragionamento: la RAM decide quanto è grande il modello (3/4 della RAM), la scheda video e il processore se va veloce
+  const budget=ram*0.75;const why=[];let lvl="";
+  for(const k of ORDER)if(LEVELS[k].ram<=budget)lvl=k;
+  why.push("RAM "+ram+" GB: posso usare fino a "+String(Math.round(budget*10)/10).replace(".",",")+" GB (3/4)"+(lvl?", basta per "+LEVELS[lvl].name:", troppo poca"));
+  if(g.ok&&!strong&&lvl==="massimo"){lvl="medio";why.push("Scheda video integrata: meglio "+LEVELS.medio.name+", il più grande andrebbe lento")}
+  if(g.ok&&g.maxBuf&&g.maxBuf<1.2e9&&lvl&&lvl!=="veloce"){lvl="veloce";why.push("La scheda video accetta blocchi piccoli: uso "+LEVELS.veloce.name)}
+  else if(g.ok&&g.maxBuf&&g.maxBuf<2.2e9&&lvl==="massimo"){lvl="medio";why.push("La scheda video accetta blocchi medi: uso "+LEVELS.medio.name)}
+  if(cores<4&&lvl&&lvl!=="veloce"){lvl="veloce";why.push("Solo "+cores+" core: uso il modello più leggero")}
+  if(strong&&g.ok)why.push("Scheda video "+name+": ottima per Natan");
+  if(!g.ok){lvl="";why.unshift("Questo browser non può usare la scheda video: serve Chrome o Edge aggiornati")}
+  return {g,cores,ram,ramBrowser:navigator.deviceMemory||0,gpuTxt,lvl,why}
+}
+async function pcTest(){
+  HELP.testing=true;HELP.msg="";renderHelpTest();
+  try{
+    const hw=await hwInfo();HELP.hw=hw;if(!hw.lvl)throw new Error(hw.why[0]||"questo computer non può aiutare");
+    let lvl=hw.lvl,r=null;
+    for(;;){HELP.msg="Scarico Natan "+LEVELS[lvl].name+" e lo provo…";renderHelpTest();
+      r=await gen(lvl,[{role:"user",content:"Spiega in cinque frasi che cos'è la fotosintesi."}],{maxTokens:160});
+      if(r.toks>=6||lvl==="veloce")break;
+      hw.why.push("Con "+LEVELS[lvl].name+" va piano ("+Math.round(r.toks)+" token/s): provo un modello più leggero");lvl=ORDER[ORDER.indexOf(lvl)-1]}
+    const words=r.text.split(/\s+/).length;
+    HELP.test={toks:Math.round(r.toks*10)/10,parole:Math.round(words/r.secs*10)/10,modello:ENG.id,livello:lvl,ram:hw.ram,cores:hw.cores,gpu:hw.gpuTxt,ok:r.toks>=5,ts:Date.now(),why:hw.why};
+    LS.set("natan_test",HELP.test);HELP.msg=HELP.test.ok?"":"Il computer è un po' lento per aiutare gli altri, ma Natan funziona lo stesso per te.";
+  }catch(e){HELP.msg="Test non riuscito: "+e.message}
+  HELP.testing=false;renderHelpTest();renderHelpStatus()
+}
+function saveCert(d){if(d&&d.certificato){LS.set("natan_cert",d.certificato);if(HELP.on&&!NET.peer)netHost()}}
+async function helpOn(){
+  if(!HELP.test||!HELP.test.ok){toast("Prima fai il test del PC");return}
+  try{const d=await api("/rete/volontario",{attivo:true,test:HELP.test,chiave:await volPub()});HELP.stato=d.stato;LS.set("natan_vol",d.stato);HELP.aiutati=d.aiutati||0;HELP.rete=d.rete||HELP.rete;HELP.mac=d.mac_occupato?"occupato":"libero";saveCert(d)}
+  catch(e){if(e.code!==0||!LS.get("natan_cert",null)){HELP.msg=e.code===0?"Il server di Natan è spento: la prima volta serve acceso. Riprova quando lo è.":e.message;renderHelpStatus();return}HELP.mac="spento"}
+  HELP.on=true;HELP.msg="";netLog("Hai acceso «Aiuta Natan»");renderHelpStatus();renderHelpBadge();
+  if(!DESK)try{HELP.lock=await navigator.wakeLock?.request("screen")}catch(e){}
+  netHost();helpLoop()
+}
+async function helpOff(){HELP.on=false;netStop();try{await api("/rete/volontario",{attivo:false})}catch(e){}try{HELP.lock?.release()}catch(e){}netLog("Hai spento «Aiuta Natan»");renderHelpStatus();renderHelpBadge()}
+function trimMsgs(ms){
+  const sys=ms.filter(m=>m.role==="system").map(m=>({role:"system",content:String(m.content).slice(0,7000)}));
+  const rest=ms.filter(m=>m.role!=="system").slice(-6).map(m=>({role:m.role,content:String(m.content).slice(0,1500)}));
+  return [...sys,...rest]
+}
+async function helpLoop(){
+  while(HELP.on){
+    try{
+      const d=await api("/rete/prendi",{attesa:20});
+      HELP.stato=d.stato||HELP.stato;LS.set("natan_vol",HELP.stato);HELP.aiuti=d.aiuti||0;HELP.aiutati=typeof d.aiutati==="number"?Math.max(d.aiutati,HELP.aiutati):HELP.aiutati;
+      HELP.rete=d.rete||HELP.rete;HELP.mac=d.mac_occupato?"occupato":"libero";HELP.sempre=d.sempre!==false;HELP.msg="";saveCert(d);renderHelpStatus();renderHelpBadge();
+      if(HELP.stato==="sospeso"){HELP.on=false;netStop();netLog("Sei stato sospeso: parlane con chi gestisce Natan");break}
+      if(!d.lavoro)continue;
+      const w=d.lavoro;HELP.job=true;renderHelpStatus();renderHelpBadge();const t0=Date.now();let last=0;
+      if(w.crea&&w.crea.kind){                             // il Mac è occupato: preparo io il documento o la presentazione
+        try{const res=await browserCreate(String(w.crea.kind),String(w.crea.arg||""),HELP.test.livello,t=>{if(Date.now()-last>1500){last=Date.now();api("/rete/consegna",{id:w.id,testo:t,finito:false}).catch(()=>{})}});
+          await api("/rete/consegna",{id:w.id,testo:res.testo,finito:true,files:res.files});HELP.aiutati++;netLog("Hai creato un file per qualcuno ("+Math.round((Date.now()-t0)/1000)+" s)")}
+        catch(e){try{await api("/rete/consegna",{id:w.id,testo:"",finito:true})}catch(er){}}
+        HELP.job=false;renderHelpStatus();renderHelpBadge();await sleep((Date.now()-t0)/3);continue}
+      try{
+        const r=await gen(HELP.test.livello,trimMsgs(w.messages),{maxTokens:Math.min(w.max_tokens||900,1200),think:!!w.think,
+          onText:t=>{if(Date.now()-last>1500){last=Date.now();api("/rete/consegna",{id:w.id,testo:t,finito:false}).catch(()=>{})}}});
+        await api("/rete/consegna",{id:w.id,testo:r.text,finito:true});HELP.aiutati++;netLog("Hai risposto a una domanda ("+Math.round((Date.now()-t0)/1000)+" s)")
+      }catch(e){}
+      HELP.job=false;renderHelpStatus();renderHelpBadge();
+      await sleep((Date.now()-t0)/3)
+    }catch(e){if(e.code===0){if(HELP.mac!=="spento")netLog("Il server di Natan si è spento: i dispositivi possono collegarsi direttamente a te");HELP.mac="spento"}else HELP.msg="Problema: "+e.message;renderHelpStatus();await sleep(15000)}
+  }
+  HELP.job=false;renderHelpStatus();renderHelpBadge()
+}
+function openHelp(pg){
+  pg.append(el("h1","","Aiuta Natan e ti daremo un Natan potente 🤵‍♂️"),el("p","lead","Il tuo computer risponde alle domande dei compagni quando il server di Natan è occupato o spento. Vedi quante persone aiuti, mai chi sono."));
+  if(IS_MOBILE){const p=el("div","panel");p.append(el("h2","","Si aiuta dal computer"),el("span","","Così non consumi la batteria del telefono. Apri questo sito dal tuo PC o Mac con Chrome o Edge."));pg.append(p);return}
+  const t=el("div","panel");t.id="helpTest";pg.append(t);const s=el("div","panel");s.id="helpStatus";pg.append(s);const l=el("div","panel");l.id="helpLog";pg.append(l);
+  const rules=el("div","panel");rules.append(el("h2","","Le regole"));
+  ["Uso al massimo 3/4 della memoria del computer e lavoro al massimo 3/4 del tempo.",(DESK?"Con l'app per computer aiuto anche a finestra chiusa (icona di Natan vicino all'orologio). A batteria mi metto in pausa. Mi spegni da quell'icona.":"Funziono solo mentre questa pagina è aperta: chiudila e mi fermo subito."),"Natan fa controlli di qualità a sorpresa: all'inizio e poi ogni 3 giorni.","Premio: chi viene approvato ha Natan Pro, cioè Altissimo (14 miliardi di parametri) con ragionamento lungo e «Pensaci meglio»."].forEach(x=>rules.append(el("span","small",x)));
+  pg.append(rules);renderHelpTest();renderHelpStatus()
+}
+async function renderHelpTest(){
+  const p=$("helpTest");if(!p||VIEW!=="aiuta")return;
+  const hw=HELP.hw||(HELP.hw=await hwInfo());if(!$("helpTest"))return;
+  p.innerHTML="";p.append(el("h2","","Il tuo computer"));
+  const g=el("div","hw");
+  const row=(k,v)=>{const d=el("div");d.append(el("b","",k),el("span","",v));g.append(d)};
+  row("Processore",hw.cores+" core");row("Scheda video",hw.gpuTxt);
+  const rr=el("div");rr.append(el("b","","RAM"));const sel=el("select","field");sel.id="ramSel";sel.style.cssText="width:auto;min-height:36px;padding:4px 10px";
+  [4,8,12,16,24,32,64].forEach(n=>{const o=el("option","",n+" GB");o.value=n;sel.append(o)});sel.value=String(hw.ram);sel.setAttribute("aria-label","Quanta RAM ha il tuo computer");
+  sel.onchange=()=>{LS.set("natan_ram",Number(sel.value));HELP.hw=null;renderHelpTest()};rr.append(sel);
+  if(hw.ramBrowser&&hw.ramBrowser>=8&&!LS.get("natan_ram",0))rr.append(el("span","small","il browser vede al massimo 8 GB: se ne hai di più, sceglilo qui"));
+  g.append(rr);p.append(g);
+  const why=el("div","list");(HELP.test&&!HELP.testing?HELP.test.why||hw.why:hw.why).forEach(x=>why.append(el("span","small","• "+x)));p.append(why);
+  if(hw.lvl&&!HELP.test)p.append(el("span","","Livello che proverò: "+LEVELS[hw.lvl].name+" ("+LEVELS[hw.lvl].params+")"));
+  if(HELP.test&&!HELP.testing){const r=el("span","pill "+(HELP.test.ok?"ok":"no"),(HELP.test.ok?"Test superato: ":"Troppo lento: ")+num(HELP.test.parole)+" parole al secondo con "+(LEVELS[HELP.test.livello]?.name||""));r.style.alignSelf="flex-start";p.append(r)}
+  if(HELP.testing&&ENG.prog){const pc=Math.round(ENG.prog.p*100);const bar=el("div","bar");const i=el("i");i.style.width=pc+"%";bar.append(i);p.append(el("span","small","Scarico il modello: "+pc+"%"),bar)}
+  if(HELP.msg&&(HELP.testing||!HELP.on))p.append(el("span","small",HELP.msg));
+  const b=el("button","btn ghost",HELP.testing?"Test in corso…":HELP.test?"Rifai il test":"Fai il test del PC");b.id="testBtn";b.disabled=HELP.testing||HELP.on;b.onclick=pcTest;b.style.alignSelf="flex-start";p.append(b)
+}
+function renderHelpStatus(){
+  renderHelpBadge();updateStatus();
+  const p=$("helpStatus");if(!p||VIEW!=="aiuta")return;p.innerHTML="";
+  const head=el("div","row");head.append(el("h2","","Aiuta Natan"));const sp=el("span","");sp.style.flex="1";head.append(sp);
+  const sw=el("button","sw"+(HELP.on?" on":""));sw.id="helpSwitch";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(HELP.on));sw.setAttribute("aria-label","Aiuta Natan");
+  head.append(el("span","pill "+(HELP.on?"ok":"wait"),HELP.on?"Attivo di serie":HELP.testing?"Preparazione…":LS.get("natan_help_off",false)?"In pausa":"Si sta avviando"));p.append(head);
+  const st={in_prova:["wait","In prova: Natan sta facendo i controlli di qualità"],approvato:["ok","Approvato: hai Natan Pro"],sospeso:["no","Sospeso: i controlli non sono andati bene, parlane con chi gestisce Natan"]}[HELP.stato];
+  if(st){const pl=el("span","pill "+st[0],st[1]);pl.style.alignSelf="flex-start";p.append(pl)}
+  if(!HELP.on){p.append(el("span","small",LS.get("natan_help_off",false)?"L'hai messo in pausa dalle Impostazioni.":HELP.test&&!HELP.test.ok?"Questo computer è troppo lento per aiutare gli altri: Natan funziona lo stesso per te.":"Natan sta controllando il computer: tra poco inizia ad aiutare da solo."));if(HELP.msg)p.append(el("span","err",HELP.msg))}
+  else{
+    const mode=HELP.mac==="spento"?(NET.peer?"Il server di Natan è spento: i dispositivi si collegano direttamente a te (posto "+NET.slot+").":"Il server di Natan è spento"+(HELP.stato==="approvato"?": sto entrando nella rete senza server…":": serve essere approvati per aiutare senza il server."))
+      :HELP.mac==="occupato"?"Il server di Natan è occupato: le domande arrivano a te."
+      :HELP.sempre?"Il server di Natan è acceso: ti passa le domande di telefoni e PC quando sei libero.":"Il server di Natan è libero e risponde da solo: ti passo le domande appena è occupato o si spegne.";
+    p.append(el("span","",mode));
+    const g=el("div","grid4");
+    const stat=(n,l)=>{const d=el("div","stat");d.append(el("b","",num(n)),el("span","",l));g.append(d)};
+    stat(HELP.aiuti+NET.conns.size,"persone che aiuti adesso");stat(HELP.job?1:0,"domande in lavorazione");stat((HELP.rete.in_attesa||0)+Math.max(0,NET.queue.length-1),"domande in coda");
+    stat(HELP.aiutati,"risposte date in tutto");stat(HELP.rete.utenti_online,"persone online su Natan");stat(HELP.rete.volontari_online,"volontari online");
+    p.append(g);if(HELP.msg)p.append(el("span","err",HELP.msg))}
+  const l=$("helpLog");if(l){l.innerHTML="";l.append(el("h2","","Cosa è successo"));const lg=el("div","log");
+    if(!HELP.log.length)lg.append(el("span","small","Ancora niente."));
+    HELP.log.slice(0,12).forEach(x=>{const d=el("div","");d.append(el("time","",hhmm(x.t)),document.createTextNode(x.x));lg.append(d)});l.append(lg)}
+}
+
+// --- Impostazioni
+function openSettings(pg){
+  pg.append(el("h1","","Impostazioni"));
+  const p1=el("div","panel");p1.append(el("h2","","Profilo"));profileForm(p1,true,()=>{renderSide();openPage("impostazioni")});pg.append(p1);
+  const p2=el("div","panel");p2.append(el("h2","","Voce"),el("span","small","La voce con cui Natan legge le risposte e parla nella chiamata. Le voci con «Natural», «Neural» o «Siri» nel nome sono le più umane."));
+  const vs=SPK.voices();const sel=el("select","field");const o0=el("option","","Scegli Natan da solo (la più naturale)");o0.value="";sel.append(o0);
+  vs.forEach(v=>{const o=el("option","",v.name+(v.localService?"":" (online)"));o.value=v.name;sel.append(o)});sel.value=LS.get("natan_voce","");
+  sel.onchange=()=>{LS.set("natan_voce",sel.value);SPK.voice=null;SPK.say("Ciao, io sono Natan. Questa è la mia voce.")};
+  const tr=el("button","btn ghost","Prova la voce");tr.style.alignSelf="flex-start";tr.onclick=()=>SPK.say("Ciao, io sono Natan. Questa è la mia voce.");
+  p2.append(vs.length?sel:el("span","small","Questo dispositivo non ha voci italiane: installane una dalle impostazioni del sistema."),tr);pg.append(p2);
+  const meta=libMeta();const n=Object.values(meta).reduce((a,m)=>a+(m.n||0),0);
+  const p3=el("div","panel");p3.append(el("h2","","Dati"),el("span","",chats.length+" chat salvate qui, "+num(n)+" appunti nella biblioteca. In attesa di arrivare al server: "+LS.get("natan_coda",[]).length+" messaggi e "+LS.get("natan_appunti_coda",[]).length+" appunti."),el("span","small","Tutto quello che scrivi arriva a chi gestisce Natan, che può leggerlo per migliorarlo."));
+  const lb=el("button","btn ghost","Gestisci la biblioteca");lb.style.alignSelf="flex-start";lb.onclick=()=>openPage("biblioteca");p3.append(lb);pg.append(p3);
+  if(!IS_MOBILE){const pa=el("div","panel");const hd=el("div","row");hd.append(el("h2","","Aiuta Natan"));const spc=el("span","");spc.style.flex="1";hd.append(spc);
+    const sw2=el("button","sw"+(LS.get("natan_help_off",false)?"":" on"));sw2.id="helpPause";sw2.setAttribute("role","switch");sw2.setAttribute("aria-checked",String(!LS.get("natan_help_off",false)));sw2.setAttribute("aria-label","Aiuta Natan attivo");
+    sw2.onclick=async()=>{const off=!LS.get("natan_help_off",false);LS.set("natan_help_off",off);sw2.classList.toggle("on",!off);sw2.setAttribute("aria-checked",String(!off));if(off){await helpOff();toast("Aiuta Natan in pausa")}else{toast("Aiuta Natan di nuovo attivo");autoAiuta()}};hd.append(sw2);pa.append(hd);
+    pa.append(el("span","small","È attivo di serie: quando il computer è libero risponde alle domande degli altri studenti (non vede mai chi sono) e usa al massimo 3/4 della memoria. Puoi metterlo in pausa qui."));pg.append(pa)}
+  const p4=el("div","panel");p4.append(el("h2","","App"),el("span","","Natan "+VERSION+(PC?" per computer":" per telefono")));
+  const r=el("div","row");const ins=el("button","btn ghost","Installa Natan come app");ins.onclick=install;const info=el("button","btn ghost","Chi è Natan");info.onclick=()=>location.href="../";r.append(ins,info);p4.append(r);pg.append(p4)
+}
+let deferred=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e});
+function install(){if(deferred){deferred.prompt();deferred=null;return}
+  if(IS_IOS)toast("Tocca Condividi in basso, poi «Aggiungi alla schermata Home»");
+  else if(PC)toast("In Chrome o Edge premi l'icona di installazione nella barra degli indirizzi");
+  else toast("Apri il menu ⋮ del browser e scegli «Installa app»")}
+if("Notification" in window&&Notification.permission==="default")document.addEventListener("click",()=>Notification.requestPermission().catch(()=>{}),{once:true});
+start();
+</script>
+</body>
+</html>

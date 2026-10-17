@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer">
+<title>Natan · Giochi</title>
+<style>
+:root{--bg:#15161c;--side:#0f1015;--raise:#1f2129;--raise2:#2a2d38;--hover:#252833;--line:#2c2f3b;--text:#ececf1;--soft:#c5c8d6;--muted:#8b8fa3;--acc:#7c83ff;--acc-h:#929aff;--vio:#a07bff;--blue:#4da3ff;--good:#3ecf8e;--bad:#f06464;--warn:#f5b84a;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--head:-apple-system,sans-serif;--col:768px;--r:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none;padding:0}
+a{color:#aab0ff}:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;background:var(--acc);color:#fff;font-weight:600}
+.btn:hover{background:var(--acc-h)}.btn.ghost{background:var(--raise);color:var(--text);border:1px solid var(--line)}.btn.ghost:hover{background:var(--hover)}
+.btn.red{background:var(--bad)}.btn:disabled{opacity:.45;cursor:default}
+.small{font-size:13px;color:var(--muted)}.hide{display:none!important}
+#gmBack{display:none!important}
+#pg{max-width:980px;margin:0 auto;padding:18px 16px 40px}
+</style></head><body>
+<div id="pg"><p class="small">Carico i giochi…</p></div>
+<script>
+// I Giochi di Natan dentro la finestra dell'app sul Mac: stessi file del sito, ma serviti dal tuo Natan (non serve aprire il browser).
+(function(){
+const q=new URLSearchParams(location.search);
+const PEERJS=["https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js","https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"];
+let PL=null;
+window.natanPeerLib=async()=>{if(PL)return PL;
+  for(const u of PEERJS){try{await new Promise((ok,bad)=>{const s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=bad;document.head.append(s)});if(window.Peer){PL=window.Peer;return PL}}catch(e){}}
+  throw new Error("Non riesco a collegarmi alla rete.")};
+window.natanGiochiSync=()=>{};
+window.natanRelayBase=async()=>location.origin;       // le sale passano dal tuo Natan (le stesse che vedono i telefoni dei tuoi amici)
+window.NATAN_VERSIONE=q.get("v")||"app";
+const pg=document.getElementById("pg");
+window.openChat=()=>{if(window.GIOCHI&&window.GIOCHI.pronto)window.GIOCHI.open(pg)};
+const V="?v="+encodeURIComponent(window.NATAN_VERSIONE);
+const load=f=>new Promise((ok,bad)=>{const s=document.createElement("script");s.src=f+V;s.onload=ok;s.onerror=()=>bad(new Error("non riesco a caricare "+f));document.head.append(s)});
+(async()=>{try{await load("giochi.js");for(const f of ["giochi-z.js","giochi-carte.js","giochi-dama.js","giochi-sport.js","giochi-classici.js","giochi-live.js"])await load(f);
+  window.GIOCHI.pronto=true;pg.innerHTML="";window.GIOCHI.open(pg)}
+catch(e){pg.textContent=e.message}})();
+})();
+</script></body></html>
